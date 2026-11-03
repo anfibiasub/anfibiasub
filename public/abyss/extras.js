@@ -4,7 +4,7 @@
 // - ponte di sabbia sul bordo del mondo con cancello chiuso "Missione 2"
 // - mano con l'erogatore (getto d'aria) e fiocina, visti in prima persona, con l'arpione che vola
 import * as THREE from '../vendor/three/three.module.min.js';
-import { heightAt } from './world.js?v=fa0fbacd';
+import { heightAt } from './world.js?v=e0788d07';
 import { GLTFLoader } from '../vendor/three/GLTFLoader.js';
 
 const NAVY = '#071D30', CYAN = '#3CC6F5', ICE = '#DCEFF5';
@@ -201,14 +201,20 @@ export async function buildGate(scene, world, tex, P, texts) {
     const p = new THREE.Mesh(new THREE.BoxGeometry(0.7, 3.2, 0.7), stone); p.position.set(0, 1.6, s * 1.6); gt.add(p);
     const cap = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.2, 0.85), stone); cap.position.set(0, 3.3, s * 1.6); gt.add(cap);
   }
+  const leaves = [];
   for (const s of [-1, 1]) {
-    const leaf = new THREE.Group(); leaf.position.set(0, 0, s * 1.25); gt.add(leaf);
+    const leaf = new THREE.Group(); leaf.position.set(0, 0, s * 1.25); gt.add(leaf); leaves.push([leaf, s]);
     for (const y of [0.25, 1.4, 2.6]) { const r = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 1.2), iron); r.position.set(0, y, -s * 0.6); leaf.add(r); }
     for (let k = 0; k < 5; k++) { const r = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 2.75, 6), iron); r.position.set(0, 1.42, -s * (0.1 + k * 0.23)); leaf.add(r); const tip = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.16, 6), iron); tip.position.set(0, 2.86, -s * (0.1 + k * 0.23)); leaf.add(tip); }
   }
   // catena e lucchetto al centro
-  for (let k = 0; k < 7; k++) { const l = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.016, 5, 10), iron); l.position.set(0.06, 1.75 - k * 0.09, (k % 2 ? 0.03 : -0.03)); l.rotation.set(0, k % 2 ? Math.PI / 2 : 0, 0); gt.add(l); }
-  const lock = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.16, 0.13), new THREE.MeshStandardMaterial({ color: 0x7d6a45, metalness: 0.8, roughness: 0.5 })); lock.position.set(0.08, 1.08, 0); gt.add(lock);
+  const chain = new THREE.Group(); gt.add(chain);
+  for (let k = 0; k < 7; k++) { const l = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.016, 5, 10), iron); l.position.set(0.06, 1.75 - k * 0.09, (k % 2 ? 0.03 : -0.03)); l.rotation.set(0, k % 2 ? Math.PI / 2 : 0, 0); chain.add(l); }
+  // il lucchetto (bersaglio della fiocina): un po' più grande, in ottone, con l'arco
+  const brassM = new THREE.MeshStandardMaterial({ color: 0xb08d57, metalness: 0.85, roughness: 0.4, emissive: 0x1a1206 });
+  const lock = new THREE.Group(); lock.position.set(-0.02, 1.02, 0); chain.add(lock);
+  lock.add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.22, 0.2), brassM));
+  { const sh = new THREE.Mesh(new THREE.TorusGeometry(0.065, 0.016, 6, 14, Math.PI), iron); sh.position.y = 0.11; sh.rotation.y = Math.PI / 2; lock.add(sh); }
 
   // cartello appeso alle sbarre: MISSIONE 2 · A PRESTO (nella lingua del gioco)
   const sign = canvasTex(1024, 640, (c, w, h) => {
@@ -243,7 +249,33 @@ export async function buildGate(scene, world, tex, P, texts) {
   g.updateMatrixWorld(true);
   // il ponte si percorre (pavimento fatto di ellissoidi lungo la cresta); il cancello in fondo non si attraversa
   for (let x = -2; x <= len + 1; x += 2) world.colliders.push({ c: g.localToWorld(new THREE.Vector3(x, -1.25, 0)), s: new THREE.Vector3(1.6, 1.45, 1.35), rot: yaw });
-  for (const s of [-1, 0, 1]) world.colliders.push({ c: g.localToWorld(new THREE.Vector3(len, 1.5, s * 1.1)), s: new THREE.Vector3(0.45, 1.7, 0.8), rot: yaw });
+  const gateCols = [-1, 0, 1].map((s) => ({ c: g.localToWorld(new THREE.Vector3(len, 1.5, s * 1.1)), s: new THREE.Vector3(0.45, 1.7, 0.8), rot: yaw }));
+  gateCols.forEach((c) => world.colliders.push(c));
+  // apertura: il lucchetto salta (colpito dall'arpione), la catena cade, le ante si aprono verso il largo, il cartello cade
+  const G = { open: false, t: 0, panel0: panel.position.clone() };
+  const lockW = new THREE.Vector3();
+  g.userData.gate = {
+    lockPos: () => lock.getWorldPosition(lockW),
+    isOpen: () => G.open,
+    open() {
+      if (G.open) return; G.open = true; G.t = 0;
+      gateCols.forEach((c) => { const i = world.colliders.indexOf(c); if (i >= 0) world.colliders.splice(i, 1); });
+    },
+    update(dt) {
+      if (!G.open || G.t > 4) return; G.t += dt;
+      const k = Math.min(1, G.t / 2.5), e = 1 - Math.pow(1 - k, 3);
+      leaves.forEach(([leaf, s]) => { leaf.rotation.y = -s * 1.45 * e; });
+      chain.position.y = -Math.min(1, G.t / 0.8) * 1.0; chain.rotation.z = Math.min(1, G.t) * 0.6;
+      panel.position.set(G.panel0.x - e * 0.5, G.panel0.y - e * 1.75, G.panel0.z); panel.rotation.z = e * 1.2;
+    },
+    // il sub ha passato il cancello?
+    crossed(p) { const c = Math.cos(ang), s2 = Math.sin(ang); const along = p.x * c + p.z * s2, across = -p.x * s2 + p.z * c; return G.open && along > r0 + len + 0.6 && Math.abs(across) < 3; },
+    reset() {
+      G.open = false; G.t = 0; leaves.forEach(([leaf]) => { leaf.rotation.y = 0; }); chain.position.y = 0; chain.rotation.z = 0;
+      panel.position.copy(G.panel0); panel.rotation.set(0.03, 0, 0);
+      gateCols.forEach((c) => { if (!world.colliders.includes(c)) world.colliders.push(c); });
+    },
+  };
   return g;
 }
 
@@ -374,7 +406,15 @@ function addGorgonians(scene, model, spots) {
   const fans = [];
   model.traverse((o) => {
     if (!o.isMesh) return;
-    const g = o.geometry.clone(); g.applyMatrix4(o.matrixWorld);
+    // il modello è quantizzato (interi normalizzati): prima lo riporto a float, se no la trasformazione lo deforma
+    const g = new THREE.BufferGeometry();
+    for (const [name, a] of Object.entries(o.geometry.attributes)) {
+      const n = a.count, k = a.itemSize, f = new Float32Array(n * k);
+      for (let i = 0; i < n; i++) for (let j = 0; j < k; j++) f[i * k + j] = a.getComponent(i, j);
+      g.setAttribute(name, new THREE.BufferAttribute(f, k));
+    }
+    if (o.geometry.index) g.setIndex(o.geometry.index.clone());
+    g.applyMatrix4(o.matrixWorld);
     g.computeBoundingBox(); const bb = g.boundingBox, c = bb.getCenter(new THREE.Vector3()), h = bb.max.y - bb.min.y;
     g.translate(-c.x, -bb.min.y, -c.z); g.scale(1 / h, 1 / h, 1 / h);          // base nell'origine, alto 1
     const m = o.material.clone(); m.side = THREE.DoubleSide;

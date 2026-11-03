@@ -99,7 +99,7 @@ export function buildWorld(scene, tex, q, avoid) {
     const spots = W.rocks.filter((r) => r.sc.x > 0.9).slice(0, q.mobile ? 32 : 64);
     W.gorgSpots = spots.map((r) => {
       const a = R(0, 7);
-      return { x: r.x + Math.cos(a) * r.sc.x * 0.35, y: r.y + r.sc.y * 0.8, z: r.z + Math.sin(a) * r.sc.z * 0.35, rot: R(0, 7), tx: R(-0.15, 0.15), tz: R(-0.15, 0.15), s: R(0.8, 1.5) };
+      return { x: r.x + Math.cos(a) * r.sc.x * 0.35, y: r.y + r.sc.y * 0.8, z: r.z + Math.sin(a) * r.sc.z * 0.35, rot: R(0, 7), tx: R(-0.15, 0.15), tz: R(-0.15, 0.15), s: R(1.0, 1.8) };
     });
     const M = new THREE.Matrix4(), Q = new THREE.Quaternion();
     const sg = new THREE.SphereGeometry(1, 10, 8);

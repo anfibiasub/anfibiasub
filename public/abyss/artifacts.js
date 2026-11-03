@@ -1,7 +1,7 @@
 // I reperti: modelli 3D generati (sostituibili con GLB), posizionati nei luoghi lontani dal relitto
 import * as THREE from '../vendor/three/three.module.min.js';
-import { compassCard, plateTex, tagTex } from './textures.js?v=fa0fbacd';
-import { CFG } from './config.js?v=fa0fbacd';
+import { compassCard, plateTex, tagTex } from './textures.js?v=e0788d07';
+import { CFG } from './config.js?v=e0788d07';
 
 function glintTex() {
   const c = document.createElement('canvas'); c.width = c.height = 128;

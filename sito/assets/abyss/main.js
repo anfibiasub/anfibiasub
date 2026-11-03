@@ -23,7 +23,8 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const Q = { mobile, particles: mobile ? 1600 : 4200, tex: mobile ? 256 : 512, shadows: !mobile };
 
 // ---------------- stato ----------------
-// phase: 1 = tre reperti e botola, 2 = botola aperta (entrare nella camera), 3 = giornale letto (cercare il cofanetto)
+// phase: 1 = tre reperti e botola, 2 = botola aperta (entrare nella camera), 3 = giornale letto (cercare il cofanetto),
+// 4 = cofanetto aperto (andare al cancello e sparare al lucchetto), 5 = cancello aperto (attraversarlo), 6 = Missione 1 finita
 const S = { state: 'INTRO', prev: null, t: 0, phase: 1, air: 220, reserveSaid: false, found: [], hatchSeen: false, reached: false, torch: false, torchTouched: false, panel: null, inspect: null, seq: null, fpsN: 0, fpsT: 0, hintT: 0 };
 const setState = (s) => { S.prev = S.state; S.state = s; root.dataset.state = s; };
 
@@ -142,7 +143,8 @@ let bags = null;
 const bagsReady = adsReady.then((o) => { bags = buildLiftBags(scene, tex, CFG.liftBags, o && o.pallone); });
 const planeReady = buildPlane(scene, world, tex, CFG.plane);
 const decoReady = buildDeco(scene, world, CFG.deco).then((d) => { world.updaters.push((dt, t) => d.update(dt, t)); });
-const gateReady = buildGate(scene, world, tex, CFG.gate, { title: tr('gate_t'), sub: tr('gate_s') });
+let gate = null;
+const gateReady = buildGate(scene, world, tex, CFG.gate, { title: tr('gate_t'), sub: tr('gate_s') }).then((g) => { gate = g.userData.gate; });
 // in prima persona: mano con l'erogatore (getto d'aria) e fiocina; arpione
 const VM = buildViewModels(camera);
 const spear = createSpear(scene);
@@ -189,7 +191,7 @@ const ui = {
 }
 function objective() {
   const txt = S.phase === 1 ? (S.found.length < 3 ? tr('obj1', { n: S.found.length }) : tr('obj2'))
-    : S.phase === 2 ? tr('obj3') : S.phase === 3 ? tr('obj4') : tr('obj5');
+    : S.phase === 2 ? tr('obj3') : S.phase === 3 ? tr('obj4') : S.phase === 4 ? tr('obj6') : S.phase === 5 ? tr('obj7') : tr('obj5');
   ui.obj.textContent = txt;
 }
 let msgTimer = 0;
@@ -471,11 +473,21 @@ function die(reason) {
   setTimeout(() => openPanel('dead'), reason === 'squalo' ? 900 : 400);
 }
 
+// cofanetto aperto: bombole ricaricate e fiocina; ora bisogna aprire il cancello del ponte (Missione 2) sparando al lucchetto
+function reward() {
+  S.air = AIR.max; S.reserveSaid = false;
+  if (!S.gun) { S.gun = true; root.classList.add('has-gun'); VM.setGunReady(true); VM.reload = 0; }
+  setState('EXPLORATION'); controls.enabled = true;
+  toast(controls.touch ? tr('gun_touch') : tr('gun_pc'), 8000);
+  setTimeout(() => { if (S.phase === 4) toast(tr('to_gate'), 9000); }, 8500);
+}
+// il lucchetto colpito: il cancello si apre
+function gateOpened() {
+  S.phase = 5; updCount(); audio.clunk(); audio.creak(); toast(tr('gate_open'), 5000);
+}
+
 function finish() {
   setState('COMPLETED');
-  // premio: bombole ricaricate e una fiocina per continuare a esplorare
-  S.air = AIR.max; S.reserveSaid = false;
-  if (!S.gun) { S.gun = true; S.gunNew = true; root.classList.add('has-gun'); VM.setGunReady(true); VM.reload = 0; }
   controls.release();
   root.classList.add('is-done');
   openPanel('end');
@@ -489,7 +501,6 @@ function continueExploring() {
   const d = camera.getWorldDirection(new THREE.Vector3());
   P.yaw = P.tyaw = Math.atan2(-d.x, -d.z); P.pitch = P.tpitch = Math.asin(Math.max(-1, Math.min(1, d.y)));
   setState('EXPLORATION'); controls.enabled = true;
-  if (S.gunNew) { S.gunNew = false; setTimeout(() => toast(controls.touch ? tr('gun_touch') : tr('gun_pc'), 9000), 600); }
 }
 
 function restart() {
@@ -497,7 +508,7 @@ function restart() {
   root.classList.remove('is-done');
   S.found = []; S.phase = 1; S.hatchSeen = false; S.reached = false; S.seq = null; S.inspect = null;
   S.air = AIR.max; S.reserveSaid = false; shark.reset(); baby.reset(); audio.hissOff(); root.classList.remove('is-dead');
-  S.gun = false; S.gunNew = false; root.classList.remove('has-gun'); spear.clear(); if (bags) bags.reset(); S.shake = 0;
+  S.gun = false; root.classList.remove('has-gun'); if (gate) gate.reset(); spear.clear(); if (bags) bags.reset(); S.shake = 0;
   arts.reset(); wreck.setOpen(false);
   const { dials, latches } = wreck.hatch.userData;
   wreck.hatch.userData.open = false; wreck.hatch.rotation.z = 0; wreck.hatch.position.y = wreck.HY + 0.46;
@@ -624,7 +635,7 @@ function tick() {
       o.rotation.y = 0.4 + Math.sin(it.t * 0.5) * 0.25; o.rotation.x = 0.35 * k; o.rotation.z = 0;
       const lid = o.userData.lid; if (lid) lid.rotation.x = -Math.min(1, Math.max(0, (it.t - 1.2) / 1.5)) * 1.9;
       if (it.t > 1.6 && !it.sfx) { it.sfx = 1; audio.finale(); }
-      if (it.t > 7.5) { S.inspect = null; o.visible = false; scene.attach(o); S.phase = 4; updCount(); finish(); }
+      if (it.t > 7.5) { S.inspect = null; o.visible = false; scene.attach(o); S.phase = 4; updCount(); reward(); }
     } else {
       o.rotation.y += dt * 1.6; o.rotation.x = 0.6 * k;
     }
@@ -748,8 +759,10 @@ function tick() {
   // --- mano con l'erogatore, fiocina, arpione, palloni ---
   VM.update(dt, t, !!(controls.blast && playing && S.air > 0), !!S.gun, camera.aspect);
   if (bags) bags.update(t);
+  if (gate) { gate.update(dt); if (S.phase === 5 && S.state === 'EXPLORATION' && gate.crossed(P.pos)) { S.phase = 6; updCount(); finish(); } }
   spear.update(dt, (a, b) => {
     const x = bags && bags.hit(a, b); if (x) { explode(x); return true; }
+    if (gate && !gate.isOpen() && segDist(a, b, gate.lockPos()) < 0.35) { gate.open(); gateOpened(); return true; }
     if (segDist(a, b, shark.group.position) < 1.3) { if (shark.scare()) toast(tr('shark_gone'), 3500); return true; }
     if (segDist(a, b, baby.group.position) < 0.7) { if (baby.scare()) toast(tr('baby_gone'), 3000); return true; }
     return false;
@@ -821,4 +834,4 @@ Promise.allSettled([adsReady, signsReady, bagsReady, planeReady, gateReady, shar
 });
 
 // per i test automatici (nessun effetto sul gioco)
-window.__abyss = { baby, VM, spear, fire, controls, finish, get bags() { return bags; }, shark, die, fish, THREE, scene, S, P, CODE, LOG, wreck, arts, spots, camera, pickup, toast, openHatch, openLog, setPos: (x, y, z, yaw, pitch) => { P.pos.set(x, y, z); P.vel.set(0, 0, 0); if (yaw !== undefined) { P.yaw = P.tyaw = yaw; P.pitch = P.tpitch = pitch; } } };
+window.__abyss = { get gate() { return gate; }, baby, VM, spear, fire, controls, finish, get bags() { return bags; }, shark, die, fish, THREE, scene, S, P, CODE, LOG, wreck, arts, spots, camera, pickup, toast, openHatch, openLog, setPos: (x, y, z, yaw, pitch) => { P.pos.set(x, y, z); P.vel.set(0, 0, 0); if (yaw !== undefined) { P.yaw = P.tyaw = yaw; P.pitch = P.tpitch = pitch; } } };

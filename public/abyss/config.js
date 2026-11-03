@@ -45,7 +45,7 @@ export const CFG = {
   // aereo ultraleggero affondato vicino al relitto
   plane: { x: -4, z: 19, rot: 0.9, tiktok: 'tiktok.png' },   // tiktok: nome del file ufficiale del simbolo in abyss/tex/ (es. 'tiktok.png')
   // ponte di sabbia con il cancello della Missione 2, sul bordo del mondo (angolo da est, distanza dal centro)
-  gate: { ang: -0.14, r: 74, len: 15 },   // il ponte parte a 74 m dal centro, è lungo 15 m; il cancello è in fondo
+  gate: { ang: -0.8, r: 74, len: 15 },   // a nord-est, dalla parte opposta all'arco del cofanetto   // il ponte parte a 74 m dal centro, è lungo 15 m; il cancello è in fondo
 
   // modelli veri sul fondale (Sketchfab, CC BY 4.0). c = centro del modello nel file (x, fondo, z), s = scala, sink = quanto affonda
   deco: {
