@@ -9,7 +9,7 @@ import { buildWreck, makeHelmet } from './wreck.js';
 import { buildArtifacts } from './artifacts.js';
 import { buildLandmarks, modelsReady } from './landmarks.js';
 import { buildFish } from './fish.js';
-import { buildShark } from './shark.js';
+import { buildShark, buildBabyShark } from './shark.js';
 import { buildAds, buildStatues, buildServiceSigns } from './ads.js';
 import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js';
 import { createControls } from './controls.js';
@@ -131,6 +131,7 @@ const spots = buildLandmarks(scene, world, tex);
 const arts = buildArtifacts(scene, wreck, tex, spots);
 const fish = buildFish(scene, Q); world.updaters.push(fish);
 const shark = buildShark(scene);
+const baby = buildBabyShark(scene);   // squaletto che gira per la mappa e ogni 2/4 minuti attacca
 const _sdir = new THREE.Vector3(), _noz = new THREE.Vector3(), _bub = new THREE.Vector3(), _mz = new THREE.Vector3(), _sd = new THREE.Vector3();
 // aria: 220 bar per 50 minuti; il getto d'aria contro lo squalo consuma il 2% al secondo
 const AIR = { max: 220, rate: 220 / (50 * 60), blast: 220 * 0.02, reserve: 50 };
@@ -495,7 +496,7 @@ function restart() {
   closePanelSilently();
   root.classList.remove('is-done');
   S.found = []; S.phase = 1; S.hatchSeen = false; S.reached = false; S.seq = null; S.inspect = null;
-  S.air = AIR.max; S.reserveSaid = false; shark.reset(); audio.hissOff(); root.classList.remove('is-dead');
+  S.air = AIR.max; S.reserveSaid = false; shark.reset(); baby.reset(); audio.hissOff(); root.classList.remove('is-dead');
   S.gun = false; S.gunNew = false; root.classList.remove('has-gun'); spear.clear(); if (bags) bags.reset(); S.shake = 0;
   arts.reset(); wreck.setOpen(false);
   const { dials, latches } = wreck.hatch.userData;
@@ -720,6 +721,7 @@ function tick() {
       VM.nozzle(_noz);
       for (let k = 0; k < 4; k++) world.bubbles.emit(_bub.copy(_noz).addScaledVector(fwd, 0.05 + Math.random() * (0.3 + VM.k * 0.6)), 1);
       if (shark.blast(camera.position, fwd)) { toast(tr('shark_gone'), 3500); }
+      if (baby.blast(camera.position, fwd)) { toast(tr('baby_gone'), 3000); }
     } else audio.hissOff();
     if (!S.reserveSaid && S.air < AIR.reserve) { S.reserveSaid = true; toast(tr('reserve'), 4500); }
     if (S.air <= 0) { S.air = 0; die('aria'); }
@@ -736,6 +738,12 @@ function tick() {
     hit() { audio.hit(); die('squalo'); },
   });
   sediment.update(dt);
+  // squaletto: il tempo per il prossimo attacco scorre solo mentre si esplora
+  if (S.state !== 'DEAD') baby.update(dt, t, P.pos, {
+    dir: camera.getWorldDirection(_sdir), active: S.state === 'EXPLORATION',
+    warn() { audio.danger(); toast(controls.touch ? tr('baby_touch') : tr('baby_pc'), 4500); },
+    bite() { audio.hit(); S.air = Math.max(0, S.air - 20); S.shake = 0.9; toast(tr('baby_bite'), 4000); },
+  });
 
   // --- mano con l'erogatore, fiocina, arpione, palloni ---
   VM.update(dt, t, !!(controls.blast && playing && S.air > 0), !!S.gun, camera.aspect);
@@ -743,6 +751,7 @@ function tick() {
   spear.update(dt, (a, b) => {
     const x = bags && bags.hit(a, b); if (x) { explode(x); return true; }
     if (segDist(a, b, shark.group.position) < 1.3) { if (shark.scare()) toast(tr('shark_gone'), 3500); return true; }
+    if (segDist(a, b, baby.group.position) < 0.7) { if (baby.scare()) toast(tr('baby_gone'), 3000); return true; }
     return false;
   });
   if (S.shake > 0) {
@@ -805,11 +814,11 @@ renderer.render(scene, camera);
 torch.intensity = 0;
 document.addEventListener('visibilitychange', () => { if (document.hidden && canPause()) pause(); });
 requestAnimationFrame(tick);
-Promise.allSettled([adsReady, signsReady, bagsReady, planeReady, gateReady, shark.ready, decoReady, ...photos, ...modelsReady]).then(() => {
+Promise.allSettled([adsReady, signsReady, bagsReady, planeReady, gateReady, shark.ready, baby.ready, decoReady, ...photos, ...modelsReady]).then(() => {
   const inChamber = (o) => { for (let p = o; p; p = p.parent) if (p.name === 'chamber') return true; return false; };
   addCaustics(scene, inChamber);
   renderer.compile(scene, camera); ready();
 });
 
 // per i test automatici (nessun effetto sul gioco)
-window.__abyss = { VM, spear, fire, controls, finish, get bags() { return bags; }, shark, die, fish, THREE, scene, S, P, CODE, LOG, wreck, arts, spots, camera, pickup, toast, openHatch, openLog, setPos: (x, y, z, yaw, pitch) => { P.pos.set(x, y, z); P.vel.set(0, 0, 0); if (yaw !== undefined) { P.yaw = P.tyaw = yaw; P.pitch = P.tpitch = pitch; } } };
+window.__abyss = { baby, VM, spear, fire, controls, finish, get bags() { return bags; }, shark, die, fish, THREE, scene, S, P, CODE, LOG, wreck, arts, spots, camera, pickup, toast, openHatch, openLog, setPos: (x, y, z, yaw, pitch) => { P.pos.set(x, y, z); P.vel.set(0, 0, 0); if (yaw !== undefined) { P.yaw = P.tyaw = yaw; P.pitch = P.tpitch = pitch; } } };

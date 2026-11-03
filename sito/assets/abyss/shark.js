@@ -5,6 +5,7 @@ import * as THREE from '../vendor/three/three.module.min.js';
 import { mergeGeometries } from '../vendor/three/BufferGeometryUtils.js';
 import { CFG, onBridge } from './config.js';
 import { GLTFLoader } from '../vendor/three/GLTFLoader.js';
+import { heightAt } from './world.js';
 
 const L = 3.1;                 // lunghezza (m)
 const TOP = new THREE.Color(0x3d4c58), BELLY = new THREE.Color(0xe4e8ea), FIN = new THREE.Color(0x34424d);
@@ -210,5 +211,76 @@ export function buildShark(scene) {
     if (S.mode === 'flee') return false;
     tmp.set(S.pos.x, 0, S.pos.z).normalize(); S.mode = 'flee'; S.t = 0; S.cool = 120; S.vel.copy(tmp).multiplyScalar(7); return true;
   }
+  return { group, update, blast, scare, reset, state: S, ready };
+}
+
+// ---------------- squaletto (1/3 del grande): gira per la mappa e attacca a intervalli di 2, 4, 2, 4... minuti ----------------
+// Arriva sempre da davanti. Col getto d'aria (o l'arpione) scappa; se morde non uccide: toglie 20 bar.
+export function buildBabyShark(scene) {
+  const group = new THREE.Group(); scene.add(group);
+  const anim = { mixer: null, swim: null, bite: null };
+  const SC = 1.12 / 3;
+  const ready = new GLTFLoader().loadAsync(new URL('./models/shark.gltf?v=1', import.meta.url).href).then((gl) => {
+    const inner = new THREE.Group(); inner.rotation.y = Math.PI; inner.scale.setScalar(SC);
+    inner.position.set(-0.26 * SC, -0.45 * SC, -74.04 * SC);
+    gl.scene.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.frustumCulled = false; } });
+    inner.add(gl.scene); group.add(inner);
+    anim.mixer = new THREE.AnimationMixer(gl.scene);
+    const clip = (n) => gl.animations.find((a) => a.name.endsWith(n));
+    anim.swim = anim.mixer.clipAction(clip('|Swim') || gl.animations[0]); anim.swim.play();
+    const b = clip('|Bite'); if (b) { anim.bite = anim.mixer.clipAction(b); anim.bite.setLoop(THREE.LoopOnce, 1); }
+  }).catch(() => {});
+
+  const GAPS = [120, 240];   // secondi tra un attacco e l'altro: 2 minuti, poi 4, poi 2...
+  const S = { mode: 'roam', t: 0, wait: GAPS[0], n: 0, go: false, biting: 0, pos: new THREE.Vector3(-20, CFG.seabed + 4, -10), vel: new THREE.Vector3(1, 0, 0), wp: new THREE.Vector3() };
+  const tmp = new THREE.Vector3(), des = new THREE.Vector3(), fw = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), M4 = new THREE.Matrix4(), Q = new THREE.Quaternion();
+  const steer = (target, speed, turn, dt) => {
+    des.subVectors(target, S.pos); const d = des.length(); if (d > 1e-3) des.multiplyScalar(speed / d);
+    S.vel.lerp(des, Math.min(1, dt * turn)); S.pos.addScaledVector(S.vel, dt);
+  };
+  const newWp = () => { const a = Math.random() * 6.28, r = 15 + Math.random() * 45; S.wp.set(Math.cos(a) * r, CFG.seabed + 2.5 + Math.random() * 5, Math.sin(a) * r); };
+  newWp();
+  const next = () => { S.n++; S.wait = GAPS[S.n % 2]; S.mode = 'roam'; S.t = 0; S.go = false; S.biting = 0; newWp(); };
+  function reset() { S.n = 0; S.wait = GAPS[0]; S.mode = 'roam'; S.t = 0; S.pos.set(-20, CFG.seabed + 4, -10); newWp(); }
+
+  function update(dt, t, player, ev) {
+    if (anim.mixer) { anim.swim.timeScale = S.mode === 'roam' ? 0.9 : 1.8; anim.mixer.update(dt); }
+    S.t += dt;
+    fw.set(ev.dir ? ev.dir.x : 0, 0, ev.dir ? ev.dir.z : -1); if (fw.lengthSq() < 1e-4) fw.set(0, 0, -1); fw.normalize();
+    if (S.mode === 'roam' || S.mode === 'leave') {
+      if (S.pos.distanceTo(S.wp) < 3) newWp();
+      steer(S.wp, S.mode === 'leave' ? 4 : 1.6, 0.8, dt);
+      if (S.mode === 'leave' && S.t > 6) { S.mode = 'roam'; S.t = 0; }
+      if (ev.active) S.wait -= dt;
+      if (S.mode === 'roam' && ev.active && S.wait <= 0) { S.mode = 'come'; S.t = 0; ev.warn(); }
+    } else if (S.mode === 'come') {
+      // arriva e si mette davanti al sub, a qualche metro
+      des.set(player.x + fw.x * 6, player.y - 0.3, player.z + fw.z * 6);
+      const dd = S.pos.distanceTo(des);
+      steer(des, Math.min(6, 1 + dd * 1.2), 2.2, dt);
+      if (dd < 3 || S.t > 12) { S.mode = 'charge'; S.t = 0; S.go = false; }
+    } else if (S.mode === 'charge') {
+      tmp.set(S.pos.x - player.x, 0, S.pos.z - player.z); const dh = tmp.length(); const front = dh > 1e-3 ? tmp.multiplyScalar(1 / dh).dot(fw) : 1;
+      if (S.go && front < 0.45) S.go = false;
+      if (!S.go && front > 0.8) S.go = true;
+      if (S.go) steer(player, 4.5, 2.6, dt); else { des.set(player.x + fw.x * 5, player.y - 0.2, player.z + fw.z * 5); steer(des, 6, 2, dt); }
+      if (S.go && anim.bite && !S.biting && S.pos.distanceTo(player) < 2.5) { S.biting = 1; anim.bite.reset().play(); }
+      if (S.go && front > 0.3 && S.pos.distanceTo(player) < 0.8) { ev.bite(); next(); S.mode = 'leave'; }
+      if (!ev.active) next();
+    }
+    S.pos.y = Math.max(S.pos.y, heightAt(S.pos.x, S.pos.z) + 0.8);
+    const r = Math.hypot(S.pos.x, S.pos.z); if (r > CFG.cliff - 4) { S.pos.x *= (CFG.cliff - 4) / r; S.pos.z *= (CFG.cliff - 4) / r; }
+    if (S.vel.lengthSq() > 1e-4) { M4.lookAt(S.pos, tmp.copy(S.pos).sub(S.vel), up); Q.setFromRotationMatrix(M4); group.quaternion.slerp(Q, Math.min(1, dt * 5)); }
+    group.position.copy(S.pos);
+  }
+  const attacking = () => S.mode === 'come' || S.mode === 'charge';
+  // getto d'aria: se è davanti e vicino scappa, e il prossimo attacco arriva dopo il solito intervallo
+  function blast(player, dir) {
+    if (!attacking()) return false;
+    tmp.subVectors(S.pos, player); const d = tmp.length();
+    if (d < 8 && tmp.normalize().dot(dir) > 0.35) { next(); S.mode = 'leave'; S.vel.copy(tmp).multiplyScalar(5); return true; }
+    return false;
+  }
+  function scare() { if (!attacking()) return false; next(); S.mode = 'leave'; return true; }
   return { group, update, blast, scare, reset, state: S, ready };
 }
