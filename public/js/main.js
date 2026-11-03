@@ -423,3 +423,28 @@ window.addEventListener('load', function () {
   window.addEventListener('touchstart', retry, { passive: true });
   window.addEventListener('scroll', retry, { passive: true });
 })();
+
+// ---------- Rifiniture: comparsa morbida dei riquadri e intestazione compatta quando si scende ----------
+(function () {
+  var head = document.querySelector('.site-header');
+  if (head) {
+    var on = false;
+    var chk = function () { var s = window.scrollY > 60; if (s !== on) { on = s; head.classList.toggle('scrolled', s); } };
+    window.addEventListener('scroll', chk, { passive: true }); chk();
+  }
+  if (!('IntersectionObserver' in window)) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var els = document.querySelectorAll('.card,.person,.module,.contact,.fasi-list li,.tbl-scroll,.mb-frame,.gb-frame,.cam-card,.detail,.game-card');
+  if (!els.length) return;
+  document.documentElement.classList.add('rv-on');
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (en) {
+      if (en.isIntersecting) {
+        var el = en.target, sib = el.parentElement ? Array.prototype.indexOf.call(el.parentElement.children, el) : 0;
+        el.style.transitionDelay = Math.min(sib, 5) * 70 + 'ms';   // in fila uno dopo l'altro
+        el.classList.add('in'); io.unobserve(el);
+      }
+    });
+  }, { rootMargin: '0px 0px -8% 0px' });
+  Array.prototype.forEach.call(els, function (el) { el.classList.add('rv'); io.observe(el); });
+})();

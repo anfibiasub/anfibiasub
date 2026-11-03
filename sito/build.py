@@ -290,12 +290,13 @@ def svc_card(s, lang):
 
 def job_card(l, lang):
     x = l[lang]
-    return f'''<a class="card" href="{url('lavori', lang, l["id"])}">
+    return f'''<a class="card job" href="{url('lavori', lang, l["id"])}">
 <img src="/img/{l["img"]}-sm.webp" alt="" width="800" height="533" loading="lazy">
 <span class="card-body">
 <span class="card-place">{e(x["luogo"])}</span>
 <span class="card-title">{e(x["t"])}</span>
 <span class="card-text">{e(x["d"])}</span>
+<span class="card-more">{UI[lang]["more"]} {ARROW}</span>
 </span>
 </a>'''
 
@@ -351,6 +352,17 @@ def moduli_html(lang):
 def cta(lang):
     U = UI[lang]
     return f'<section class="section band"><div class="wrap split"><div><h2 class="h2">{U["need"]}</h2><p class="lead">{U["need_lead"]}</p></div><div style="display:flex;flex-wrap:wrap;gap:12px"><a class="btn" href="{WA}" target="_blank" rel="noopener">{U["wa"]}</a></div></div></section>'
+
+
+def tool_h2(t, lang):
+    # titolo di sezione della pagina Utilità come il resto del sito: scritta piccola sopra, ultima parola azzurra
+    if ': ' in t:
+        a, b = t.split(': ', 1)
+        h = f'{a}<br><span class="hl">{b}</span>'
+    else:
+        a, _, b = t.rpartition(' ')
+        h = f'{a} <span class="hl">{b}</span>' if a else t
+    return f'<p class="eyebrow">{tx(lang, "q_util")[0]}</p><h2 class="h2">{h}</h2>'
 
 
 def phero(img, eyebrow, h1, lead):
@@ -557,13 +569,13 @@ def utilita_html(lang):
 <div class="meteo" data-meteo data-lang="{lang}" data-title="{title['meteo'][lang]}"><div class="mb-frame"><div class="mb-art"></div></div></div>
 <div class="gb" data-giorni data-lang="{lang}" data-title="{GB_TITLE[lang]}"><div class="gb-frame"><div class="gb-art"></div></div></div>
 </section>
-<section class="tool-sec" id="webcam"><h2 class="h2">{title['webcam'][lang]}</h2>
+<section class="tool-sec" id="webcam">{tool_h2(title['webcam'][lang], lang)}
 <a class="cam-card" href="{WEBCAM_URL}" target="_blank" rel="noopener">
 <img src="/img/webcam-loano.webp" alt="" loading="lazy"><span class="cam-live">LIVE</span>
 <span class="cam-txt"><strong>{T('cam_title')}</strong><span>{T('cam_sub')} →</span></span>
 </a>
 </section>
-<section class="tool-sec" id="gps"><h2 class="h2">{title['gps'][lang]}</h2>
+<section class="tool-sec" id="gps">{tool_h2(title['gps'][lang], lang)}
 <p class="lead" style="margin-bottom:18px">{T('gps_lead')}</p>
 <div class="gps-map" data-gps data-lang="{lang}"></div>
 <p class="hint gps-coords" data-gps-coords>{T('gps_none')}</p>
@@ -575,7 +587,7 @@ def utilita_html(lang):
 <button class="btn btn-ghost is-off" type="button" data-gps-copy data-done="{T('copied')}">{T('gps_copy')}</button>
 </div>
 </section>
-<section class="tool-sec" id="porto"><h2 class="h2">{PORTO_TITLE[lang]}</h2>
+<section class="tool-sec" id="porto">{tool_h2(PORTO_TITLE[lang], lang)}
 <p class="lead" style="margin-bottom:18px">{PORTO_LEAD[lang]}</p>
 <div class="porto-wrap"><div class="porto-map" data-porto data-center="{PORTO_CENTER[0]},{PORTO_CENTER[1]}" data-more="{PORTO_MORE[lang]}" data-punti="{e(_json.dumps([{'id': i, 'p': ll, 'img': '/img/' + im + '-sm.webp', 't': t[lang][0], 'd': t[lang][1], 'u': url(k, lang, an)} for i, ll, im, (k, an), t in PORTO_PUNTI], ensure_ascii=False))}"></div>
 <ol class="porto-list" data-porto-list></ol></div>
@@ -583,10 +595,10 @@ def utilita_html(lang):
 </section>'''
     h += f'''<div class="wrap">
 {live}
-<section class="tool-sec" id="vento"><h2 class="h2">{title['vento'][lang]}</h2>{bf}</section>
-<section class="tool-sec" id="cime"><h2 class="h2">{title['cime'][lang]}</h2>{cime}{note}</section>
-<section class="tool-sec" id="cavi"><h2 class="h2">{title['cavi'][lang]}</h2>{cavi}{note}</section>
-<section class="tool-sec" id="catene"><h2 class="h2">{title['catene'][lang]}</h2>{cat}<div style="height:30px"></div>{anc}{note}</section>
+<section class="tool-sec" id="vento">{tool_h2(title['vento'][lang], lang)}{bf}</section>
+<section class="tool-sec" id="cime">{tool_h2(title['cime'][lang], lang)}{cime}{note}</section>
+<section class="tool-sec" id="cavi">{tool_h2(title['cavi'][lang], lang)}{cavi}{note}</section>
+<section class="tool-sec" id="catene">{tool_h2(title['catene'][lang], lang)}{cat}<div style="height:30px"></div>{anc}{note}</section>
 </div>''' + cta(lang)
     return h
 

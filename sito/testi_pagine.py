@@ -47,7 +47,7 @@ TX = {
                   'en': 'Sign in with your password and find everything in one place: boat details, cleaning history with photos from our divers, anode log and email reminders.',
                   'es': 'Entra con tu contraseña y encuentra todo en un solo lugar: ficha del barco, historial de limpiezas con las fotos de nuestros buzos, registro de ánodos y recordatorios por email.',
                   'de': 'Melden Sie sich mit Ihrem Passwort an und finden Sie alles an einem Ort: Bootsdatenblatt, Reinigungsverlauf mit Fotos unserer Taucher, Anodenprotokoll und E-Mail-Erinnerungen.'},
-    'area_cta': {'it': 'ACCEDI ALL\'AREA CLIENTI', 'en': 'SIGN IN TO THE CUSTOMER AREA', 'es': 'ENTRA EN EL ÁREA DE CLIENTES', 'de': 'ZUM KUNDENBEREICH'},
+    'area_cta': {'it': 'Accedi all\'area clienti', 'en': 'Sign in to the customer area', 'es': 'Entra en el área de clientes', 'de': 'Zum Kundenbereich'},
     'home_title': {'it': 'Lavori marittimi subacquei a Loano', 'en': 'Underwater marine works in Loano, Italy', 'es': 'Trabajos marítimos subacuáticos en Loano, Italia', 'de': 'Maritime Unterwasserarbeiten in Loano, Italien'},
     'home_desc': {'it': 'Pulizia eliche e carene, sostituzione anodi, lavori edili e metalmeccanici subacquei, recuperi in mare. Porto di Loano (SV).',
                   'en': 'Propeller and hull cleaning, anode replacement, underwater civil and metal works, salvage at sea. Loano harbour, Italian Riviera.',
