@@ -943,3 +943,18 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
   background:linear-gradient(180deg,#3CC6F5,#1d86c4);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 2px 4px rgba(0,0,0,.4)}
 .team-grid .person li::after{content:"";position:absolute;left:6px;top:5px;width:5px;height:9px;border:solid #04121e;border-width:0 2px 2px 0;transform:rotate(45deg)}
 @media (max-width:767px){.team-grid .person{padding:22px 20px}.team-grid .avatar{width:60px;height:60px;font-size:20px}.p-name{font-size:19px}.p-role{font-size:10px;letter-spacing:.03em;white-space:nowrap}}
+
+/* ---------- RIQUADRI DEL SITO IN RILIEVO (come le schede di Chi siamo) ---------- */
+:root{--r3d-bg:radial-gradient(120% 70% at 15% 0%,rgba(120,210,255,.13),rgba(120,210,255,0) 55%),linear-gradient(160deg,#17405f 0%,#0d2642 48%,#081a2e 100%);
+  --r3d-sh:inset 0 1px 0 rgba(255,255,255,.15),inset 0 -3px 0 rgba(0,0,0,.35),0 4px 0 #04101d,0 18px 36px rgba(0,0,0,.5),0 0 26px rgba(60,198,245,.08);
+  --r3d-sh-h:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.35),0 6px 0 #04101d,0 24px 44px rgba(0,0,0,.58),0 0 34px rgba(60,198,245,.18);
+  --r3d-bd:1px solid rgba(60,198,245,.38)}
+.contact,.module,.card,.fasi-list li,body .panel{background:var(--r3d-bg);border:var(--r3d-bd);box-shadow:var(--r3d-sh);border-radius:18px}
+.card{transition:transform .2s,box-shadow .2s}
+a.card:hover{transform:translateY(-4px);box-shadow:var(--r3d-sh-h);border-color:rgba(60,198,245,.6)}
+.contact h3,.contact strong:first-child{text-shadow:0 2px 0 rgba(0,0,0,.4)}
+.fasi-list li{border-radius:14px}
+/* riquadri con foto, mappe, tabelle: stessa cornice azzurra e ombra */
+.tbl-scroll,.mb-frame,.gb-frame,.cam-card,.gps-map,.porto-map{border:var(--r3d-bd);box-shadow:0 4px 0 #04101d,0 18px 36px rgba(0,0,0,.5),0 0 26px rgba(60,198,245,.08)}
+/* punti forti nella prima schermata: restano in vetro, con un po' di rilievo */
+@media (min-width:1024px){.hero .badge{box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 10px 24px rgba(0,0,0,.35)}}
