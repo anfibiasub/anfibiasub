@@ -141,8 +141,6 @@ TEAM_ES_DE = {
                de=dict(r='Berufstaucher (O.T.S.)', b=['IANTD-Ausbilder für Mischgastauchen', 'ANIS-Hilfsausbilder', 'Einsatztaucher des Italienischen Roten Kreuzes', 'Rettungsschwimmen und Wiederbelebung (Rotes Kreuz)'])),
     'SC': dict(es=dict(r='Buzo profesional (O.T.S.)', b=['Ayudante de instructor ANIS', 'Buzo operativo de la Cruz Roja Italiana', 'Salvamento y reanimación de la Cruz Roja']),
                de=dict(r='Berufstaucher (O.T.S.)', b=['ANIS-Hilfsausbilder', 'Einsatztaucher des Italienischen Roten Kreuzes', 'Rettungsschwimmen und Wiederbelebung (Rotes Kreuz)'])),
-    'RC': dict(es=dict(r='Buzo de escafandra y patrón', b=['Inscrito en la Autoridad Marítima de Savona como patrón para tráfico local', 'Licencia de navegación más allá de 12 millas', 'Años a bordo de pesqueros, pontones grúa y dragas']),
-               de=dict(r='Helmtaucher und Schiffsführer', b=['Bei der Seebehörde Savona als Bootsführer für den Lokalverkehr eingetragen', 'Bootsführerschein über 12 Seemeilen', 'Jahre an Bord von Fischkuttern, Kranpontons und Baggern'])),
 }
 
 MEZZI_ES_DE = {

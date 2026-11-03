@@ -307,7 +307,7 @@ def team_html(lang):
         lis = ''.join(f'<li>{e(b)}</li>' for b in x['b'])
         out += f'''<div class="person">
 <div class="person-head"><span class="avatar" aria-hidden="true">{p["ini"]}</span>
-<span style="line-height:1.3"><strong style="color:#fff;font-weight:600;font-size:18px">{e(p["n"])}</strong><br><span style="font-size:13px;color:var(--cyan)">{e(x["r"])}</span></span></div>
+<span class="p-id"><strong class="p-name">{e(p["n"])}</strong><span class="p-role">{e(x["r"])}</span></span></div>
 <ul>{lis}</ul>
 </div>'''
     return out
@@ -443,7 +443,7 @@ def build_lang(lang):
 <p class="eyebrow">{N['chi']}</p>
 <h2 class="h2" id="chi-t">{T('fam_h2')}</h2>
 <p class="lead" style="margin-bottom:40px">{T('fam_lead')}</p>
-<div class="g3">{team_html(lang)}</div>
+<div class="team-grid">{team_html(lang)}</div>
 </div>
 </section>
 
@@ -487,7 +487,7 @@ def build_lang(lang):
 
     # CHI SIAMO
     chi = phero('spianamenti', N['chi'], T('fam_h2'), T('chi_lead'))
-    chi += f'<section class="section"><div class="wrap"><div class="g3">{team_html(lang)}</div></div></section>'
+    chi += f'<section class="section"><div class="wrap"><div class="team-grid">{team_html(lang)}</div></div></section>'
     chi += f'''<section class="section band" id="mezzi"><div class="wrap">
 <p class="eyebrow">{T('mezzi_eyebrow')}</p>
 <h2 class="h2">{T('mezzi_h2')}</h2>

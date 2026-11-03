@@ -162,9 +162,6 @@ TEAM = [
     dict(ini='SC', n='Simone Cuvato',
          it=dict(r='Operatore tecnico subacqueo', b=['Aiuto istruttore ANIS', 'Sommozzatore operativo Croce Rossa', 'Salvamento e tecniche di rianimazione CRI']),
          en=dict(r='Commercial diver (O.T.S.)', b=['ANIS assistant instructor', 'Italian Red Cross operational diver', 'Red Cross lifesaving and resuscitation'])),
-    dict(ini='RC', n='Roberto Cuvato',
-         it=dict(r='Palombaro e capo barca', b=['Iscritto al Compartimento Marittimo di Savona come conduttore per il traffico locale', 'Patente nautica oltre le 12 miglia', 'Anni a bordo di pescherecci, motopontoni e draghe']),
-         en=dict(r='Hard-hat diver and skipper', b=['Registered with the Savona Maritime Authority as local-traffic boat operator', 'Boat licence beyond 12 nautical miles', 'Years on board fishing boats, crane pontoons and dredgers'])),
 ]
 
 MEZZI = {
