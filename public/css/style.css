@@ -958,3 +958,16 @@ a.card:hover{transform:translateY(-4px);box-shadow:var(--r3d-sh-h);border-color:
 .tbl-scroll,.mb-frame,.gb-frame,.cam-card,.gps-map,.porto-map{border:var(--r3d-bd);box-shadow:0 4px 0 #04101d,0 18px 36px rgba(0,0,0,.5),0 0 26px rgba(60,198,245,.08)}
 /* punti forti nella prima schermata: restano in vetro, con un po' di rilievo */
 @media (min-width:1024px){.hero .badge{box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 10px 24px rgba(0,0,0,.35)}}
+
+/* ---------- ICONE IN RILIEVO: sfera azzurra come le iniziali di Chi siamo ---------- */
+:root{--ic3d-bg:radial-gradient(circle at 35% 28%,#4b9fd6 0%,#1a4c78 45%,#0a1f35 100%);
+  --ic3d-sh:inset 0 3px 6px rgba(255,255,255,.28),inset 0 -6px 10px rgba(0,0,0,.45),0 6px 12px rgba(0,0,0,.5),0 0 16px rgba(60,198,245,.35)}
+.fs-ic{width:46px;height:46px;border-radius:50%;color:#fff;background:var(--ic3d-bg);border:2px solid rgba(60,198,245,.7);box-shadow:var(--ic3d-sh)}
+.fs-ic svg{width:22px;height:22px;filter:drop-shadow(0 0 4px rgba(60,198,245,.9))}
+.badge svg{box-sizing:content-box;width:24px;height:24px;padding:11px;border-radius:50%;color:#fff;background:var(--ic3d-bg);border:2px solid rgba(60,198,245,.7);box-shadow:var(--ic3d-sh)}
+@media (min-width:1280px){.hero .badge svg{width:22px;height:22px;padding:10px}}
+@media (max-width:767px){
+  .q-tile svg{box-sizing:content-box;width:13px;height:13px;padding:6px;border-radius:50%;color:#fff;background:var(--ic3d-bg);border:1.5px solid rgba(60,198,245,.7);
+    box-shadow:inset 0 2px 3px rgba(255,255,255,.28),inset 0 -3px 5px rgba(0,0,0,.45),0 3px 6px rgba(0,0,0,.5),0 0 10px rgba(60,198,245,.35);filter:none}
+  .fasi-list li .fs-ic{width:40px;height:40px}
+}

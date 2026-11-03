@@ -4,7 +4,7 @@
 // - ponte di sabbia sul bordo del mondo con cancello chiuso "Missione 2"
 // - mano con l'erogatore (getto d'aria) e fiocina, visti in prima persona, con l'arpione che vola
 import * as THREE from '../vendor/three/three.module.min.js';
-import { heightAt } from './world.js?v=4ecb67b8';
+import { heightAt } from './world.js?v=1b0317d2';
 import { GLTFLoader } from '../vendor/three/GLTFLoader.js';
 
 const NAVY = '#071D30', CYAN = '#3CC6F5', ICE = '#DCEFF5';
@@ -367,6 +367,29 @@ export function createSpear(scene) {
 }
 
 
+// gorgonie vere sulle rocce: il modello ha 4 ventagli (arancio, viola, bianco, giallo); ognuno diventa un InstancedMesh
+// e su ogni roccia ne metto uno solo, a turno, così il costo resta basso anche sul telefono
+function addGorgonians(scene, model, spots) {
+  model.updateMatrixWorld(true);
+  const fans = [];
+  model.traverse((o) => {
+    if (!o.isMesh) return;
+    const g = o.geometry.clone(); g.applyMatrix4(o.matrixWorld);
+    g.computeBoundingBox(); const bb = g.boundingBox, c = bb.getCenter(new THREE.Vector3()), h = bb.max.y - bb.min.y;
+    g.translate(-c.x, -bb.min.y, -c.z); g.scale(1 / h, 1 / h, 1 / h);          // base nell'origine, alto 1
+    const m = o.material.clone(); m.side = THREE.DoubleSide;
+    fans.push({ g, m });
+  });
+  if (!fans.length) return;
+  const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(), P = new THREE.Vector3(), S = new THREE.Vector3();
+  fans.forEach((f, k) => {
+    const mine = spots.filter((_, i) => i % fans.length === k);
+    const im = new THREE.InstancedMesh(f.g, f.m, mine.length);
+    mine.forEach((sp, i) => { M.compose(P.set(sp.x, sp.y, sp.z), Q.setFromEuler(E.set(sp.tx, sp.rot, sp.tz)), S.setScalar(sp.s)); im.setMatrixAt(i, M); });
+    im.castShadow = true; im.frustumCulled = false; scene.add(im);
+  });
+}
+
 // ======================================================================================
 // MODELLI VERI SUL FONDALE (Sketchfab, CC BY 4.0): idrovolante Albatross vicino alle anfore, auto affondata,
 // gorgonie, ancora, cannone, cassa; tartaruga che nuota intorno al relitto
@@ -388,6 +411,7 @@ export async function buildDeco(scene, world, D) {
   };
   const jobs = [];
   for (const d of D.items) jobs.push(load(d.m).then((gl) => {
+    if (d.m === 'coral' && world.gorgSpots) addGorgonians(scene, gl.scene, world.gorgSpots);
     if (d.copies) { for (const c of d.copies) place(gl.scene.clone(true), { ...d, ...c }); } else place(gl.scene, d);
   }).catch((e) => console.warn('ABYSS modello', d.m, e && e.message)));
   // tartaruga: nuota in cerchio intorno al relitto, sale e scende piano

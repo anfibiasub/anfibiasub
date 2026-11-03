@@ -1,5 +1,5 @@
 // Testi del gioco nella lingua della pagina (generati da sito/abyss_testi.py dentro la pagina).
-import { CFG } from './config.js?v=4ecb67b8';
+import { CFG } from './config.js?v=1b0317d2';
 
 const el = document.getElementById('ab-i18n');
 export const L = el ? JSON.parse(el.textContent) : {};

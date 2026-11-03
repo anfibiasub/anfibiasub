@@ -1,19 +1,19 @@
 // ABYSS — Il relitto dimenticato. Motore principale e macchina a stati.
 import * as THREE from '../vendor/three/three.module.min.js';
-import { CFG, CODE, bearing } from './config.js?v=4ecb67b8';
-import { t as tr, L as TX } from './i18n.js?v=4ecb67b8';
-import { addCaustics, makeBeam, CAUSTIC } from './look.js?v=4ecb67b8';
-import { makeTextures, logbookPage } from './textures.js?v=4ecb67b8';
-import { buildWorld, collideWorld } from './world.js?v=4ecb67b8';
-import { buildWreck, makeHelmet } from './wreck.js?v=4ecb67b8';
-import { buildArtifacts } from './artifacts.js?v=4ecb67b8';
-import { buildLandmarks, modelsReady } from './landmarks.js?v=4ecb67b8';
-import { buildFish } from './fish.js?v=4ecb67b8';
-import { buildShark } from './shark.js?v=4ecb67b8';
-import { buildAds, buildStatues, buildServiceSigns } from './ads.js?v=4ecb67b8';
-import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js?v=4ecb67b8';
-import { createControls } from './controls.js?v=4ecb67b8';
-import { createAudio } from './audio.js?v=4ecb67b8';
+import { CFG, CODE, bearing } from './config.js?v=1b0317d2';
+import { t as tr, L as TX } from './i18n.js?v=1b0317d2';
+import { addCaustics, makeBeam, CAUSTIC } from './look.js?v=1b0317d2';
+import { makeTextures, logbookPage } from './textures.js?v=1b0317d2';
+import { buildWorld, collideWorld } from './world.js?v=1b0317d2';
+import { buildWreck, makeHelmet } from './wreck.js?v=1b0317d2';
+import { buildArtifacts } from './artifacts.js?v=1b0317d2';
+import { buildLandmarks, modelsReady } from './landmarks.js?v=1b0317d2';
+import { buildFish } from './fish.js?v=1b0317d2';
+import { buildShark } from './shark.js?v=1b0317d2';
+import { buildAds, buildStatues, buildServiceSigns } from './ads.js?v=1b0317d2';
+import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js?v=1b0317d2';
+import { createControls } from './controls.js?v=1b0317d2';
+import { createAudio } from './audio.js?v=1b0317d2';
 
 const $ = (s) => document.querySelector(s);
 const root = $('#abyss');

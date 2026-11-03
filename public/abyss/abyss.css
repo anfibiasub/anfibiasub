@@ -18,7 +18,7 @@ button{font:inherit;color:inherit}
 .is-diving .ab-intro-bg{transform:scale(1.35) translateY(8%);filter:brightness(.25) saturate(.7)}
 .is-diving .ab-intro-txt{opacity:0;transform:translateY(-20px)}
 .ab-intro-txt{position:relative;z-index:2;max-width:660px;padding:0 6vw;transition:opacity .8s,transform .8s}
-.ab-logo{margin:0;font-weight:800;font-size:clamp(54px,9vw,128px);letter-spacing:.12em;line-height:.95;background:linear-gradient(180deg,#eef8fb 30%,#7fd6f2 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 40px rgba(60,198,245,.15)}
+.ab-logo{margin:0;font-weight:800;font-size:clamp(34px,min(9vw,13vh),128px);max-width:100%;letter-spacing:.12em;line-height:.95;background:linear-gradient(180deg,#eef8fb 30%,#7fd6f2 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 40px rgba(60,198,245,.15)}
 .ab-sub{margin:.4em 0 0;font-weight:600;letter-spacing:.42em;font-size:clamp(12px,1.4vw,15px);color:var(--cyan)}
 .ab-lead{max-width:28em;margin:2.2em 0 2em;font-size:clamp(15px,1.5vw,18px);line-height:1.6;color:var(--ice);max-width:30em}
 .ab-credit{margin:1.4em 0 0;color:var(--grey);font-size:11px;line-height:1.5;opacity:.75}.ab-credit a{color:inherit}
@@ -212,7 +212,7 @@ button{font:inherit;color:inherit}
 @media (max-height:520px){
   .ab-intro{align-items:flex-start}
   .ab-intro-txt{padding-top:52px}
-  .ab-logo{font-size:52px}.ab-lead{margin:1em 0 1.1em;font-size:14px}.ab-sec{margin-top:.8em;font-size:12px}.ab-how{font-size:12px}
+  .ab-logo{font-size:min(52px,12vw)}.ab-lead{margin:1em 0 1.1em;font-size:14px}.ab-sec{margin-top:.8em;font-size:12px}.ab-how{font-size:12px}
   .ab-end .ab-small,.ab-end .ab-sum{display:none}
   .ab-end .ab-box{padding:18px 18px}
 }

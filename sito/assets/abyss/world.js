@@ -93,34 +93,15 @@ export function buildWorld(scene, tex, q, avoid) {
     W.rockBases = bases.map((b) => b.g); W.rockMat = m;
   }
 
-  // ---------------- gorgonie rosse e spugne ----------------
+  // ---------------- gorgonie (modello vero, messo da extras.js) e spugne ----------------
+  // qui scelgo solo dove vanno: in cima alle rocce più grandi, una per roccia
   {
-    const c = document.createElement('canvas'); c.width = c.height = 256;
-    const g = c.getContext('2d');
-    const branch = (x, y, a, L, w, d) => {
-      const x2 = x + Math.cos(a) * L, y2 = y + Math.sin(a) * L;
-      g.strokeStyle = d > 4 ? '#e8b23a' : '#8e1d1d'; g.lineWidth = w; g.lineCap = 'round';
-      g.beginPath(); g.moveTo(x, y); g.lineTo(x2, y2); g.stroke();
-      if (d < 6) { branch(x2, y2, a - 0.38 + Math.random() * 0.15, L * 0.78, w * 0.72, d + 1); branch(x2, y2, a + 0.38 - Math.random() * 0.15, L * 0.78, w * 0.72, d + 1); }
-    };
-    branch(128, 256, -Math.PI / 2, 52, 9, 0);
-    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-    const p1 = new THREE.PlaneGeometry(1, 1).translate(0, 0.5, 0), p2 = p1.clone().rotateY(Math.PI / 2);
-    const geo = mergeGeometries([p1, p2]);
-    const mat = new THREE.MeshStandardMaterial({ map: t, alphaTest: 0.45, side: THREE.DoubleSide, roughness: 0.9 });
-    const spots = W.rocks.filter((r) => r.sc.x > 0.9).slice(0, 60);
-    const im = new THREE.InstancedMesh(geo, mat, spots.length * 2);
+    const spots = W.rocks.filter((r) => r.sc.x > 0.9).slice(0, q.mobile ? 32 : 64);
+    W.gorgSpots = spots.map((r) => {
+      const a = R(0, 7);
+      return { x: r.x + Math.cos(a) * r.sc.x * 0.35, y: r.y + r.sc.y * 0.8, z: r.z + Math.sin(a) * r.sc.z * 0.35, rot: R(0, 7), tx: R(-0.15, 0.15), tz: R(-0.15, 0.15), s: R(0.8, 1.5) };
+    });
     const M = new THREE.Matrix4(), Q = new THREE.Quaternion();
-    let k = 0;
-    for (const r of spots) for (let j = 0; j < 2; j++) {
-      const a = R(0, 7), s = R(0.5, 1.3);
-      const pos = new THREE.Vector3(r.x + Math.cos(a) * r.sc.x * 0.4, r.y + r.sc.y * 0.75, r.z + Math.sin(a) * r.sc.z * 0.4);
-      Q.setFromEuler(new THREE.Euler(R(-0.2, 0.2), R(0, 7), R(-0.2, 0.2)));
-      M.compose(pos, Q, new THREE.Vector3(s, s, s)); im.setMatrixAt(k++, M);
-    }
-    im.count = k;
-    scene.add(im);
-
     const sg = new THREE.SphereGeometry(1, 10, 8);
     const sm = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1 });
     const sp = new THREE.InstancedMesh(sg, sm, 160);
