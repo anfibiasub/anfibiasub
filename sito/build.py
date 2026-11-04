@@ -74,8 +74,10 @@ def inst_manifests():
         with open(os.path.join(OUT, f'sito-{lang}.webmanifest'), 'w', encoding='utf-8') as f:
             _json.dump({'id': '/', 'name': APP_NAME, 'short_name': APP_NAME, 'start_url': url('home', lang), 'scope': '/', 'display': 'standalone', 'lang': lang,
                         'background_color': '#050E1A', 'theme_color': '#050E1A',
-                        'icons': [{'src': '/icona-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any maskable'},
-                                  {'src': '/icona-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any maskable'}]}, f, ensure_ascii=False)
+                        # icone tonde a sfondo trasparente (PC, Chrome); la "maskable" piena serve ad Android, che la ritaglia nella sua forma
+                        'icons': [{'src': '/icona-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any'},
+                                  {'src': '/icona-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any'},
+                                  {'src': '/icona-maskable-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'}]}, f, ensure_ascii=False)
 
 e = html.escape
 import hashlib
