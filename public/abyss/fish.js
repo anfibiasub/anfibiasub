@@ -3,9 +3,9 @@
 // rivolto a DESTRA, che riempie il riquadro 2:1) viene usata quella, generata con l'IA.
 import * as THREE from '../vendor/three/three.module.min.js';
 import { mergeGeometries } from '../vendor/three/BufferGeometryUtils.js';
-import { heightAt } from './world.js?v=ff48b2ff';
-import { rng } from './noise.js?v=ff48b2ff';
-import { CFG } from './config.js?v=ff48b2ff';
+import { heightAt } from './world.js?v=7ecb497c';
+import { rng } from './noise.js?v=7ecb497c';
+import { CFG } from './config.js?v=7ecb497c';
 
 const rand = rng(77);
 const R = (a, b) => a + (b - a) * rand();

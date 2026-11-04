@@ -25,7 +25,7 @@ const Q = { mobile, particles: mobile ? 1600 : 4200, tex: mobile ? 256 : 512, sh
 // ---------------- stato ----------------
 // phase: 1 = tre reperti e botola, 2 = botola aperta (entrare nella camera), 3 = giornale letto (cercare il cofanetto),
 // 4 = cofanetto aperto (andare al cancello e sparare al lucchetto), 5 = cancello aperto (attraversarlo), 6 = Missione 1 finita
-const S = { state: 'INTRO', prev: null, t: 0, phase: 1, air: 220, reserveSaid: false, found: [], hatchSeen: false, reached: false, torch: false, torchTouched: false, panel: null, inspect: null, seq: null, fpsN: 0, fpsT: 0, hintT: 0 };
+const S = { state: 'INTRO', prev: null, t: 0, phase: 1, air: 220, reserveSaid: false, found: [], hatchSeen: false, reached: false, torch: false, torchTouched: false, panel: null, inspect: null, seq: null, fpsN: 0, fpsT: 0, hintT: 0, inK: 0, wasIn: false };
 const setState = (s) => { S.prev = S.state; S.state = s; root.dataset.state = s; };
 
 // ---------------- renderer ----------------
@@ -494,6 +494,21 @@ function finish() {
   openPanel('end');
 }
 
+// trucco per le prove: digitando 123456789 sulla tastiera (anche nel pannello della botola) la botola si apre subito
+{
+  let typed = '';
+  addEventListener('keydown', (e) => {
+    if (!/^[0-9]$/.test(e.key)) { typed = ''; return; }
+    typed = (typed + e.key).slice(-12);
+    if (!(typed.endsWith('123456789') || typed.endsWith('1234563789'))) return;
+    typed = '';
+    if (S.phase !== 1 || !['EXPLORATION', 'LOCK_PUZZLE', 'DESCENT'].includes(S.state) || wreck.hatch.userData.open) return;
+    closePanelSilently();
+    for (const a of arts.list) if (!a.final && !a.taken) { a.taken = true; S.found.push(a.id); a.glint.material.opacity = 0; a.obj.visible = false; (a.extra || []).forEach((m) => { m.visible = false; }); }
+    S.reached = true; updCount(); openHatch();
+  });
+}
+
 function continueExploring() {
   closePanelSilently(); controls.reset();
   root.classList.remove('is-done');
@@ -665,7 +680,7 @@ function tick() {
   scene.environmentIntensity = 0.4 * lit + 0.05;
   world.surface.uniforms.uTime.value = t; world.surface.uniforms.uCam.value.copy(camera.position);
   CAUSTIC.uCaTime.value = t; CAUSTIC.uCaStr.value = 0.9 * lit + 0.2;
-  beam.material.uniforms.uTime.value = t; beam.material.uniforms.uOn.value = torch.intensity / TORCH_I;
+  beam.material.uniforms.uTime.value = t; beam.material.uniforms.uOn.value = Math.min(1, torch.intensity / TORCH_I);
   world.surface.uniforms.uFog.value.copy(tmpC); world.surface.uniforms.uDensity.value = scene.fog.density * 0.9;
   ui.depth.textContent = depth.toFixed(1).replace('.', TX.decimal || ',');
   ui.gauge.style.setProperty('--d', Math.min(1, depth / 50).toFixed(4));
@@ -687,7 +702,13 @@ function tick() {
   // --- torcia ---
   camera.getWorldDirection(fwd);
   const flick = reduced ? 1 : 1 + Math.sin(t * 23) * 0.012 + Math.sin(t * 7.3) * 0.015;
-  torch.intensity = S.torch ? TORCH_I * flick : 0;
+  // dentro la nave la torcia diventa molto più forte e larga, e si accende da sola entrando
+  const inShip = playing && wreck.inside(P.pos);
+  if (inShip && !S.wasIn && !S.torch) toggleTorch(true);
+  S.wasIn = inShip;
+  S.inK += ((inShip ? 1 : 0) - S.inK) * Math.min(1, dt * 3);
+  torch.intensity = S.torch ? TORCH_I * flick * (1 + 3 * S.inK) : 0;
+  torch.angle = CFG.torch.angle + 0.4 * S.inK; torch.penumbra = 0.6 + 0.3 * S.inK; torch.decay = 1.4 - 0.7 * S.inK;
   torch.position.copy(camera.position).addScaledVector(right, 0.18).addScaledVector(UP, -0.15);
   torch.target.position.copy(camera.position).addScaledVector(fwd, 10);
   world.particles.uniforms.uTime.value = t; world.particles.uniforms.uCam.value.copy(camera.position);

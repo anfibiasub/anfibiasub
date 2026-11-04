@@ -2,10 +2,10 @@
 // Geometria generata via codice (costole, fasciame, ponte, cabina, ancora, catena, botola, camera nascosta).
 import * as THREE from '../vendor/three/three.module.min.js';
 import { mergeGeometries } from '../vendor/three/BufferGeometryUtils.js';
-import { noise2, rng } from './noise.js?v=ff48b2ff';
-import { heightAt } from './world.js?v=ff48b2ff';
-import { dialTex, symbolPlate, logbookTex } from './textures.js?v=ff48b2ff';
-import { CFG } from './config.js?v=ff48b2ff';
+import { noise2, rng } from './noise.js?v=7ecb497c';
+import { heightAt } from './world.js?v=7ecb497c';
+import { dialTex, symbolPlate, logbookTex } from './textures.js?v=7ecb497c';
+import { CFG } from './config.js?v=7ecb497c';
 
 const rand = rng(31);
 const R = (a, b) => a + (b - a) * rand();
@@ -238,19 +238,26 @@ export function buildWreck(scene, tex) {
   const chamber = new THREE.Group(); chamber.name = 'chamber';   // dentro la nave niente caustiche (è sotto il ponte)
   {
     const k = 1 / S;   // oggetti a grandezza reale
-    const wallM = new THREE.MeshStandardMaterial({ map: tex.wood.map, normalMap: tex.wood.normalMap, roughness: 1, side: THREE.DoubleSide, color: 0x7d7364, emissive: 0x6a6258, emissiveMap: tex.wood.map, emissiveIntensity: 1.1 });
-    const floorM = new THREE.MeshStandardMaterial({ map: tex.sand.map, normalMap: tex.sand.normalMap, roughness: 1, side: THREE.DoubleSide, color: 0x9a907a, emissive: 0x5a5648, emissiveMap: tex.sand.map, emissiveIntensity: 1.0 });
+    const wallM = new THREE.MeshStandardMaterial({ map: tex.wood.map, normalMap: tex.wood.normalMap, roughness: 1, side: THREE.DoubleSide, color: 0x7d7364, emissive: 0x6a6258, emissiveMap: tex.wood.map, emissiveIntensity: 1.5 });
+    const floorM = new THREE.MeshStandardMaterial({ map: tex.sand.map, normalMap: tex.sand.normalMap, roughness: 1, side: THREE.DoubleSide, color: 0x9a907a, emissive: 0x5a5648, emissiveMap: tex.sand.map, emissiveIntensity: 1.4 });
     const wallG = [], floorG = [], furnG = [], ironG = [];
     // parete piana con aperture: u lungo la parete, v in altezza
     const panel = (ax, c, u0, u1, v0, v1, holes, arr) => {
-      const sh = new THREE.Shape(); sh.moveTo(u0, v0); sh.lineTo(u1, v0); sh.lineTo(u1, v1); sh.lineTo(u0, v1); sh.closePath();
-      for (const hl of holes) {
-        if (hl.length === 3) { const p = new THREE.Path(); p.absarc(hl[0], hl[1], hl[2], 0, Math.PI * 2, true); sh.holes.push(p); continue; }
-        const [h0, h1, hv0, hv1] = hl;
-        const a = Math.max(u0 + 0.01, h0), b = Math.min(u1 - 0.01, h1); if (b <= a) continue;
-        const p = new THREE.Path(); p.moveTo(a, hv0 + 0.001); p.lineTo(a, hv1); p.lineTo(b, hv1); p.lineTo(b, hv0 + 0.001); p.closePath(); sh.holes.push(p);
+      // aperture rettangolari: la parete è fatta a strisce (piena tra le porte, architrave sopra ogni porta)
+      const rect = holes.filter((h) => h.length === 4).map(([h0, h1, , hv1]) => [Math.max(u0, h0), Math.min(u1, h1), hv1]).filter(([a, b]) => b > a).sort((p, q) => p[0] - q[0]);
+      if (rect.length) {
+        let cur = u0;
+        for (const [a, b, top] of rect) {
+          if (a > cur + 1e-3) panel(ax, c, cur, a, v0, v1, [], arr);
+          if (top < v1 - 1e-3) panel(ax, c, a, b, top, v1, [], arr);
+          cur = Math.max(cur, b);
+        }
+        if (u1 > cur + 1e-3) panel(ax, c, cur, u1, v0, v1, [], arr);
+        return;
       }
-      const g = new THREE.ShapeGeometry(sh);
+      const sh = new THREE.Shape(); sh.moveTo(u0, v0); sh.lineTo(u1, v0); sh.lineTo(u1, v1); sh.lineTo(u0, v1); sh.closePath();
+      for (const hl of holes) { const p = new THREE.Path(); p.absarc(hl[0], hl[1], hl[2], 0, Math.PI * 2, true); sh.holes.push(p); }
+      const g = new THREE.ShapeGeometry(sh, 24);
       const pos = g.attributes.position, uv = g.attributes.uv;
       for (let i = 0; i < pos.count; i++) {
         const u = pos.getX(i), v = pos.getY(i);
