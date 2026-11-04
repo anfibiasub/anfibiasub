@@ -21,6 +21,8 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
 <link rel="preload" href="/fonts/montserrat-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/css/style.css?v=60dd878e">
+<link rel="manifest" href="/sito-it.webmanifest">
+<link rel="stylesheet" href="/css/installa.css?v=dcd1883d">
 </head>
 <body>
 <div class="abyss-bg" aria-hidden="true" data-max="50"><i class="ab-l"></i><i class="ab-r"><video class="ab-rel" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video></i><span class="ab-veil"></span></div>
@@ -32,6 +34,7 @@
 <img class="logo-img" src="/img/logo-libero-160.webp?v=31c2b9" alt="" width="64" height="64">
 <span class="logo-txt"><span class="logo-name">ANFIBIA<span class="hl">SUB</span></span><span class="logo-sub">LAVORI MARITTIMI SUBACQUEI</span></span>
 </a>
+<button class="inst-btn" type="button" id="inst-btn" hidden><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7M9 11l3 3 3-3M10 18h4"/></svg><span class="inst-l">Installa l'app</span><span class="inst-s" aria-hidden="true">App</span></button>
 <a class="btn nav-cta" data-quote href="/contatti.html">Richiedi un preventivo</a>
 <button class="menu-btn" type="button" aria-label="Apri il menu" aria-expanded="false" aria-controls="nav"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
 <nav class="nav" id="nav" aria-label="Menu">
@@ -278,6 +281,20 @@
 <div class="sos-btns"><button class="sos-no" type="button" data-c-close>Chiudi</button></div>
 </dialog>
 <script src="/js/main.js?v=60dd878e"></script>
+<div id="inst-guide" class="ig" hidden role="dialog" aria-modal="true" aria-labelledby="ig-t">
+<div class="ig-box">
+<h2 id="ig-t">Metti l'app sulla schermata Home</h2>
+<ol class="ig-steps">
+<li><span class="ig-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 10H6v11h12V10h-2"/><path d="M12 3v12M8.5 6.5 12 3l3.5 3.5"/></svg></span><span>Tocca <b>Condividi</b> nella barra di Safari (se non lo vedi, tocca prima <b>···</b>)</span></li>
+<li><span class="ig-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><path d="M12 8v8M8 12h8"/></svg></span><span>Scorri e scegli <b>Aggiungi alla schermata Home</b>, poi <b>Aggiungi</b></span></li>
+<li><span class="ig-ico ig-app"><img src="/icona-192.png" alt="" width="40" height="40"></span><span>Apri l'app dall'icona: sito, area clienti e la tua barca a portata di tocco</span></li>
+</ol>
+<p class="ig-note">È gratis e non occupa spazio.</p>
+<button class="btn ig-ok" type="button" data-ig-close>Ho capito</button>
+</div>
+<div class="ig-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M6 13l6 6 6-6"/></svg></div>
+</div>
+<script src="/js/installa.js?v=dcd1883d"></script>
 <script src="/js/utilita.js?v=60dd878e"></script>
 </body>
 </html>

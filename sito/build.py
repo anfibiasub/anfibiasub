@@ -20,6 +20,63 @@ SITE_URL = 'https://www.anfibiasub.it'
 # Indirizzo dell'area clienti: in prova sta sullo stesso server, online sul sottodominio
 AREA = 'https://clienti.anfibiasub.it/area/login' if PROD else '/area/login'
 
+# ---------------- app installabile (pulsante "Installa l'app" in home) ----------------
+APP_NAME = 'Anfibiasub'   # nome dell'app sul telefono: cambialo qui quando cambia il nome del sito
+INST = {
+    'btn': {'it': "Installa l'app", 'en': 'Install the app', 'es': 'Instalar la app', 'de': 'App installieren'},
+    'title': {'it': "Metti l'app sulla schermata Home", 'en': 'Add the app to your Home Screen', 'es': 'Añade la app a la pantalla de inicio', 'de': 'App zum Home-Bildschirm hinzufügen'},
+    's1': {'it': 'Tocca <b>Condividi</b> nella barra di Safari (se non lo vedi, tocca prima <b>···</b>)',
+           'en': "Tap <b>Share</b> in the Safari bar (if you can't see it, tap <b>···</b> first)",
+           'es': 'Toca <b>Compartir</b> en la barra de Safari (si no lo ves, toca antes <b>···</b>)',
+           'de': 'Tippe in der Safari-Leiste auf <b>Teilen</b> (falls nicht sichtbar, zuerst auf <b>···</b>)'},
+    's2': {'it': 'Scorri e scegli <b>Aggiungi alla schermata Home</b>, poi <b>Aggiungi</b>',
+           'en': 'Scroll and choose <b>Add to Home Screen</b>, then <b>Add</b>',
+           'es': 'Desplázate y elige <b>Añadir a pantalla de inicio</b>, luego <b>Añadir</b>',
+           'de': 'Nach unten scrollen, <b>Zum Home-Bildschirm</b> wählen, dann <b>Hinzufügen</b>'},
+    's3': {'it': "Apri l'app dall'icona: sito, area clienti e la tua barca a portata di tocco",
+           'en': 'Open the app from the icon: website, customer area and your boat one tap away',
+           'es': 'Abre la app desde el icono: web, área de clientes y tu barco a un toque',
+           'de': 'App über das Symbol öffnen: Website, Kundenbereich und dein Boot mit einem Tipp'},
+    'note': {'it': 'È gratis e non occupa spazio.', 'en': "It's free and takes no space.", 'es': 'Es gratis y no ocupa espacio.', 'de': 'Kostenlos und braucht keinen Speicherplatz.'},
+    'ok': {'it': 'Ho capito', 'en': 'Got it', 'es': 'Entendido', 'de': 'Verstanden'},
+}
+INST_ICON = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7M9 11l3 3 3-3M10 18h4"/></svg>'
+
+
+def inst_btn(lang):
+    return f'<button class="inst-btn" type="button" id="inst-btn" hidden>{INST_ICON}<span class="inst-l">{INST["btn"][lang]}</span><span class="inst-s" aria-hidden="true">App</span></button>\n'
+
+
+def inst_guide(lang):
+    T = {k: v[lang] for k, v in INST.items()}
+    share = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 10H6v11h12V10h-2"/><path d="M12 3v12M8.5 6.5 12 3l3.5 3.5"/></svg>'
+    plus = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><path d="M12 8v8M8 12h8"/></svg>'
+    return f'''<div id="inst-guide" class="ig" hidden role="dialog" aria-modal="true" aria-labelledby="ig-t">
+<div class="ig-box">
+<h2 id="ig-t">{T["title"]}</h2>
+<ol class="ig-steps">
+<li><span class="ig-ico">{share}</span><span>{T["s1"]}</span></li>
+<li><span class="ig-ico">{plus}</span><span>{T["s2"]}</span></li>
+<li><span class="ig-ico ig-app"><img src="/icona-192.png" alt="" width="40" height="40"></span><span>{T["s3"]}</span></li>
+</ol>
+<p class="ig-note">{T["note"]}</p>
+<button class="btn ig-ok" type="button" data-ig-close>{T["ok"]}</button>
+</div>
+<div class="ig-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M6 13l6 6 6-6"/></svg></div>
+</div>
+'''
+
+
+def inst_manifests():
+    # percorsi relativi al dominio: se il sito cambia indirizzo il manifest resta valido
+    # (chi ha installato l'app dal vecchio dominio dovrà reinstallarla dal nuovo)
+    for lang in LANGS:
+        with open(os.path.join(OUT, f'sito-{lang}.webmanifest'), 'w', encoding='utf-8') as f:
+            _json.dump({'id': '/', 'name': APP_NAME, 'short_name': APP_NAME, 'start_url': url('home', lang), 'scope': '/', 'display': 'standalone', 'lang': lang,
+                        'background_color': '#050E1A', 'theme_color': '#050E1A',
+                        'icons': [{'src': '/icona-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any maskable'},
+                                  {'src': '/icona-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any maskable'}]}, f, ensure_ascii=False)
+
 e = html.escape
 import hashlib
 _A = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets')
@@ -37,6 +94,7 @@ def bust(t):
     return _re.sub(r'/img/([\w./-]+?\.(?:webp|png|jpe?g|svg|gif))(?![\w?])', imgv, t)
 VER = hashlib.md5(b''.join(open(os.path.join(_A, f), 'rb').read() for f in ('css/style.css', 'js/main.js', 'js/utilita.js'))
                   + b''.join(open(os.path.join(_IMG, f), 'rb').read() for f in sorted(os.listdir(_IMG)) if os.path.isfile(os.path.join(_IMG, f)))).hexdigest()[:8]
+INST_V = hashlib.md5(b''.join(open(os.path.join(_A, f), 'rb').read() for f in ('css/installa.css', 'js/installa.js'))).hexdigest()[:8]
 ARROW = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
 LOCK = '<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>'
 WA_ICON = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg>'
@@ -114,7 +172,7 @@ def header(cur, lang, overlay):
 <img class="logo-img" src="/img/logo-libero-160.webp" alt="" width="64" height="64">
 <span class="logo-txt"><span class="logo-name">ANFIBIA<span class="hl">SUB</span></span><span class="logo-sub">{U["tagline"]}</span></span>
 </a>
-<a class="btn nav-cta" data-quote href="{url('contatti', lang)}">{U["quote"]}</a>
+{inst_btn(lang) if cur == 'home' else ''}<a class="btn nav-cta" data-quote href="{url('contatti', lang)}">{U["quote"]}</a>
 <button class="menu-btn" type="button" aria-label="{U["menu_open"]}" aria-expanded="false" aria-controls="nav">{MENU}</button>
 <nav class="nav" id="nav" aria-label="Menu">
 {links}
@@ -233,6 +291,8 @@ def footer(lang):
 
 def page(key, lang, title, desc, body, overlay=False, og='porto-loano'):
     extra_head = '<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">\n' if key == 'utilita' else ''
+    if key == 'home':
+        extra_head += f'<link rel="manifest" href="/sito-{lang}.webmanifest">\n<link rel="stylesheet" href="/css/installa.css?v={INST_V}">\n'
     extra_js = (f'<script src="/vendor/leaflet/leaflet.js"></script>\n<script src="/js/utilita.js?v={VER}"></script>\n' if key == 'utilita'
                 else f'<script src="/js/utilita.js?v={VER}"></script>\n' if key == 'home' else '')
     fname = PAGES[key][lang]
@@ -265,7 +325,7 @@ def page(key, lang, title, desc, body, overlay=False, og='porto-loano'):
 {body}
 </main>
 {footer(lang)}
-{extra_js}</body>
+{inst_guide(lang) + f'<script src="/js/installa.js?v={INST_V}"></script>' + chr(10) if key == 'home' else ''}{extra_js}</body>
 </html>
 '''
     path = os.path.join(OUT, fname)
@@ -668,7 +728,6 @@ def extras_prod():
 
 
 # ---------------- ABYSS (minigioco 3D, in tutte le lingue del sito) ----------------
-APP_NAME = 'ABYSS · Anfibiasub'   # nome dell'app installata: cambialo qui quando cambia il nome del sito
 def build_abyss():
     src = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'abyss')
     files = sorted(f for f in os.listdir(src) if f.endswith(('.js', '.css')))
@@ -698,13 +757,8 @@ def build_abyss():
         js = _json.dumps(jd, ensure_ascii=False).replace('</', '<\\/')
         man = f'abyss-{lang}.webmanifest'
         with open(os.path.join(OUT, man), 'w', encoding='utf-8') as f:
-            # percorsi relativi al dominio: se il sito cambia indirizzo il manifest resta valido (chi l'ha installato dal vecchio dominio dovrà reinstallarla)
-            # icone 192 e 512: senza queste Chrome/Android non propone l'installazione
-            _json.dump({'id': path, 'name': APP_NAME, 'short_name': 'ABYSS', 'start_url': path, 'scope': '/', 'display': 'fullscreen', 'orientation': 'landscape', 'lang': lang,
-                        'background_color': '#050E1A', 'theme_color': '#050E1A',
-                        'icons': [{'src': '/icona-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any maskable'},
-                                  {'src': '/icona-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any maskable'},
-                                  {'src': '/apple-touch-icon.png', 'sizes': '180x180', 'type': 'image/png'}]}, f, ensure_ascii=False)
+            _json.dump({'name': 'ABYSS · Anfibiasub', 'short_name': 'ABYSS', 'start_url': path, 'display': 'fullscreen', 'orientation': 'landscape', 'lang': lang,
+                        'background_color': '#050E1A', 'theme_color': '#050E1A', 'icons': [{'src': '/apple-touch-icon.png', 'sizes': '180x180', 'type': 'image/png'}]}, f, ensure_ascii=False)
         alts = ''.join(f'<link rel="alternate" hreflang="{l}" href="{SITE_URL}{abyss_url(l)}">\n' for l in LANGS)
         doc = f'''<!doctype html>
 <html lang="{lang}">
@@ -745,6 +799,7 @@ if __name__ == '__main__':
     for lang in LANGS:
         build_lang(lang)
     build_abyss()
+    inst_manifests()
     # l'area clienti mostra la stessa informativa privacy nella finestra "Termini e Privacy" della registrazione
     import json
     # vecchi indirizzi /it/... -> nuove pagine, usati dal server su Railway
