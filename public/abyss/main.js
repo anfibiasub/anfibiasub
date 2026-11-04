@@ -1,20 +1,21 @@
 // ABYSS — Il relitto dimenticato. Motore principale e macchina a stati.
 import * as THREE from '../vendor/three/three.module.min.js';
-import { CFG, CODE, bearing } from './config.js?v=cdb9eab5';
-import { t as tr, L as TX } from './i18n.js?v=cdb9eab5';
-import { addCaustics, makeBeam, CAUSTIC } from './look.js?v=cdb9eab5';
-import { makeTextures, logbookPage } from './textures.js?v=cdb9eab5';
-import { buildWorld, collideWorld } from './world.js?v=cdb9eab5';
-import { buildWreck, makeHelmet } from './wreck.js?v=cdb9eab5';
-import { buildArtifacts } from './artifacts.js?v=cdb9eab5';
-import { buildLandmarks, modelsReady } from './landmarks.js?v=cdb9eab5';
-import { buildFish } from './fish.js?v=cdb9eab5';
-import { buildShark, buildBabyShark } from './shark.js?v=cdb9eab5';
-import { buildAds, buildStatues, buildServiceSigns } from './ads.js?v=cdb9eab5';
-import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js?v=cdb9eab5';
-import { createControls } from './controls.js?v=cdb9eab5';
-import { createSolids } from './solid.js?v=cdb9eab5';
-import { createAudio } from './audio.js?v=cdb9eab5';
+import { CFG, CODE, bearing } from './config.js?v=8b59fd59';
+import { t as tr, L as TX } from './i18n.js?v=8b59fd59';
+import { addCaustics, makeBeam, CAUSTIC } from './look.js?v=8b59fd59';
+import { makeTextures, logbookPage } from './textures.js?v=8b59fd59';
+import { buildWorld, collideWorld } from './world.js?v=8b59fd59';
+import { buildWreck, makeHelmet } from './wreck.js?v=8b59fd59';
+import { buildArtifacts } from './artifacts.js?v=8b59fd59';
+import { buildLandmarks, modelsReady } from './landmarks.js?v=8b59fd59';
+import { buildFish } from './fish.js?v=8b59fd59';
+import { buildShark, buildBabyShark } from './shark.js?v=8b59fd59';
+import { buildAds, buildStatues, buildServiceSigns } from './ads.js?v=8b59fd59';
+import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js?v=8b59fd59';
+import { createControls } from './controls.js?v=8b59fd59';
+import { createSolids } from './solid.js?v=8b59fd59';
+import { createAudio } from './audio.js?v=8b59fd59';
+import { initInstall } from './install.js?v=8b59fd59';
 
 const $ = (s) => document.querySelector(s);
 const root = $('#abyss');
@@ -340,6 +341,7 @@ if (/iPhone|iPod/.test(navigator.userAgent) && !navigator.standalone) {
   // le proprie barre (non le tocchiamo noi) e il gioco si adatta subito alla nuova area (vedi resize).
   document.documentElement.classList.add('ios-scroll');
 }
+initInstall();
 function goFullscreen() {
   const el = document.documentElement, f = el.requestFullscreen || el.webkitRequestFullscreen;
   if (!f || document.fullscreenElement) return;

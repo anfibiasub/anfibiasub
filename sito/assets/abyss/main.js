@@ -15,6 +15,7 @@ import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, bui
 import { createControls } from './controls.js';
 import { createSolids } from './solid.js';
 import { createAudio } from './audio.js';
+import { initInstall } from './install.js';
 
 const $ = (s) => document.querySelector(s);
 const root = $('#abyss');
@@ -340,6 +341,7 @@ if (/iPhone|iPod/.test(navigator.userAgent) && !navigator.standalone) {
   // le proprie barre (non le tocchiamo noi) e il gioco si adatta subito alla nuova area (vedi resize).
   document.documentElement.classList.add('ios-scroll');
 }
+initInstall();
 function goFullscreen() {
   const el = document.documentElement, f = el.requestFullscreen || el.webkitRequestFullscreen;
   if (!f || document.fullscreenElement) return;

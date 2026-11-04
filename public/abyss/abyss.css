@@ -301,3 +301,25 @@ html.ios-scroll .ab[data-state]:not([data-state="INTRO"]):not([data-state="DIVE"
 .ab-film::after{content:"";position:absolute;inset:-64px;background-image:var(--grain);opacity:.06;mix-blend-mode:overlay;animation:ab-grain .5s steps(4) infinite}
 @keyframes ab-grain{0%{transform:translate(0,0)}25%{transform:translate(-37px,21px)}50%{transform:translate(19px,-43px)}75%{transform:translate(-11px,-17px)}100%{transform:translate(0,0)}}
 @media (prefers-reduced-motion:reduce){.ab-film::after{animation:none}}
+/* installazione: pulsante sulla schermata iniziale e guida per iPhone/iPad */
+.ab-install{margin:.9em 0 0;display:flex;gap:.6em;font-size:13px;letter-spacing:.1em;min-height:44px}
+.ab-install svg{width:18px;height:18px;flex:none}
+.ab-install[hidden]{display:none}
+.ab-ig{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:16px;padding-bottom:max(16px,env(safe-area-inset-bottom));background:rgba(2,8,16,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.ab-ig[hidden]{display:none}
+.ab-ig-box{width:100%;max-width:440px;max-height:calc(100% - 70px);overflow-y:auto;box-sizing:border-box;padding:22px 20px;border:1px solid rgba(60,198,245,.35);border-radius:14px;background:rgba(5,14,26,.96);color:var(--ice);text-align:left}
+.ab-ig-box h2{margin:0 0 14px;font-size:18px;font-weight:800;line-height:1.25}
+.ab-ig-steps{list-style:none;margin:0;padding:0;counter-reset:ig}
+.ab-ig-steps li{counter-increment:ig;display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgba(141,169,184,.15);font-size:14px;line-height:1.45}
+.ab-ig-steps li:first-child{border-top:0}
+.ab-ig-steps li::before{content:counter(ig);flex:none;width:22px;height:22px;border-radius:50%;background:var(--cyan);color:#050E1A;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center}
+.ab-ig-ico{flex:none;width:44px;height:44px;border-radius:10px;background:rgba(60,198,245,.12);color:var(--cyan);display:flex;align-items:center;justify-content:center}
+.ab-ig-ico svg{width:26px;height:26px}
+.ab-ig-app{background:none}.ab-ig-app img{width:40px;height:40px;border-radius:9px}
+.ab-ig-steps b{color:#fff}
+.ab-ig-note{margin:12px 0 16px;color:var(--grey);font-size:12.5px;line-height:1.5}
+.ab-ig .ab-btn-main{width:100%}
+.ab-ig-arrow{position:absolute;left:50%;bottom:max(6px,env(safe-area-inset-bottom));width:44px;height:44px;margin-left:-22px;color:var(--cyan);animation:ab-ig-b 1.2s ease-in-out infinite}
+@keyframes ab-ig-b{50%{transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){.ab-ig-arrow{animation:none}}
+@media (orientation:landscape) and (max-height:500px){.ab-ig{align-items:flex-start;padding-top:max(10px,env(safe-area-inset-top))}.ab-ig-box{max-width:620px;padding:14px 18px;max-height:calc(100% - 54px)}.ab-ig-box h2{font-size:16px;margin-bottom:4px}.ab-ig-steps li{padding:5px 0;font-size:13px}.ab-ig-ico{width:34px;height:34px}.ab-ig-ico svg{width:20px;height:20px}.ab-ig-app img{width:32px;height:32px}.ab-ig-note{display:none}.ab-ig .ab-btn-main{min-height:38px;padding:.5em 1em}.ab-ig-arrow{width:34px;height:34px;margin-left:-17px}}

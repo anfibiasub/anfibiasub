@@ -668,6 +668,7 @@ def extras_prod():
 
 
 # ---------------- ABYSS (minigioco 3D, in tutte le lingue del sito) ----------------
+APP_NAME = 'ABYSS · Anfibiasub'   # nome dell'app installata: cambialo qui quando cambia il nome del sito
 def build_abyss():
     src = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'abyss')
     files = sorted(f for f in os.listdir(src) if f.endswith(('.js', '.css')))
@@ -697,8 +698,13 @@ def build_abyss():
         js = _json.dumps(jd, ensure_ascii=False).replace('</', '<\\/')
         man = f'abyss-{lang}.webmanifest'
         with open(os.path.join(OUT, man), 'w', encoding='utf-8') as f:
-            _json.dump({'name': 'ABYSS · Anfibiasub', 'short_name': 'ABYSS', 'start_url': path, 'display': 'fullscreen', 'orientation': 'landscape', 'lang': lang,
-                        'background_color': '#050E1A', 'theme_color': '#050E1A', 'icons': [{'src': '/apple-touch-icon.png', 'sizes': '180x180', 'type': 'image/png'}]}, f, ensure_ascii=False)
+            # percorsi relativi al dominio: se il sito cambia indirizzo il manifest resta valido (chi l'ha installato dal vecchio dominio dovrà reinstallarla)
+            # icone 192 e 512: senza queste Chrome/Android non propone l'installazione
+            _json.dump({'id': path, 'name': APP_NAME, 'short_name': 'ABYSS', 'start_url': path, 'scope': '/', 'display': 'fullscreen', 'orientation': 'landscape', 'lang': lang,
+                        'background_color': '#050E1A', 'theme_color': '#050E1A',
+                        'icons': [{'src': '/icona-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any maskable'},
+                                  {'src': '/icona-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any maskable'},
+                                  {'src': '/apple-touch-icon.png', 'sizes': '180x180', 'type': 'image/png'}]}, f, ensure_ascii=False)
         alts = ''.join(f'<link rel="alternate" hreflang="{l}" href="{SITE_URL}{abyss_url(l)}">\n' for l in LANGS)
         doc = f'''<!doctype html>
 <html lang="{lang}">
