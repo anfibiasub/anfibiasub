@@ -68,6 +68,7 @@ def inst_guide(lang):
 
 
 def inst_manifests():
+    iv = lambda n: hashlib.md5(open(os.path.join(_A, n), 'rb').read()).hexdigest()[:6]
     # percorsi relativi al dominio: se il sito cambia indirizzo il manifest resta valido
     # (chi ha installato l'app dal vecchio dominio dovrà reinstallarla dal nuovo)
     for lang in LANGS:
@@ -75,9 +76,10 @@ def inst_manifests():
             _json.dump({'id': '/', 'name': APP_NAME, 'short_name': APP_NAME, 'start_url': url('home', lang), 'scope': '/', 'display': 'standalone', 'lang': lang,
                         'background_color': '#050E1A', 'theme_color': '#050E1A',
                         # icone tonde a sfondo trasparente (PC, Chrome); la "maskable" piena serve ad Android, che la ritaglia nella sua forma
-                        'icons': [{'src': '/icona-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any'},
-                                  {'src': '/icona-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any'},
-                                  {'src': '/icona-maskable-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'}]}, f, ensure_ascii=False)
+                        # ?v=impronta: il server fa tenere le immagini 7 giorni in cache, così un'icona cambiata arriva subito
+                        'icons': [{'src': f'/icona-192.png?v={iv("icona-192.png")}', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any'},
+                                  {'src': f'/icona-512.png?v={iv("icona-512.png")}', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any'},
+                                  {'src': f'/icona-maskable-512.png?v={iv("icona-maskable-512.png")}', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'}]}, f, ensure_ascii=False)
 
 e = html.escape
 import hashlib
@@ -96,6 +98,7 @@ def bust(t):
     return _re.sub(r'/img/([\w./-]+?\.(?:webp|png|jpe?g|svg|gif))(?![\w?])', imgv, t)
 VER = hashlib.md5(b''.join(open(os.path.join(_A, f), 'rb').read() for f in ('css/style.css', 'js/main.js', 'js/utilita.js'))
                   + b''.join(open(os.path.join(_IMG, f), 'rb').read() for f in sorted(os.listdir(_IMG)) if os.path.isfile(os.path.join(_IMG, f)))).hexdigest()[:8]
+MAN_V = hashlib.md5(b''.join(open(os.path.join(_A, f), 'rb').read() for f in ('icona-192.png', 'icona-512.png', 'icona-maskable-512.png'))).hexdigest()[:6]   # cambia quando cambiano le icone
 INST_V = hashlib.md5(b''.join(open(os.path.join(_A, f), 'rb').read() for f in ('css/installa.css', 'js/installa.js'))).hexdigest()[:8]
 ARROW = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
 LOCK = '<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>'
@@ -294,7 +297,7 @@ def footer(lang):
 def page(key, lang, title, desc, body, overlay=False, og='porto-loano'):
     extra_head = '<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">\n' if key == 'utilita' else ''
     if key == 'home':
-        extra_head += f'<link rel="manifest" href="/sito-{lang}.webmanifest">\n<link rel="stylesheet" href="/css/installa.css?v={INST_V}">\n'
+        extra_head += f'<link rel="manifest" href="/sito-{lang}.webmanifest?v={MAN_V}">\n<link rel="stylesheet" href="/css/installa.css?v={INST_V}">\n'
     extra_js = (f'<script src="/vendor/leaflet/leaflet.js"></script>\n<script src="/js/utilita.js?v={VER}"></script>\n' if key == 'utilita'
                 else f'<script src="/js/utilita.js?v={VER}"></script>\n' if key == 'home' else '')
     fname = PAGES[key][lang]
