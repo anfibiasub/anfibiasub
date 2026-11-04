@@ -4,7 +4,7 @@
 // - ponte di sabbia sul bordo del mondo con cancello chiuso "Missione 2"
 // - mano con l'erogatore (getto d'aria) e fiocina, visti in prima persona, con l'arpione che vola
 import * as THREE from '../vendor/three/three.module.min.js';
-import { heightAt } from './world.js?v=e0788d07';
+import { heightAt } from './world.js?v=a77beef3';
 import { GLTFLoader } from '../vendor/three/GLTFLoader.js';
 
 const NAVY = '#071D30', CYAN = '#3CC6F5', ICE = '#DCEFF5';

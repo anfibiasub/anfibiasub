@@ -202,36 +202,142 @@ export function buildWreck(scene, tex) {
   const rustM = new THREE.Mesh(mergeGeometries(rustG.map((g) => { const n = g.index ? g.toNonIndexed() : g; for (const k of Object.keys(n.attributes)) if (!['position', 'normal', 'uv'].includes(k)) n.deleteAttribute(k); return n; })), rust);
   for (const m of [woodM, rustM]) { m.castShadow = m.receiveShadow = true; ship.add(m); }
 
-  // ---- camera nascosta sotto la botola ----
-  const chamber = new THREE.Group(); chamber.name = 'chamber';   // dentro la camera niente caustiche (è sotto il ponte)
+  // ---- interno della nave sotto la botola: stiva, corridoio, cabine e la cabina del capitano ----
+  // Le stanze sono scatole (coordinate locali) separate da paratie sottili; le porte sono scatole che
+  // attraversano le paratie. Ci si muove solo dentro l'unione di stanze e porte.
+  const Y0 = HY - 2.3, YC = HY - 0.3, HOLE = HATCH.r - 0.06, RL = CFG.swim.radius / S;
+  const box3 = (x0, x1, y0, y1, z0, z1) => ({ min: new THREE.Vector3(x0, y0, z0), max: new THREE.Vector3(x1, y1, z1) });
+  const ROOMS = {
+    A: [3.2, 5.6, -1.6, 1.6],            // stiva sotto la botola (scafandro)
+    C: [-7.2, 3.1, -0.5, 0.5],           // corridoio centrale (crollato a metà)
+    P1: [0.7, 3.1, 0.6, 1.6], P2: [-2.6, 0.6, 0.6, 1.6], P3: [-5.0, -2.7, 0.6, 1.6], P4: [-7.2, -5.1, 0.6, 1.6],
+    S1: [0.7, 3.1, -1.6, -0.6], S2: [-2.6, 0.6, -1.6, -0.6], S3: [-5.0, -2.7, -1.6, -0.6], S4: [-7.2, -5.1, -1.6, -0.6],
+    K1: [-9.6, -7.3, -1.5, 0.1],         // cabina del capitano: ufficio
+    K2: [-9.6, -7.3, 0.2, 1.5],          // alcova del capitano: il leggio
+  };
+  // porte: asse della paratia ('x' = paratia perpendicolare a x), posizione, tratto lungo la paratia, altezza
+  const DOORS = [
+    ['x', 3.15, -0.5, 0.5, 1.75],
+    ['z', 0.55, 1.5, 2.4, 1.6], ['z', -0.55, 1.2, 2.1, 1.6],
+    ['z', 0.55, -0.6, 0.3, 1.6], ['z', -0.55, -1.9, -1.0, 1.6],
+    ['x', -2.65, 0.85, 1.55, 1.25],      // paratia sfondata tra due cabine
+    ['z', 0.55, -4.6, -3.7, 1.6], ['z', -0.55, -4.2, -3.3, 1.6],
+    ['z', 0.55, -6.6, -5.7, 1.6], ['z', -0.55, -6.0, -5.2, 1.6],
+    ['x', -7.25, -1.5, -0.8, 1.2],       // paratia sfondata verso la cabina del capitano
+    ['z', 0.15, -8.2, -7.4, 1.6],        // passaggio verso l'alcova
+  ];
+  const free = [];
+  for (const [k, [x0, x1, z0, z1]] of Object.entries(ROOMS)) {
+    if (k === 'C') { free.push(box3(-2.2, x1, Y0, YC, z0, z1), box3(x0, -3.0, Y0, YC, z0, z1)); continue; }   // macerie a metà corridoio
+    free.push(box3(x0, x1, Y0, YC, z0, z1));
+  }
+  const DD = 0.05 + RL + 0.3;
+  for (const [ax, at, a0, a1, h] of DOORS) free.push(ax === 'x' ? box3(at - DD, at + DD, Y0, Y0 + h, a0, a1) : box3(a0, a1, Y0, Y0 + h, at - DD, at + DD));
+  free.push(box3(HATCH.x - 0.5, HATCH.x + 0.5, Y0, HY + 0.3, -0.5, 0.5));   // pozzo della botola
+
+  const chamber = new THREE.Group(); chamber.name = 'chamber';   // dentro la nave niente caustiche (è sotto il ponte)
   {
-    const w = 2.2, h = 2.3, y0 = HY - h;
-    const wallM = new THREE.MeshStandardMaterial({ map: tex.wood.map, normalMap: tex.wood.normalMap, roughness: 1, side: THREE.DoubleSide, color: 0x9a8f80 });
-    const floorM = new THREE.MeshStandardMaterial({ map: tex.sand.map, normalMap: tex.sand.normalMap, roughness: 1, color: 0xb0a690 });
-    const p = (W, H) => new THREE.PlaneGeometry(W, H);
-    const fl = new THREE.Mesh(p(w, w).rotateX(-Math.PI / 2), floorM); fl.position.set(HATCH.x, y0, 0);
-    chamber.add(fl);
-    [[0, w / 2, 0], [0, -w / 2, Math.PI], [w / 2, 0, -Math.PI / 2], [-w / 2, 0, Math.PI / 2]].forEach(([dx, dz, ry]) => {
-      const m = new THREE.Mesh(p(w, h), wallM); m.position.set(HATCH.x + dx, y0 + h / 2, dz); m.rotation.y = ry; chamber.add(m);
-    });
-    // supporto e scafandro
-    const k = 1 / S;   // scafandro, supporto e giornale a grandezza reale
-    const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.28 * k, 0.36 * k, 0.75 * k, 16), rust); stand.position.set(HATCH.x + 0.3, y0 + 0.375 * k, -0.25); chamber.add(stand);
+    const k = 1 / S;   // oggetti a grandezza reale
+    const wallM = new THREE.MeshStandardMaterial({ map: tex.wood.map, normalMap: tex.wood.normalMap, roughness: 1, side: THREE.DoubleSide, color: 0x7d7364, emissive: 0x6a6258, emissiveMap: tex.wood.map, emissiveIntensity: 1.1 });
+    const floorM = new THREE.MeshStandardMaterial({ map: tex.sand.map, normalMap: tex.sand.normalMap, roughness: 1, side: THREE.DoubleSide, color: 0x9a907a, emissive: 0x5a5648, emissiveMap: tex.sand.map, emissiveIntensity: 1.0 });
+    const wallG = [], floorG = [], furnG = [], ironG = [];
+    // parete piana con aperture: u lungo la parete, v in altezza
+    const panel = (ax, c, u0, u1, v0, v1, holes, arr) => {
+      const sh = new THREE.Shape(); sh.moveTo(u0, v0); sh.lineTo(u1, v0); sh.lineTo(u1, v1); sh.lineTo(u0, v1); sh.closePath();
+      for (const hl of holes) {
+        if (hl.length === 3) { const p = new THREE.Path(); p.absarc(hl[0], hl[1], hl[2], 0, Math.PI * 2, true); sh.holes.push(p); continue; }
+        const [h0, h1, hv0, hv1] = hl;
+        const a = Math.max(u0 + 0.01, h0), b = Math.min(u1 - 0.01, h1); if (b <= a) continue;
+        const p = new THREE.Path(); p.moveTo(a, hv0 + 0.001); p.lineTo(a, hv1); p.lineTo(b, hv1); p.lineTo(b, hv0 + 0.001); p.closePath(); sh.holes.push(p);
+      }
+      const g = new THREE.ShapeGeometry(sh);
+      const pos = g.attributes.position, uv = g.attributes.uv;
+      for (let i = 0; i < pos.count; i++) {
+        const u = pos.getX(i), v = pos.getY(i);
+        uv.setXY(i, u * 0.55, v * 1.6);
+        if (ax === 'x') pos.setXYZ(i, c, v, u); else if (ax === 'z') pos.setXYZ(i, u, v, c); else pos.setXYZ(i, u, c, v);
+      }
+      g.computeVertexNormals(); arr.push(g);
+    };
+    const holesOn = (ax, c) => DOORS.filter(([dx, at]) => dx === ax && Math.abs(at - c) < 0.07).map(([, , a0, a1, h]) => [a0, a1, Y0 - 0.01, Y0 + h]);
+    for (const [key, [x0, x1, z0, z1]] of Object.entries(ROOMS)) {
+      panel('x', x0, z0, z1, Y0, YC, holesOn('x', x0), wallG);
+      panel('x', x1, z0, z1, Y0, YC, holesOn('x', x1), wallG);
+      panel('z', z0, x0, x1, Y0, YC, holesOn('z', z0), wallG);
+      panel('z', z1, x0, x1, Y0, YC, holesOn('z', z1), wallG);
+      panel('y', Y0, x0, x1, z0, z1, [], floorG);
+      panel('y', YC, x0, x1, z0, z1, key === 'A' ? [[HATCH.x, 0, HOLE + 0.02]] : [], wallG);
+    }
+    // pavimento e soffitto sotto le porte (lo spessore della paratia)
+    for (const [ax, at, a0, a1, h] of DOORS) {
+      if (ax === 'x') { panel('y', Y0, at - 0.06, at + 0.06, a0, a1, [], floorG); panel('z', a0, at - 0.06, at + 0.06, Y0, Y0 + h, [], wallG); panel('z', a1, at - 0.06, at + 0.06, Y0, Y0 + h, [], wallG); panel('y', Y0 + h, at - 0.06, at + 0.06, a0, a1, [], wallG); }
+      else { panel('y', Y0, a0, a1, at - 0.06, at + 0.06, [], floorG); panel('x', a0, at - 0.06, at + 0.06, Y0, Y0 + h, [], wallG); panel('x', a1, at - 0.06, at + 0.06, Y0, Y0 + h, [], wallG); panel('y', Y0 + h, a0, a1, at - 0.06, at + 0.06, [], wallG); }
+    }
+    // pozzo della botola: tubo dal soffitto della stiva al ponte
+    { const t = new THREE.CylinderGeometry(HOLE + 0.02, HOLE + 0.02, HY + 0.08 - YC, 32, 1, true); t.translate(HATCH.x, (YC + HY + 0.08) / 2, 0); wallG.push(t); }
+    // mobili e detriti (unità locali)
+    const B = (x, y, z, w, h, d, ry = 0, arr = furnG, rz = 0) => { const g = new THREE.BoxGeometry(w, h, d); if (rz) g.rotateZ(rz); if (ry) g.rotateY(ry); g.translate(x, y, z); arr.push(g); };
+    const crate = (x, z, s, ry, y = Y0) => B(x, y + s * 0.4, z, s, s * 0.8, s * 0.9, ry);
+    const barrel = (x, z, lying, ry = 0) => { const g = new THREE.CylinderGeometry(0.2, 0.2, 0.55, 14); if (lying) g.rotateZ(Math.PI / 2); g.rotateY(ry); g.translate(x, Y0 + (lying ? 0.2 : 0.275), z); ironG.push(g); };
+    // stiva A: casse
+    crate(3.7, 1.2, 0.5, 0.3); crate(3.6, -1.2, 0.45, -0.4); crate(5.2, 1.25, 0.4, 0.8); barrel(5.2, -1.2, false);
+    // P1: cuccette dell'equipaggio
+    for (const xx of [1.0, 2.0]) { B(xx + 0.4, Y0 + 0.35, 1.3, 0.9, 0.06, 0.55); B(xx + 0.4, Y0 + 1.05, 1.3, 0.9, 0.06, 0.55); B(xx - 0.02, Y0 + 0.75, 1.55, 0.06, 1.5, 0.06); }
+    // S1: magazzino
+    crate(1.0, -1.25, 0.5, 0.2); crate(1.05, -1.2, 0.38, 0.9, Y0 + 0.4); crate(2.7, -1.2, 0.5, -0.3); barrel(1.9, -1.35, true, 0.2);
+    // P2: cambusa con tavolo
+    B(-1.2, Y0 + 0.55, 1.1, 1.2, 0.06, 0.6); for (const [dx, dz] of [[-0.5, -0.22], [0.5, -0.22], [-0.5, 0.22], [0.5, 0.22]]) B(-1.2 + dx, Y0 + 0.27, 1.1 + dz, 0.06, 0.55, 0.06);
+    barrel(-2.2, 1.3, false); barrel(0.2, 1.35, true, 1.2);
+    // S2: vicolo cieco pieno di casse
+    crate(-0.2, -1.1, 0.55, 0.1); crate(-1.4, -1.25, 0.5, 0.6); crate(-2.2, -1.1, 0.5, -0.2); crate(-1.4, -1.2, 0.4, 0.2, Y0 + 0.4);
+    // P3: amache e cime
+    barrel(-3.2, 1.3, true, 0.4); crate(-4.5, 1.2, 0.45, 0.5);
+    // S3: barili
+    barrel(-3.1, -1.25, false); barrel(-3.5, -1.3, false); barrel(-4.6, -1.0, true, 0.9);
+    // P4: pozzo delle catene
+    { const g = new THREE.TorusGeometry(0.3, 0.08, 8, 20).rotateX(Math.PI / 2); g.translate(-6.4, Y0 + 0.1, 1.15); ironG.push(g); const g2 = g.clone().translate(0, 0.13, 0); ironG.push(g2); }
+    // S4: tavole crollate davanti alla paratia sfondata
+    B(-6.9, Y0 + 0.5, -0.75, 1.2, 0.05, 0.25, 0.2, furnG, 0.7); B(-6.6, Y0 + 0.15, -1.2, 1.0, 0.05, 0.25, -0.5, furnG, 0.15); crate(-5.6, -1.25, 0.45, 0.3);
+    // corridoio: crollo di travi e casse che blocca il passaggio
+    for (let i = 0; i < 6; i++) B(-2.6 + (i % 3 - 1) * 0.22, Y0 + 0.9, -0.3 + i * 0.12, 0.12, 2.3, 0.1, 0, furnG, (i % 2 ? 0.55 : -0.5));
+    crate(-2.6, -0.2, 0.55, 0.4); crate(-2.55, 0.25, 0.45, -0.3); crate(-2.6, 0.0, 0.4, 0.8, Y0 + 0.45);
+    B(-2.6, Y0 + 1.3, 0, 0.12, 0.12, 1.0, 0, ironG); B(-2.7, Y0 + 1.7, 0.05, 0.14, 0.14, 1.0, 0.3, ironG);
+    // fondo del corridoio: porta della cabina sbarrata con assi
+    B(-7.15, Y0 + 0.8, 0, 0.05, 1.6, 0.8); for (const yy of [0.4, 0.9, 1.35]) B(-7.08, Y0 + yy, 0, 0.05, 0.12, 1.0, 0, furnG, 0);
+    // K1: scrivania, sedia rovesciata, baule
+    B(-8.9, Y0 + 0.45, -1.15, 0.9, 0.06, 0.5); B(-8.9, Y0 + 0.22, -1.15, 0.85, 0.44, 0.04); crate(-9.3, -0.3, 0.45, 0.2);
+    B(-8.3, Y0 + 0.15, -0.6, 0.3, 0.05, 0.3, 0.6, furnG, 1.2);
+    // K2: cuccetta del capitano e scaffale
+    B(-8.3, Y0 + 0.3, 1.25, 1.6, 0.25, 0.45); B(-9.55, Y0 + 0.9, 0.85, 0.06, 1.6, 1.2);
+    // il leggio con il giornale di bordo, nell'angolo dell'alcova
+    const lect = new THREE.Group(); lect.position.set(-9.15, Y0, 0.95); lect.rotation.y = 1.9; lect.scale.setScalar(k);
+    { const lw = new THREE.MeshStandardMaterial({ map: tex.wood.map, color: 0x8a6040, roughness: 0.9, emissive: 0x6b4a30, emissiveMap: tex.wood.map, emissiveIntensity: 1.2 });
+      const foot = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.06, 0.4), lw); foot.position.y = 0.03; lect.add(foot);
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.0, 0.08), lw); post.position.y = 0.55; lect.add(post);
+      const top = new THREE.Group(); top.position.y = 1.08; top.rotation.x = 0.38; lect.add(top);
+      const board = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.03, 0.42), lw); top.add(board);
+      const lip = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.05, 0.03), lw); lip.position.set(0, 0.03, 0.2); top.add(lip);
+      lect.userData.top = top; }
+    chamber.add(lect);
+    // scafandro nella stiva
+    const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.28 * k, 0.36 * k, 0.75 * k, 16), rust); stand.position.set(HATCH.x + 0.3, Y0 + 0.375 * k, -0.25); chamber.add(stand);
     const helmet = makeHelmet(brass); helmet.scale.setScalar(k);
-    helmet.position.set(HATCH.x + 0.3, y0 + 0.75 * k, -0.25); helmet.rotation.y = -0.9;
+    helmet.position.set(HATCH.x + 0.3, Y0 + 0.75 * k, -0.25); helmet.rotation.y = -0.9;
     chamber.add(helmet);
-    // giornale di bordo aperto su una cassa, nell'angolo opposto
-    const crateB = new THREE.Mesh(new THREE.BoxGeometry(0.7 * k, 0.55 * k, 0.55 * k), wallM); crateB.position.set(HATCH.x - 0.55, y0 + 0.275 * k, 0.55); crateB.rotation.y = 0.3; chamber.add(crateB);
-    const book = new THREE.Group(); book.scale.setScalar(k); book.position.set(HATCH.x - 0.55, y0 + 0.555 * k, 0.55); book.rotation.y = 0.3 + Math.PI / 2;
+    // giornale di bordo aperto sul leggio
+    const book = new THREE.Group(); book.position.set(0, 0.015, 0);
     const cover = new THREE.MeshStandardMaterial({ color: 0x3a2618, roughness: 0.9 });
     const pageM = new THREE.MeshStandardMaterial({ map: logbookTex(), roughness: 1 });
     const base = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.02, 0.32), cover); base.position.y = 0.01; book.add(base);
     for (const sx of [-1, 1]) { const pg = new THREE.Mesh(new THREE.BoxGeometry(0.21, 0.025, 0.3), [cover, cover, pageM, cover, cover, cover]); pg.position.set(sx * 0.113, 0.03, 0); pg.rotation.z = sx * -0.06; book.add(pg); }
-    chamber.add(book);
-    // casse e detriti
-    for (let i = 0; i < 3; i++) { const c = new THREE.Mesh(new THREE.BoxGeometry(R(0.4, 0.6), R(0.3, 0.5), R(0.4, 0.6)), wallM); c.position.set(HATCH.x + R(-0.8, -0.4), y0 + 0.2, R(-0.7, 0.7)); c.rotation.y = R(0, 2); chamber.add(c); }
-    const light = new THREE.PointLight(0xffd59a, 0, 7, 1.6); light.position.set(HATCH.x, y0 + 1.6, 0.2); chamber.add(light);
-    chamber.userData = { light, helmet, book, floorY: y0 };
+    lect.userData.top.add(book);
+    const nf = (arr) => arr.map((g) => { const n = g.index ? g.toNonIndexed() : g; for (const a of Object.keys(n.attributes)) if (!['position', 'normal', 'uv'].includes(a)) n.deleteAttribute(a); return n; });
+    const mk = (arr, m) => { const me = new THREE.Mesh(mergeGeometries(nf(arr)), m); me.receiveShadow = true; chamber.add(me); return me; };
+    mk(wallG, wallM); mk(floorG, floorM); mk(furnG, wallM); mk(ironG, rust);
+    const light = new THREE.PointLight(0xffd59a, 0, 7, 1.6); light.position.set(HATCH.x, Y0 + 1.6, 0.2); chamber.add(light);
+    // un filo di luce dall'oblò della cabina del capitano: si intravede il leggio
+    const glow = new THREE.PointLight(0x9fd8e6, 0, 4, 1.4); glow.position.set(-8.6, Y0 + 1.6, 0.9); chamber.add(glow);
+    chamber.userData = { light, glow, helmet, book, floorY: Y0 };
     chamber.visible = false;      // si rende visibile solo all'apertura (prima è chiusa e invisibile)
     ship.add(chamber);
   }
@@ -324,7 +430,7 @@ export function buildWreck(scene, tex) {
   ];
   const _c = new THREE.Vector3(), _ab = new THREE.Vector3();
   // mastra della botola: 4 pareti + piano superiore forato; la camera sotto si può visitare quando la botola è aperta
-  const HS = HATCH.size, HOLE = HATCH.r - 0.06, Y0 = HY - 2.3, CW = 1.1, TOP = HY + 0.46;
+  const HS = HATCH.size, TOP = HY + 0.46;
   const coaming = [
     { min: new THREE.Vector3(HATCH.x - HS, HY, -HS), max: new THREE.Vector3(HATCH.x + HS, TOP, -HS + 0.12) },
     { min: new THREE.Vector3(HATCH.x - HS, HY, HS - 0.12), max: new THREE.Vector3(HATCH.x + HS, TOP, HS) },
@@ -339,18 +445,29 @@ export function buildWreck(scene, tex) {
     }
   };
   const state = { open: false };
+  const insideLocal = (q) => free.some((b) => q.x > b.min.x - 0.25 && q.x < b.max.x + 0.25 && q.y > b.min.y - 0.25 && q.y < b.max.y + 0.25 && q.z > b.min.z - 0.25 && q.z < b.max.z + 0.25);
+  const _q = new THREE.Vector3();
   function collide(p, rw) {
     const r = rw / S;
     lp.copy(p).applyMatrix4(inv);
     const dh = Math.hypot(lp.x - HATCH.x, lp.z);
-    // dentro la camera nascosta o nel pozzo della botola aperta: solo le pareti della camera
-    if (state.open && lp.y > Y0 - 0.2 && lp.y < TOP + r && ((lp.y < HY - 0.02 && Math.abs(lp.x - HATCH.x) < CW + 0.3 && Math.abs(lp.z) < CW + 0.3) || dh < HOLE)) {
-      if (lp.y < HY - 0.02) {
-        lp.x = clamp(lp.x, HATCH.x - CW + r, HATCH.x + CW - r); lp.z = clamp(lp.z, -CW + r, CW - r);
-        if (lp.y < Y0 + r) lp.y = Y0 + r;
-        // dalla camera si esce solo dal pozzo
-        if (lp.y > HY - 0.02 - r && dh > HOLE - r) lp.y = HY - 0.02 - r;
-      } else if (dh > HOLE - r) { const k = (HOLE - r) / dh; lp.x = HATCH.x + (lp.x - HATCH.x) * k; lp.z *= k; }
+    // nel pozzo della botola aperta: solo il bordo tondo
+    if (state.open && lp.y >= HY - 0.02 && lp.y < TOP + r && dh < HOLE) {
+      if (dh > HOLE - r) { const k = (HOLE - r) / dh; lp.x = HATCH.x + (lp.x - HATCH.x) * k; lp.z *= k; }
+      p.copy(lp.applyMatrix4(ship.matrixWorld));
+      return;
+    }
+    // dentro la nave: ci si muove solo nell'unione di stanze, porte e pozzo
+    if (state.open && insideLocal(lp)) {
+      let bx = 0, by = 0, bz = 0, bd = 1e9;
+      for (const b of free) {
+        const cx = b.max.x - b.min.x > 2 * r ? clamp(lp.x, b.min.x + r, b.max.x - r) : (b.min.x + b.max.x) / 2;
+        const cy = b.max.y - b.min.y > 2 * r ? clamp(lp.y, b.min.y + r, b.max.y - r) : (b.min.y + b.max.y) / 2;
+        const cz = b.max.z - b.min.z > 2 * r ? clamp(lp.z, b.min.z + r, b.max.z - r) : (b.min.z + b.max.z) / 2;
+        const d = (cx - lp.x) ** 2 + (cy - lp.y) ** 2 + (cz - lp.z) ** 2;
+        if (d < bd) { bd = d; bx = cx; by = cy; bz = cz; }
+      }
+      lp.set(bx, by, bz);
       p.copy(lp.applyMatrix4(ship.matrixWorld));
       return;
     }
@@ -381,8 +498,9 @@ export function buildWreck(scene, tex) {
   return {
     ship, hatch, chamber, collide, toW, fwd, side, anchorPos, chainCurve, debris, S, state,
     setOpen(v) { state.open = v; },
+    inside: (p) => state.open && insideLocal(_q.copy(p).applyMatrix4(inv)),
     hatchWorld: () => toW(HATCH.x, HY + 0.5, 0),
-    chamberWorld: () => toW(HATCH.x, Y0 + 0.9, 0),
+    chamberWorld: () => toW(HATCH.x, HY - 1.4, 0),
     bookWorld: () => chamber.userData.book.getWorldPosition(new THREE.Vector3()),
     sternWorld: () => toW(XS + 0.3, 0, 0),
     helmetWorld: () => chamber.userData.helmet.getWorldPosition(new THREE.Vector3()),

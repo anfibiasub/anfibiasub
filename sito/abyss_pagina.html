@@ -21,7 +21,7 @@
 <div class="ab-hud" aria-live="polite">
   <div class="ab-tl"><span class="ab-mark">ABYSS</span><span id="ab-depth" class="ab-depth"><b>0,0</b> m</span>
     <span class="ab-man" title="{{gauge}}"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" class="m-bg"/><path d="M17.5 82.5A46 46 0 1 1 82.5 82.5" class="m-arc"/><path d="M71 76A33 33 0 0 0 82.5 82.5" class="m-red"/><g class="m-ticks"></g><line x1="50" y1="50" x2="50" y2="14" class="ab-man-needle"/><circle cx="50" cy="50" r="5" class="m-hub"/></svg><span class="m-val"><b id="ab-bar">220</b> bar</span></span><span id="ab-obj" class="ab-obj"></span></div>
-  <div class="ab-comp" aria-hidden="true"><div class="ab-comp-win"><div class="ab-comp-strip"></div></div><span id="ab-hdg">000°</span></div>
+  <div class="ab-comp" aria-hidden="true"><div class="ab-comp-win"><div class="ab-comp-strip"></div><span class="ab-comp-gate" hidden>◆</span></div><span id="ab-hdg">000°</span></div>
   <div class="ab-tr">
     <button class="ab-ico ab-inv-btn" type="button" data-act="inv" aria-label="{{inv}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16v12H4z"/><path d="M9 8V5h6v3"/></svg><span id="ab-count">0/3</span></button>
     <button class="ab-ico" type="button" data-act="audio" aria-label="Audio on/off"><svg class="snd-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg><svg class="snd-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg></button>
@@ -121,9 +121,8 @@
       <p class="ab-small ab-poll-msg" role="status"></p>
     </div>
     <p class="ab-small">{{end_p}}</p>
-    <ul class="ab-sum"><li>{{sum1}}</li><li>{{sum2}}</li><li>{{sum3}}</li><li>{{sum4}}</li></ul>
+    <ul class="ab-sum"><li>{{sum1}}</li><li>{{sum2}}</li><li>{{sum3}}</li><li>{{sum4}}</li><li>{{sum5}}</li></ul>
     <div class="ab-ad">
-      <p class="ab-ad-lab">{{ad_k}}</p>
       <div class="ab-ad-logo"><img src="/img/logo-casco-96.png" alt="" width="64" height="64"><b>ANFIBIA<span>SUB</span></b></div>
       <p class="ab-small">{{ad_p}}</p>
       <ul class="ab-svc"><li>{{svc1}}</li><li>{{svc2}}</li><li>{{svc3}}</li><li>{{svc4}}</li><li>{{svc5}}</li><li>{{svc6}}</li></ul>

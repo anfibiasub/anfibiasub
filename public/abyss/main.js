@@ -1,19 +1,19 @@
 // ABYSS — Il relitto dimenticato. Motore principale e macchina a stati.
 import * as THREE from '../vendor/three/three.module.min.js';
-import { CFG, CODE, bearing } from './config.js?v=e0788d07';
-import { t as tr, L as TX } from './i18n.js?v=e0788d07';
-import { addCaustics, makeBeam, CAUSTIC } from './look.js?v=e0788d07';
-import { makeTextures, logbookPage } from './textures.js?v=e0788d07';
-import { buildWorld, collideWorld } from './world.js?v=e0788d07';
-import { buildWreck, makeHelmet } from './wreck.js?v=e0788d07';
-import { buildArtifacts } from './artifacts.js?v=e0788d07';
-import { buildLandmarks, modelsReady } from './landmarks.js?v=e0788d07';
-import { buildFish } from './fish.js?v=e0788d07';
-import { buildShark, buildBabyShark } from './shark.js?v=e0788d07';
-import { buildAds, buildStatues, buildServiceSigns } from './ads.js?v=e0788d07';
-import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js?v=e0788d07';
-import { createControls } from './controls.js?v=e0788d07';
-import { createAudio } from './audio.js?v=e0788d07';
+import { CFG, CODE, bearing } from './config.js?v=a77beef3';
+import { t as tr, L as TX } from './i18n.js?v=a77beef3';
+import { addCaustics, makeBeam, CAUSTIC } from './look.js?v=a77beef3';
+import { makeTextures, logbookPage } from './textures.js?v=a77beef3';
+import { buildWorld, collideWorld } from './world.js?v=a77beef3';
+import { buildWreck, makeHelmet } from './wreck.js?v=a77beef3';
+import { buildArtifacts } from './artifacts.js?v=a77beef3';
+import { buildLandmarks, modelsReady } from './landmarks.js?v=a77beef3';
+import { buildFish } from './fish.js?v=a77beef3';
+import { buildShark, buildBabyShark } from './shark.js?v=a77beef3';
+import { buildAds, buildStatues, buildServiceSigns } from './ads.js?v=a77beef3';
+import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js?v=a77beef3';
+import { createControls } from './controls.js?v=a77beef3';
+import { createAudio } from './audio.js?v=a77beef3';
 
 const $ = (s) => document.querySelector(s);
 const root = $('#abyss');
@@ -179,7 +179,7 @@ const canPause = () => ['DESCENT', 'EXPLORATION'].includes(S.state);
 // ---------------- interfaccia ----------------
 const ui = {
   depth: $('#ab-depth b'), count: $('#ab-count'), prompt: $('#ab-prompt'), msg: $('#ab-msg'), hint: $('#ab-hint'),
-  veil: $('#ab-veil'), start: $('#ab-start'), bar: $('#ab-bar'), needle: $('.ab-man-needle'), obj: $('#ab-obj'), gauge: $('.ab-gauge'), strip: $('.ab-comp-strip'), hdg: $('#ab-hdg'),
+  veil: $('#ab-veil'), start: $('#ab-start'), bar: $('#ab-bar'), needle: $('.ab-man-needle'), obj: $('#ab-obj'), gauge: $('.ab-gauge'), strip: $('.ab-comp-strip'), hdg: $('#ab-hdg'), gateMk: $('.ab-comp-gate'),
 };
 // bussola da polso: striscia con i punti cardinali (2 px per grado, ripetuta)
 {
@@ -445,6 +445,7 @@ function openHatch() {
       }
       // la camera nascosta si illumina
       wreck.chamber.userData.light.intensity = Math.min(1, Math.max(0, (t - 3.6) / 3)) * 10;
+      wreck.chamber.userData.glow.intensity = Math.min(1, Math.max(0, (t - 3.6) / 3)) * 2.5;
       // 5.2-9 s: la visuale scende sopra l'apertura e guarda lo scafandro
       if (t >= 5.2) {
         const e2 = ease(Math.min(1, (t - 5.2) / 3.4));
@@ -455,7 +456,7 @@ function openHatch() {
       if (t > 9.2) {
         S.seq = null; S.phase = 2; wreck.setOpen(true); updCount();
         continueExploring();
-        toast(tr('hatch_open'), 5000);
+        toast(tr('hatch_open'), 8000);
       }
     },
   };
@@ -514,7 +515,7 @@ function restart() {
   wreck.hatch.userData.open = false; wreck.hatch.rotation.z = 0; wreck.hatch.position.y = wreck.HY + 0.46;
   dials.forEach((d) => { d.rotation.x = 0; });
   latches.forEach((l) => l.m.position.set(Math.cos(l.a) * 0.73, 0.04, Math.sin(l.a) * 0.73));
-  wreck.chamber.visible = false; wreck.chamber.userData.light.intensity = 0;
+  wreck.chamber.visible = false; wreck.chamber.userData.light.intensity = 0; wreck.chamber.userData.glow.intensity = 0;
   dial.fill(0); $('#ab-lockfb').textContent = '';
   world.bubbles.clear(); sediment.stop();
   resetPlayer(); toggleTorch(false); S.torchTouched = false;
@@ -669,6 +670,13 @@ function tick() {
   ui.depth.textContent = depth.toFixed(1).replace('.', TX.decimal || ',');
   ui.gauge.style.setProperty('--d', Math.min(1, depth / 50).toFixed(4));
   { const hd = ((Math.atan2(fwd.x, -fwd.z) * 180 / Math.PI) + 360) % 360; ui.strip.style.transform = `translateX(${-hd * 2}px)`; ui.hdg.textContent = String(Math.round(hd) % 360).padStart(3, '0') + '°'; }
+  // segnale giallo sulla bussola: la direzione del cancello della Missione 2, finché non lo attraversi
+  if (gate && (S.phase === 4 || S.phase === 5)) {
+    const L = gate.lockPos(), bg = ((Math.atan2(L.x - P.pos.x, -(L.z - P.pos.z)) * 180 / Math.PI) + 360) % 360;
+    const hd = ((Math.atan2(fwd.x, -fwd.z) * 180 / Math.PI) + 360) % 360, half = ui.gateMk.parentNode.clientWidth / 2 - 12;
+    const dx = Math.max(-half, Math.min(half, (((bg - hd + 540) % 360) - 180) * 2));
+    ui.gateMk.hidden = false; ui.gateMk.style.transform = `translateX(${dx}px)`;
+  } else if (!ui.gateMk.hidden) ui.gateMk.hidden = true;
   audio.depth(depth);
 
   if (playing && !S.reached && depth > 23) {
@@ -751,7 +759,7 @@ function tick() {
   sediment.update(dt);
   // squaletto: il tempo per il prossimo attacco scorre solo mentre si esplora
   if (S.state !== 'DEAD') baby.update(dt, t, P.pos, {
-    dir: camera.getWorldDirection(_sdir), active: S.state === 'EXPLORATION',
+    dir: camera.getWorldDirection(_sdir), active: S.state === 'EXPLORATION' && !wreck.inside(P.pos),
     warn() { audio.danger(); toast(controls.touch ? tr('baby_touch') : tr('baby_pc'), 4500); },
     bite() { audio.hit(); S.air = Math.max(0, S.air - 20); S.shake = 0.9; toast(tr('baby_bite'), 4000); },
   });

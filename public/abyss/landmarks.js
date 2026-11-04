@@ -1,9 +1,9 @@
 // Luoghi dei reperti, lontani dal relitto: grotta, elicottero affondato, campo di anfore, arco di roccia.
 // Restituisce i punti in cui appoggiare i reperti (spots).
 import * as THREE from '../vendor/three/three.module.min.js';
-import { heightAt } from './world.js?v=e0788d07';
-import { rng } from './noise.js?v=e0788d07';
-import { CFG } from './config.js?v=e0788d07';
+import { heightAt } from './world.js?v=a77beef3';
+import { rng } from './noise.js?v=a77beef3';
+import { CFG } from './config.js?v=a77beef3';
 import { GLTFLoader } from '../vendor/three/GLTFLoader.js';
 
 const loader = new GLTFLoader();
