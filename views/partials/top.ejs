@@ -22,6 +22,7 @@
 <% if (admin) { %>
 <a href="/admin"<%- path === '/admin' || path.startsWith('/admin/barca') ? ' aria-current="page"' : '' %>>Clienti e barche</a>
 <a href="/admin/clienti/nuovo"<%- path === '/admin/clienti/nuovo' ? ' aria-current="page"' : '' %>>Nuovo cliente</a>
+<a href="/admin/abyss"<%- path === '/admin/abyss' ? ' aria-current="page"' : '' %>>Statistiche ABYSS</a>
 <a href="/admin/impostazioni"<%- path === '/admin/impostazioni' ? ' aria-current="page"' : '' %>>Impostazioni</a>
 <a href="/admin/guida"<%- path === '/admin/guida' ? ' aria-current="page"' : '' %>>Guida</a>
 <% } else { %>

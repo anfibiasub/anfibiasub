@@ -1,0 +1,83 @@
+<%- include('../partials/top', { title: 'Statistiche ABYSS' }) %>
+<%
+  const mm = (s) => { if (s == null) return '—'; const m = Math.floor(s / 60), x = s % 60; return m ? `${m} min ${String(x).padStart(2, '0')} s` : `${x} s`; };
+  const ore = (s) => { const h = s / 3600; return h >= 10 ? Math.round(h) + ' ore' : h >= 1 ? h.toFixed(1).replace('.', ',') + ' ore' : Math.round(s / 60) + ' min'; };
+  const pc = (a, b) => (b ? Math.round(a * 100 / b) : 0);
+  const N = tot.tutte;
+  const fasi = [['Hanno iniziato l\'immersione', N], ['Hanno trovato almeno un reperto', tot.f1], ['Hanno trovato tutti e 3 i reperti', tot.f2], ['Hanno aperto la botola', tot.f3],
+    ['Hanno trovato e letto il giornale di bordo', tot.f4], ['Hanno aperto il cofanetto', tot.f5], ['Hanno aperto il cancello', tot.f6], ['Missione 1 completata', tot.f7]];
+  const maxG = Math.max(1, ...giorni.map((g) => g.n));
+  const LN = { it: 'Italiano', en: 'Inglese', es: 'Spagnolo', de: 'Tedesco', '': 'Non indicata' };
+  const bar = (v, max, col) => `<span style="display:block;height:10px;border-radius:5px;background:#081A2C;overflow:hidden"><span style="display:block;height:100%;width:${max ? Math.max(v ? 2 : 0, Math.round(v * 100 / max)) : 0}%;background:${col}"></span></span>`;
+%>
+<main class="app-main" id="main">
+<div class="page-top">
+<div><p class="eyebrow">Gioco ABYSS</p><h1>Statistiche</h1><p class="sub">Dati anonimi delle partite e risposte al sondaggio di fine partita</p></div>
+<% if (prova) { %><a class="chip-sm" href="/admin/abyss">Escludi le partite di prova</a><% } else if (prove) { %><a class="chip-sm" href="/admin/abyss?prova=1"><%= prove === 1 ? 'Includi la partita di prova' : `Includi le ${prove} partite di prova` %></a><% } %>
+</div>
+
+<style>.tiles.ab4{grid-template-columns:repeat(4,minmax(0,1fr))}.two.ab3{grid-template-columns:repeat(3,minmax(0,1fr))}@media (max-width:760px){.tiles.ab4{grid-template-columns:1fr 1fr}.two.ab3{grid-template-columns:repeat(3,minmax(0,1fr))}}</style>
+<div class="tiles ab4">
+<span class="mini"><span class="mini-label">Partite oggi</span><span class="mini-val"><%= tot.oggi %></span></span>
+<span class="mini"><span class="mini-label">Ultimi 7 giorni</span><span class="mini-val"><%= tot.sett %></span></span>
+<span class="mini"><span class="mini-label">Ultimi 30 giorni</span><span class="mini-val"><%= tot.mese %></span></span>
+<span class="mini"><span class="mini-label">Totale partite</span><span class="mini-val"><%= N %></span></span>
+<span class="mini"><span class="mini-label">Durata media</span><span class="mini-val"><%= mm(tot.media) %></span><span class="mini-note">metà dei giocatori sta più di <%= mm(tot.mediana) %></span></span>
+<span class="mini"><span class="mini-label">Tempo giocato in totale</span><span class="mini-val"><%= ore(tot.sec_tot) %></span></span>
+<span class="mini"><span class="mini-label">Vogliono la Missione 2</span><span class="mini-val"><%= voti.si %> su <%= voti.n %></span><span class="mini-note"><%= pc(voti.si, voti.n) %>% di chi ha risposto</span></span>
+<span class="mini"><span class="mini-label">Voto medio</span><span class="mini-val"><%= voti.media ? String(voti.media).replace('.', ',') + ' ★' : '—' %></span><span class="mini-note">da 1 a 5 stelle</span></span>
+</div>
+
+<div class="tiles cols2" style="margin-top:22px">
+<div class="panel"><div class="panel-head"><h2>Fin dove arrivano</h2><span class="hint">su <%= N %> partite</span></div>
+<% for (const [t, v] of fasi) { %>
+<div style="margin:10px 0"><div style="display:flex;justify-content:space-between;gap:10px;font-size:14px"><span><%= t %></span><strong style="color:#fff"><%= v %> <span class="hint">(<%= pc(v, N) %>%)</span></strong></div><%- bar(v, N, 'var(--cyan, #3CC6F5)') %></div>
+<% } %>
+<p class="hint" style="margin-top:12px">Dove la barra cala di più, è lì che i giocatori si bloccano o smettono.</p>
+</div>
+
+<div class="panel"><div class="panel-head"><h2>Partite negli ultimi 30 giorni</h2></div>
+<div style="display:flex;align-items:flex-end;gap:3px;height:140px;padding-top:6px">
+<% for (const g of giorni) { %><span title="<%= fmtDate(g.giorno) %>: <%= g.n %>" style="flex:1;min-width:0;height:<%= Math.max(g.n ? 4 : 1, Math.round(g.n * 100 / maxG)) %>%;background:<%= g.n ? '#3CC6F5' : '#12304A' %>;border-radius:3px 3px 0 0"></span><% } %>
+</div>
+<div class="hint" style="display:flex;justify-content:space-between;margin-top:6px"><span><%= fmtDate(giorni[0].giorno) %></span><span>oggi</span></div>
+<div class="two" style="margin-top:20px">
+<div><h3 style="font-size:15px;margin:0 0 8px">Dispositivo</h3>
+<div class="hint" style="display:flex;justify-content:space-between"><span>Computer</span><span><%= tot.pc %> (<%= pc(tot.pc, N) %>%)</span></div><%- bar(tot.pc, N, '#9fe3b0') %>
+<div class="hint" style="display:flex;justify-content:space-between;margin-top:8px"><span>Telefono / tablet</span><span><%= tot.tel %> (<%= pc(tot.tel, N) %>%)</span></div><%- bar(tot.tel, N, '#9fe3b0') %>
+</div>
+<div><h3 style="font-size:15px;margin:0 0 8px">Lingua</h3>
+<% for (const l of lingue) { %><div class="hint" style="display:flex;justify-content:space-between;margin-top:6px"><span><%= LN[l.lingua] || l.lingua %></span><span><%= l.n %></span></div><%- bar(l.n, N, '#D4AC63') %><% } %>
+<% if (!lingue.length) { %><p class="hint">—</p><% } %>
+</div>
+</div>
+<h3 style="font-size:15px;margin:20px 0 8px">Morti</h3>
+<div class="two ab3">
+<span class="mini"><span class="mini-label">Squalo</span><span class="mini-val"><%= tot.squalo %></span></span>
+<span class="mini"><span class="mini-label">Aria finita</span><span class="mini-val"><%= tot.aria %></span></span>
+<span class="mini"><span class="mini-label">Pallone esploso</span><span class="mini-val"><%= tot.pallone %></span></span>
+</div>
+</div>
+</div>
+
+<div class="tiles cols2" style="margin-top:22px">
+<div class="panel"><div class="panel-head"><h2>Sondaggio di fine partita</h2><span class="hint"><%= voti.n %> risposte</span></div>
+<div style="margin:6px 0 14px"><div style="display:flex;justify-content:space-between;font-size:14px"><span>Vogliono un'altra missione</span><strong style="color:#fff"><%= voti.si %> (<%= pc(voti.si, voti.n) %>%)</strong></div><%- bar(voti.si, voti.n, '#7cff9a') %></div>
+<div style="margin:6px 0 18px"><div style="display:flex;justify-content:space-between;font-size:14px"><span>Gli basta così</span><strong style="color:#fff"><%= voti.n - voti.si %> (<%= pc(voti.n - voti.si, voti.n) %>%)</strong></div><%- bar(voti.n - voti.si, voti.n, '#8da9b8') %></div>
+<% for (const k of [5, 4, 3, 2, 1]) { const v = voti['v' + k]; %>
+<div style="display:grid;grid-template-columns:92px 1fr 40px;gap:10px;align-items:center;margin:6px 0"><span style="color:#D4AC63"><%= '★'.repeat(k) %></span><%- bar(v, voti.n, '#D4AC63') %><span class="hint" style="text-align:right"><%= v %></span></div>
+<% } %>
+</div>
+<div class="panel"><div class="panel-head"><h2>Commenti</h2><span class="hint">gli ultimi 50</span></div>
+<% if (!commenti.length) { %><p class="hint">Nessun commento per ora.</p><% } %>
+<% for (const c of commenti) { %>
+<div style="border-top:1px solid var(--line2, #1c3a52);padding:10px 0">
+<div class="hint"><%= fmtDate(c.created_at) %> · <%= c.altra ? 'vuole la Missione 2' : 'gli basta così' %><%= c.voto ? ' · ' + '★'.repeat(c.voto) : '' %></div>
+<div style="margin-top:3px"><%= c.commento %></div>
+</div>
+<% } %>
+</div>
+</div>
+<p class="hint" style="margin-top:18px">Il gioco non usa cookie e non salva nomi, email o indirizzi IP. Le partite fatte con il trucco di prova (123456789) sono escluse dai numeri.</p>
+</main>
+<%- include('../partials/bottom') %>

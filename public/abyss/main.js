@@ -1,20 +1,20 @@
 // ABYSS — Il relitto dimenticato. Motore principale e macchina a stati.
 import * as THREE from '../vendor/three/three.module.min.js';
-import { CFG, CODE, bearing } from './config.js?v=5e15d4f6';
-import { t as tr, L as TX } from './i18n.js?v=5e15d4f6';
-import { addCaustics, makeBeam, CAUSTIC } from './look.js?v=5e15d4f6';
-import { makeTextures, logbookPage } from './textures.js?v=5e15d4f6';
-import { buildWorld, collideWorld } from './world.js?v=5e15d4f6';
-import { buildWreck, makeHelmet } from './wreck.js?v=5e15d4f6';
-import { buildArtifacts } from './artifacts.js?v=5e15d4f6';
-import { buildLandmarks, modelsReady } from './landmarks.js?v=5e15d4f6';
-import { buildFish } from './fish.js?v=5e15d4f6';
-import { buildShark, buildBabyShark } from './shark.js?v=5e15d4f6';
-import { buildAds, buildStatues, buildServiceSigns } from './ads.js?v=5e15d4f6';
-import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js?v=5e15d4f6';
-import { createControls } from './controls.js?v=5e15d4f6';
-import { createSolids } from './solid.js?v=5e15d4f6';
-import { createAudio } from './audio.js?v=5e15d4f6';
+import { CFG, CODE, bearing } from './config.js?v=cdb9eab5';
+import { t as tr, L as TX } from './i18n.js?v=cdb9eab5';
+import { addCaustics, makeBeam, CAUSTIC } from './look.js?v=cdb9eab5';
+import { makeTextures, logbookPage } from './textures.js?v=cdb9eab5';
+import { buildWorld, collideWorld } from './world.js?v=cdb9eab5';
+import { buildWreck, makeHelmet } from './wreck.js?v=cdb9eab5';
+import { buildArtifacts } from './artifacts.js?v=cdb9eab5';
+import { buildLandmarks, modelsReady } from './landmarks.js?v=cdb9eab5';
+import { buildFish } from './fish.js?v=cdb9eab5';
+import { buildShark, buildBabyShark } from './shark.js?v=cdb9eab5';
+import { buildAds, buildStatues, buildServiceSigns } from './ads.js?v=cdb9eab5';
+import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js?v=cdb9eab5';
+import { createControls } from './controls.js?v=cdb9eab5';
+import { createSolids } from './solid.js?v=cdb9eab5';
+import { createAudio } from './audio.js?v=cdb9eab5';
 
 const $ = (s) => document.querySelector(s);
 const root = $('#abyss');
@@ -171,6 +171,31 @@ function resetPlayer() {
 resetPlayer();
 
 const audio = createAudio();
+
+// ---------------- statistiche anonime delle partite (nessun cookie, nessun dato personale) ----------------
+// Il gioco manda al server: inizio, un aggiornamento al minuto e la fine della partita, con durata, fase raggiunta,
+// esito, morti, lingua e tipo di dispositivo. Le partite fatte col trucco di prova sono segnate e si possono escludere.
+const stats = (() => {
+  const url = (root.dataset.api || '').replace(/voto$/, 'partita');
+  let id = null, sec = 0, sent = 0, last = performance.now(), esito = '', ended = false, prova = false;
+  const morti = { squalo: 0, aria: 0, pallone: 0 };
+  const post = (ev) => {
+    if (!id || !url) return;
+    const body = JSON.stringify({ id, ev, sec: Math.round(sec), fase: S.phase, reperti: S.found.length, esito, morti, lingua: document.documentElement.lang, dev: controls.touch ? 'telefono' : 'pc', prova });
+    try { fetch(url, { method: 'POST', body, keepalive: true, mode: 'no-cors', credentials: 'omit' }).catch(() => {}); } catch (_) { /* niente */ }
+  };
+  const newId = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+  return {
+    start() { id = newId(); sec = 0; sent = 0; esito = ''; ended = false; prova = false; morti.squalo = morti.aria = morti.pallone = 0; post('start'); },
+    // tempo vero (orologio), contato solo mentre si gioca con la pagina in primo piano
+    tick(active) { const now = performance.now(), d = Math.min(5, (now - last) / 1000); last = now; if (!id || !active || document.hidden) return; sec += d; if (sec - sent >= 60) { sent = sec; post('ping'); } },
+    death(r) { if (!id) return; if (morti[r] !== undefined) morti[r]++; esito = r; post('ping'); },
+    test() { prova = true; post('ping'); },
+    end(e) { if (!id || ended) return; ended = true; if (e) esito = e; post('end'); },
+    flush() { if (id) post('ping'); },
+    get id() { return id; },
+  };
+})();
 const controls = createControls(canvas, root, {
   escape() {
     if (S.state === 'DEAD') return;
@@ -266,7 +291,7 @@ root.addEventListener('click', (e) => {
   else if (act === 'restart') restart();
   else if (act === 'continue') continueExploring();
   else if (act === 'log') openLog();
-  else if (act === 'exit') { try { if (document.fullscreenElement) document.exitFullscreen(); } catch (_) { /* niente */ } location.href = '/'; }
+  else if (act === 'exit') { stats.end('uscita'); audio.stop(); try { if (document.fullscreenElement) document.exitFullscreen(); } catch (_) { /* niente */ } location.href = '/'; }
   else if (act === 'dial-up' || act === 'dial-dn') {
     const i = +b.dataset.i; dial[i] = (dial[i] + (act === 'dial-up' ? 1 : 9)) % 10; drawDials(); audio.click(); $('#ab-lockfb').textContent = '';
   } else if (act === 'confirm') confirmCode();
@@ -324,6 +349,7 @@ ui.start.addEventListener('click', () => {
   if (S.state !== 'INTRO') return;
   if (controls.touch) goFullscreen();
   audio.init();
+  stats.start();
   setState('DIVE');
   root.classList.add('is-diving');
   // transizione: l'immagine si scurisce e "scende", poi si è in acqua
@@ -476,6 +502,7 @@ function openHatch() {
 function die(reason) {
   if (S.state === 'DEAD') return;
   setState('DEAD'); S.seq = null; S.inspect = null;
+  stats.death(reason === 'squalo' ? 'squalo' : reason === 'pallone' ? 'pallone' : 'aria');
   controls.enabled = false; controls.reset(); controls.release(); audio.hissOff();
   root.classList.add('is-dead');
   const why = reason === 'squalo' ? 'shark' : reason === 'pallone' ? 'bag' : 'air';
@@ -499,6 +526,7 @@ function gateOpened() {
 
 function finish() {
   setState('COMPLETED');
+  stats.end('completata');
   controls.release();
   root.classList.add('is-done');
   openPanel('end');
@@ -515,7 +543,7 @@ function finish() {
     if (S.phase !== 1 || !['EXPLORATION', 'LOCK_PUZZLE', 'DESCENT'].includes(S.state) || wreck.hatch.userData.open) return;
     closePanelSilently();
     for (const a of arts.list) if (!a.final && !a.taken) { a.taken = true; S.found.push(a.id); a.glint.material.opacity = 0; a.obj.visible = false; (a.extra || []).forEach((m) => { m.visible = false; }); }
-    S.reached = true; updCount(); openHatch();
+    S.reached = true; updCount(); stats.test(); openHatch();
   });
 }
 
@@ -530,6 +558,7 @@ function continueExploring() {
 }
 
 function restart() {
+  stats.end('ricominciata'); stats.start();
   closePanelSilently();
   root.classList.remove('is-done');
   S.found = []; S.phase = 1; S.hatchSeen = false; S.reached = false; S.seq = null; S.inspect = null;
@@ -565,7 +594,7 @@ function restart() {
     if (b.dataset.poll === 'send' && poll.altra !== null) {
       send.disabled = true; msg.textContent = tr('sending');
       try {
-        const r = await fetch(root.dataset.api, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...poll, commento: $('#ab-poll-txt').value }) });
+        const r = await fetch(root.dataset.api, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...poll, commento: $('#ab-poll-txt').value, partita: stats.id }) });
         if (!r.ok) throw new Error(r.status);
         box.classList.add('sent');
         msg.textContent = poll.altra ? tr('thanks_yes') : tr('thanks_no');
@@ -609,6 +638,7 @@ function tick() {
   S.t += dt;
   const t = S.t;
   const playing = ['DESCENT', 'EXPLORATION'].includes(S.state);
+  stats.tick(playing || S.state === 'READING' || S.state === 'LOCK_PUZZLE' || S.state === 'INSPECT' || S.state === 'OPENING');
 
   // --- movimento del sub ---
   if (!S.seq && S.state !== 'COMPLETED') {
@@ -866,7 +896,13 @@ torch.intensity = 1;
 renderer.compile(scene, camera);
 renderer.render(scene, camera);
 torch.intensity = 0;
-document.addEventListener('visibilitychange', () => { if (document.hidden && canPause()) pause(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { if (canPause()) pause(); audio.sleep(); stats.flush(); } else audio.wake();
+});
+// pagina chiusa o abbandonata: il suono si spegne subito e la partita risulta chiusa
+addEventListener('pagehide', () => { audio.stop(); stats.end('chiusa'); });
+// tornando indietro col browser la pagina riparte pulita (il suono era stato spento)
+addEventListener('pageshow', (e) => { if (e.persisted) location.reload(); });
 requestAnimationFrame(tick);
 Promise.allSettled([adsReady, signsReady, bagsReady, planeReady, gateReady, shark.ready, baby.ready, decoReady, ...photos, ...modelsReady]).then(() => {
   const inChamber = (o) => { for (let p = o; p; p = p.parent) if (p.name === 'chamber') return true; return false; };

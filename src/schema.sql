@@ -142,3 +142,22 @@ CREATE TABLE IF NOT EXISTS abyss_feedback (
   ua         TEXT NOT NULL DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Statistiche anonime del gioco ABYSS: una riga per partita (nessun dato personale, niente IP)
+CREATE TABLE IF NOT EXISTS abyss_partite (
+  id            TEXT PRIMARY KEY,
+  started_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+  secondi       INT NOT NULL DEFAULT 0,
+  fase          SMALLINT NOT NULL DEFAULT 1,
+  reperti       SMALLINT NOT NULL DEFAULT 0,
+  esito         TEXT NOT NULL DEFAULT '',
+  morti_squalo  SMALLINT NOT NULL DEFAULT 0,
+  morti_aria    SMALLINT NOT NULL DEFAULT 0,
+  morti_pallone SMALLINT NOT NULL DEFAULT 0,
+  lingua        TEXT NOT NULL DEFAULT '',
+  dispositivo   TEXT NOT NULL DEFAULT '',
+  prova         BOOLEAN NOT NULL DEFAULT FALSE
+);
+CREATE INDEX IF NOT EXISTS abyss_partite_started ON abyss_partite(started_at);
+ALTER TABLE abyss_feedback ADD COLUMN IF NOT EXISTS partita TEXT;

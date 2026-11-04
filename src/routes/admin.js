@@ -233,4 +233,42 @@ r.post('/impostazioni/test-email', async (req, res) => {
   res.redirect('/admin/impostazioni');
 });
 
+// ---------- statistiche del gioco ABYSS (dati anonimi) ----------
+r.get('/abyss', async (req, res) => {
+  const prova = req.query.prova === '1';
+  const W = prova ? 'TRUE' : 'NOT prova';
+  const TZ = "(started_at AT TIME ZONE 'Europe/Rome')::date";
+  const oggi = "(now() AT TIME ZONE 'Europe/Rome')::date";
+  const tot = await one(`SELECT count(*)::int AS tutte,
+      count(*) FILTER (WHERE ${TZ} = ${oggi})::int AS oggi,
+      count(*) FILTER (WHERE ${TZ} > ${oggi} - 7)::int AS sett,
+      count(*) FILTER (WHERE ${TZ} > ${oggi} - 30)::int AS mese,
+      coalesce(sum(secondi), 0)::int AS sec_tot,
+      round(avg(secondi) FILTER (WHERE secondi >= 15))::int AS media,
+      round(percentile_cont(0.5) WITHIN GROUP (ORDER BY secondi) FILTER (WHERE secondi >= 15))::int AS mediana,
+      count(*) FILTER (WHERE reperti >= 1 OR fase >= 2)::int AS f1,
+      count(*) FILTER (WHERE reperti >= 3 OR fase >= 2)::int AS f2,
+      count(*) FILTER (WHERE fase >= 2)::int AS f3,
+      count(*) FILTER (WHERE fase >= 3)::int AS f4,
+      count(*) FILTER (WHERE fase >= 4)::int AS f5,
+      count(*) FILTER (WHERE fase >= 5)::int AS f6,
+      count(*) FILTER (WHERE fase >= 6)::int AS f7,
+      coalesce(sum(morti_squalo), 0)::int AS squalo, coalesce(sum(morti_aria), 0)::int AS aria, coalesce(sum(morti_pallone), 0)::int AS pallone,
+      count(*) FILTER (WHERE dispositivo = 'telefono')::int AS tel,
+      count(*) FILTER (WHERE dispositivo = 'pc')::int AS pc,
+      count(*) FILTER (WHERE prova)::int AS prove
+    FROM abyss_partite WHERE ${W}`);
+  const prove = (await one('SELECT count(*)::int AS n FROM abyss_partite WHERE prova')).n;
+  const lingue = await all(`SELECT lingua, count(*)::int AS n FROM abyss_partite WHERE ${W} GROUP BY lingua ORDER BY n DESC`);
+  const giorni = await all(`SELECT d::date AS giorno, coalesce(x.n, 0)::int AS n FROM generate_series(${oggi} - 29, ${oggi}, interval '1 day') d
+    LEFT JOIN (SELECT ${TZ} AS g, count(*) AS n FROM abyss_partite WHERE ${W} GROUP BY 1) x ON x.g = d::date ORDER BY d`);
+  const voti = await one(`SELECT count(*)::int AS n, count(*) FILTER (WHERE altra)::int AS si,
+      round(avg(voto) FILTER (WHERE voto > 0), 1)::float AS media,
+      count(*) FILTER (WHERE voto = 1)::int AS v1, count(*) FILTER (WHERE voto = 2)::int AS v2, count(*) FILTER (WHERE voto = 3)::int AS v3,
+      count(*) FILTER (WHERE voto = 4)::int AS v4, count(*) FILTER (WHERE voto = 5)::int AS v5
+    FROM abyss_feedback`);
+  const commenti = await all("SELECT created_at, altra, voto, commento FROM abyss_feedback WHERE commento <> '' ORDER BY created_at DESC LIMIT 50");
+  res.render('admin/abyss', { tot, prove, prova, lingue, giorni, voti, commenti });
+});
+
 module.exports = r;

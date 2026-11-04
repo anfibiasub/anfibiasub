@@ -26,6 +26,10 @@ export function createAudio() {
     A.ready = true;
   };
 
+  // pagina nascosta: il suono si ferma; tornando si riprende. Uscendo dal gioco si spegne del tutto.
+  A.sleep = () => { if (A.ctx && A.ctx.state === 'running') A.ctx.suspend().catch(() => {}); };
+  A.wake = () => { if (A.ctx && A.ctx.state === 'suspended') A.ctx.resume().catch(() => {}); };
+  A.stop = () => { if (!A.ctx) return; try { if (master) master.gain.value = 0; A.ctx.close(); } catch (_) { /* niente */ } A.ctx = null; A.ready = false; };
   A.setOn = (v) => { A.on = v; if (master) master.gain.setTargetAtTime(v ? 0.9 : 0, A.ctx.currentTime, 0.1); };
   A.depth = (d) => { if (!A.ready) return; ambF.frequency.setTargetAtTime(520 - d * 9, A.ctx.currentTime, 0.5); };
 

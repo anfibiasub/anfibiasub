@@ -1,7 +1,7 @@
 // Texture PBR generate al volo (albedo, normal, roughness/metalness).
 // Sono il ripiego finché non ci sono texture fotografiche/modelli GLB definitivi.
 import * as THREE from '../vendor/three/three.module.min.js';
-import { tileFbm } from './noise.js?v=5e15d4f6';
+import { tileFbm } from './noise.js?v=cdb9eab5';
 
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const mix = (a, b, t) => a + (b - a) * t;
