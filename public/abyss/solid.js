@@ -15,15 +15,11 @@ function bvhOf(g) {
   try {
     const pa = g.attributes.position;
     if (!pa || pa.count < 3) { g.userData.bvh = null; return null; }
-    let cg = g;
-    if (!(pa.array instanceof Float32Array) || pa.isInterleavedBufferAttribute) {
-      const f = new Float32Array(pa.count * 3);
-      for (let i = 0; i < pa.count; i++) { f[i * 3] = pa.getX(i); f[i * 3 + 1] = pa.getY(i); f[i * 3 + 2] = pa.getZ(i); }
-      cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.BufferAttribute(f, 3));
-      if (g.index) cg.setIndex(g.index.clone());
-    } else if (g.index === null || g.groups.length) {
-      cg = new THREE.BufferGeometry(); cg.setAttribute('position', pa); if (g.index) cg.setIndex(g.index.clone());
-    }
+    // copia separata: il BVH riordina vertici e indici, la geometria disegnata non va mai toccata
+    const f = new Float32Array(pa.count * 3);
+    for (let i = 0; i < pa.count; i++) { f[i * 3] = pa.getX(i); f[i * 3 + 1] = pa.getY(i); f[i * 3 + 2] = pa.getZ(i); }
+    const cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.BufferAttribute(f, 3));
+    if (g.index) cg.setIndex(new THREE.BufferAttribute(g.index.array.slice(), 1));
     bvh = new MeshBVH(cg, { maxLeafSize: 10 });
   } catch (e) { bvh = null; }
   g.userData.bvh = bvh;

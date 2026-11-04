@@ -1,20 +1,20 @@
 // ABYSS — Il relitto dimenticato. Motore principale e macchina a stati.
 import * as THREE from '../vendor/three/three.module.min.js';
-import { CFG, CODE, bearing } from './config.js?v=54d20f2c';
-import { t as tr, L as TX } from './i18n.js?v=54d20f2c';
-import { addCaustics, makeBeam, CAUSTIC } from './look.js?v=54d20f2c';
-import { makeTextures, logbookPage } from './textures.js?v=54d20f2c';
-import { buildWorld, collideWorld } from './world.js?v=54d20f2c';
-import { buildWreck, makeHelmet } from './wreck.js?v=54d20f2c';
-import { buildArtifacts } from './artifacts.js?v=54d20f2c';
-import { buildLandmarks, modelsReady } from './landmarks.js?v=54d20f2c';
-import { buildFish } from './fish.js?v=54d20f2c';
-import { buildShark, buildBabyShark } from './shark.js?v=54d20f2c';
-import { buildAds, buildStatues, buildServiceSigns } from './ads.js?v=54d20f2c';
-import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js?v=54d20f2c';
-import { createControls } from './controls.js?v=54d20f2c';
-import { createSolids } from './solid.js?v=54d20f2c';
-import { createAudio } from './audio.js?v=54d20f2c';
+import { CFG, CODE, bearing } from './config.js?v=5e15d4f6';
+import { t as tr, L as TX } from './i18n.js?v=5e15d4f6';
+import { addCaustics, makeBeam, CAUSTIC } from './look.js?v=5e15d4f6';
+import { makeTextures, logbookPage } from './textures.js?v=5e15d4f6';
+import { buildWorld, collideWorld } from './world.js?v=5e15d4f6';
+import { buildWreck, makeHelmet } from './wreck.js?v=5e15d4f6';
+import { buildArtifacts } from './artifacts.js?v=5e15d4f6';
+import { buildLandmarks, modelsReady } from './landmarks.js?v=5e15d4f6';
+import { buildFish } from './fish.js?v=5e15d4f6';
+import { buildShark, buildBabyShark } from './shark.js?v=5e15d4f6';
+import { buildAds, buildStatues, buildServiceSigns } from './ads.js?v=5e15d4f6';
+import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js?v=5e15d4f6';
+import { createControls } from './controls.js?v=5e15d4f6';
+import { createSolids } from './solid.js?v=5e15d4f6';
+import { createAudio } from './audio.js?v=5e15d4f6';
 
 const $ = (s) => document.querySelector(s);
 const root = $('#abyss');

@@ -339,7 +339,8 @@ export function buildWreck(scene, tex) {
     lect.userData.top.add(book);
     const nf = (arr) => arr.map((g) => { const n = g.index ? g.toNonIndexed() : g; for (const a of Object.keys(n.attributes)) if (!['position', 'normal', 'uv'].includes(a)) n.deleteAttribute(a); return n; });
     const mk = (arr, m) => { const me = new THREE.Mesh(mergeGeometries(nf(arr)), m); me.receiveShadow = true; chamber.add(me); return me; };
-    mk(wallG, wallM).userData.noSolid = true; mk(floorG, floorM).userData.noSolid = true;   // pareti e pavimenti: collisione a stanze mk(furnG, wallM); mk(ironG, rust);
+    mk(wallG, wallM).userData.noSolid = true; mk(floorG, floorM).userData.noSolid = true;   // pareti e pavimenti: collisione a stanze
+    mk(furnG, wallM); mk(ironG, rust);   // mobili, casse, barili, crollo: solidi
     // telai metallici chiari intorno a ogni passaggio (si vedono anche al buio) e anta aperta accanto
     const frameG = [], leafG = [];
     for (const [ax, at, a0, a1, h] of DOORS) {

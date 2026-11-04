@@ -2,10 +2,10 @@
 // Geometria generata via codice (costole, fasciame, ponte, cabina, ancora, catena, botola, camera nascosta).
 import * as THREE from '../vendor/three/three.module.min.js';
 import { mergeGeometries } from '../vendor/three/BufferGeometryUtils.js';
-import { noise2, rng } from './noise.js?v=54d20f2c';
-import { heightAt } from './world.js?v=54d20f2c';
-import { dialTex, symbolPlate, logbookTex } from './textures.js?v=54d20f2c';
-import { CFG } from './config.js?v=54d20f2c';
+import { noise2, rng } from './noise.js?v=5e15d4f6';
+import { heightAt } from './world.js?v=5e15d4f6';
+import { dialTex, symbolPlate, logbookTex } from './textures.js?v=5e15d4f6';
+import { CFG } from './config.js?v=5e15d4f6';
 
 const rand = rng(31);
 const R = (a, b) => a + (b - a) * rand();
@@ -339,7 +339,8 @@ export function buildWreck(scene, tex) {
     lect.userData.top.add(book);
     const nf = (arr) => arr.map((g) => { const n = g.index ? g.toNonIndexed() : g; for (const a of Object.keys(n.attributes)) if (!['position', 'normal', 'uv'].includes(a)) n.deleteAttribute(a); return n; });
     const mk = (arr, m) => { const me = new THREE.Mesh(mergeGeometries(nf(arr)), m); me.receiveShadow = true; chamber.add(me); return me; };
-    mk(wallG, wallM).userData.noSolid = true; mk(floorG, floorM).userData.noSolid = true;   // pareti e pavimenti: collisione a stanze mk(furnG, wallM); mk(ironG, rust);
+    mk(wallG, wallM).userData.noSolid = true; mk(floorG, floorM).userData.noSolid = true;   // pareti e pavimenti: collisione a stanze
+    mk(furnG, wallM); mk(ironG, rust);   // mobili, casse, barili, crollo: solidi
     // telai metallici chiari intorno a ogni passaggio (si vedono anche al buio) e anta aperta accanto
     const frameG = [], leafG = [];
     for (const [ax, at, a0, a1, h] of DOORS) {
