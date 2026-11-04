@@ -4,7 +4,7 @@
 // - ponte di sabbia sul bordo del mondo con cancello chiuso "Missione 2"
 // - mano con l'erogatore (getto d'aria) e fiocina, visti in prima persona, con l'arpione che vola
 import * as THREE from '../vendor/three/three.module.min.js';
-import { heightAt } from './world.js?v=7ecb497c';
+import { heightAt } from './world.js?v=54d20f2c';
 import { GLTFLoader } from '../vendor/three/GLTFLoader.js';
 
 const NAVY = '#071D30', CYAN = '#3CC6F5', ICE = '#DCEFF5';
@@ -248,8 +248,8 @@ export async function buildGate(scene, world, tex, P, texts) {
   shade(g);
   g.updateMatrixWorld(true);
   // il ponte si percorre (pavimento fatto di ellissoidi lungo la cresta); il cancello in fondo non si attraversa
-  for (let x = -2; x <= len + 1; x += 2) world.colliders.push({ c: g.localToWorld(new THREE.Vector3(x, -1.25, 0)), s: new THREE.Vector3(1.6, 1.45, 1.35), rot: yaw });
-  const gateCols = [-1, 0, 1].map((s) => ({ c: g.localToWorld(new THREE.Vector3(len, 1.5, s * 1.1)), s: new THREE.Vector3(0.45, 1.7, 0.8), rot: yaw }));
+  for (let x = -2; x <= len + 1; x += 2) world.colliders.push({ c: g.localToWorld(new THREE.Vector3(x, -1.25, 0)), s: new THREE.Vector3(1.6, 1.45, 1.35), rot: yaw, keep: true });
+  const gateCols = [-1, 0, 1].map((s) => ({ c: g.localToWorld(new THREE.Vector3(len, 1.5, s * 1.1)), s: new THREE.Vector3(0.45, 1.7, 0.8), rot: yaw, keep: true }));
   gateCols.forEach((c) => world.colliders.push(c));
   // apertura: il lucchetto salta (colpito dall'arpione), la catena cade, le ante si aprono verso il largo, il cartello cade
   const G = { open: false, t: 0, panel0: panel.position.clone() };
@@ -377,7 +377,7 @@ export function createSpear(scene) {
   const steel = new THREE.MeshStandardMaterial({ color: 0xb8c1c5, roughness: 0.3, metalness: 1 }); steel.userData.noCaustics = true;
   const m = new THREE.Group();
   { const s = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 1.2, 6).rotateX(Math.PI / 2), steel); m.add(s); const t = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.09, 8).rotateX(-Math.PI / 2), steel); t.position.z = -0.64; m.add(t); }
-  m.visible = false; scene.add(m);
+  m.visible = false; m.userData.noSolid = true; scene.add(m);
   const S = { m, on: false, stuck: 0, pos: new THREE.Vector3(), vel: new THREE.Vector3(), dist: 0 };
   const prev = new THREE.Vector3();
   S.fire = (from, dir) => { S.on = true; S.stuck = 0; S.dist = 0; S.pos.copy(from); S.vel.copy(dir).multiplyScalar(24); m.visible = true; m.position.copy(from); m.lookAt(from.clone().sub(dir)); };
@@ -456,7 +456,7 @@ export async function buildDeco(scene, world, D) {
   }).catch((e) => console.warn('ABYSS modello', d.m, e && e.message)));
   // tartaruga: nuota in cerchio intorno al relitto, sale e scende piano
   jobs.push(load('turtle').then((gl) => {
-    const g = new THREE.Group(); gl.scene.scale.setScalar(1.1); gl.scene.position.set(0, -0.15, 0); g.add(gl.scene);
+    const g = new THREE.Group(); gl.scene.scale.setScalar(1.1); gl.scene.position.set(0, -0.15, 0); g.add(gl.scene); g.userData.noSolid = true; out.turtle = g;
     gl.scene.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.frustumCulled = false; } });
     scene.add(g);
     const mixer = gl.animations.length ? new THREE.AnimationMixer(gl.scene) : null;

@@ -2,10 +2,10 @@
 // Geometria generata via codice (costole, fasciame, ponte, cabina, ancora, catena, botola, camera nascosta).
 import * as THREE from '../vendor/three/three.module.min.js';
 import { mergeGeometries } from '../vendor/three/BufferGeometryUtils.js';
-import { noise2, rng } from './noise.js?v=7ecb497c';
-import { heightAt } from './world.js?v=7ecb497c';
-import { dialTex, symbolPlate, logbookTex } from './textures.js?v=7ecb497c';
-import { CFG } from './config.js?v=7ecb497c';
+import { noise2, rng } from './noise.js?v=54d20f2c';
+import { heightAt } from './world.js?v=54d20f2c';
+import { dialTex, symbolPlate, logbookTex } from './textures.js?v=54d20f2c';
+import { CFG } from './config.js?v=54d20f2c';
 
 const rand = rng(31);
 const R = (a, b) => a + (b - a) * rand();
@@ -200,7 +200,7 @@ export function buildWreck(scene, tex) {
 
   const woodM = new THREE.Mesh(mergeGeometries(woodG.map((g) => g.index ? g.toNonIndexed() : g)), wood);
   const rustM = new THREE.Mesh(mergeGeometries(rustG.map((g) => { const n = g.index ? g.toNonIndexed() : g; for (const k of Object.keys(n.attributes)) if (!['position', 'normal', 'uv'].includes(k)) n.deleteAttribute(k); return n; })), rust);
-  for (const m of [woodM, rustM]) { m.castShadow = m.receiveShadow = true; ship.add(m); }
+  for (const m of [woodM, rustM]) { m.castShadow = m.receiveShadow = true; m.userData.noSolid = true; ship.add(m); }   // lo scafo ha la sua collisione
 
   // ---- interno della nave sotto la botola: stiva, corridoio, cabine e la cabina del capitano ----
   // Le stanze sono scatole (coordinate locali) separate da paratie sottili; le porte sono scatole che
@@ -275,10 +275,9 @@ export function buildWreck(scene, tex) {
       panel('y', Y0, x0, x1, z0, z1, [], floorG);
       panel('y', YC, x0, x1, z0, z1, key === 'A' ? [[HATCH.x, 0, HOLE + 0.02]] : [], wallG);
     }
-    // pavimento e soffitto sotto le porte (lo spessore della paratia)
-    for (const [ax, at, a0, a1, h] of DOORS) {
-      if (ax === 'x') { panel('y', Y0, at - 0.06, at + 0.06, a0, a1, [], floorG); panel('z', a0, at - 0.06, at + 0.06, Y0, Y0 + h, [], wallG); panel('z', a1, at - 0.06, at + 0.06, Y0, Y0 + h, [], wallG); panel('y', Y0 + h, at - 0.06, at + 0.06, a0, a1, [], wallG); }
-      else { panel('y', Y0, a0, a1, at - 0.06, at + 0.06, [], floorG); panel('x', a0, at - 0.06, at + 0.06, Y0, Y0 + h, [], wallG); panel('x', a1, at - 0.06, at + 0.06, Y0, Y0 + h, [], wallG); panel('y', Y0 + h, a0, a1, at - 0.06, at + 0.06, [], wallG); }
+    // pavimento sotto le porte (lo spessore della paratia); i lati e l'architrave li fa il telaio
+    for (const [ax, at, a0, a1] of DOORS) {
+      if (ax === 'x') panel('y', Y0, at - 0.06, at + 0.06, a0, a1, [], floorG); else panel('y', Y0, a0, a1, at - 0.06, at + 0.06, [], floorG);
     }
     // pozzo della botola: tubo dal soffitto della stiva al ponte
     { const t = new THREE.CylinderGeometry(HOLE + 0.02, HOLE + 0.02, HY + 0.08 - YC, 32, 1, true); t.translate(HATCH.x, (YC + HY + 0.08) / 2, 0); wallG.push(t); }
@@ -340,7 +339,7 @@ export function buildWreck(scene, tex) {
     lect.userData.top.add(book);
     const nf = (arr) => arr.map((g) => { const n = g.index ? g.toNonIndexed() : g; for (const a of Object.keys(n.attributes)) if (!['position', 'normal', 'uv'].includes(a)) n.deleteAttribute(a); return n; });
     const mk = (arr, m) => { const me = new THREE.Mesh(mergeGeometries(nf(arr)), m); me.receiveShadow = true; chamber.add(me); return me; };
-    mk(wallG, wallM); mk(floorG, floorM); mk(furnG, wallM); mk(ironG, rust);
+    mk(wallG, wallM).userData.noSolid = true; mk(floorG, floorM).userData.noSolid = true;   // pareti e pavimenti: collisione a stanze mk(furnG, wallM); mk(ironG, rust);
     // telai metallici chiari intorno a ogni passaggio (si vedono anche al buio) e anta aperta accanto
     const frameG = [], leafG = [];
     for (const [ax, at, a0, a1, h] of DOORS) {
@@ -348,7 +347,7 @@ export function buildWreck(scene, tex) {
       const put = (u, v, w, hh, d) => { const g = new THREE.BoxGeometry(ax === 'x' ? d : w, hh, ax === 'x' ? w : d); g.translate(ax === 'x' ? at : u, v, ax === 'x' ? u : at); frameG.push(g); };
       put(a0 - T / 2, Y0 + h / 2, T, h + T, D); put(a1 + T / 2, Y0 + h / 2, T, h + T, D);
       put((a0 + a1) / 2, yt + T / 2, a1 - a0 + 2 * T, T, D);
-      put((a0 + a1) / 2, Y0 + 0.015, a1 - a0, 0.03, D);
+      put((a0 + a1) / 2, Y0 + 0.02, a1 - a0 - 0.01, 0.03, D - 0.01);
       if (broken) {   // paratia sfondata: schegge di tavole intorno al buco
         for (let i = 0; i < 4; i++) { const g = new THREE.BoxGeometry(ax === 'x' ? 0.04 : 0.1, R(0.25, 0.5), ax === 'x' ? 0.1 : 0.04); g.rotateX(ax === 'x' ? R(-0.6, 0.6) : 0); g.rotateZ(ax === 'z' ? R(-0.6, 0.6) : 0); const u = a0 + (i + 0.5) * (a1 - a0) / 4; g.translate(ax === 'x' ? at : u, yt + 0.12, ax === 'x' ? u : at); leafG.push(g); }
         continue;
@@ -402,7 +401,7 @@ export function buildWreck(scene, tex) {
     }
     // cerniera
     const hinge = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.5, 10).rotateX(Math.PI / 2), rust); lid.add(hinge); hinge.position.set(-HATCH.r, 0, 0);
-    hatch.userData = { dials, latches, lid };
+    hatch.userData = { dials, latches, lid, noSolid: true };
     ship.add(hatch);
   }
 

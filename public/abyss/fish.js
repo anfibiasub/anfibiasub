@@ -3,9 +3,9 @@
 // rivolto a DESTRA, che riempie il riquadro 2:1) viene usata quella, generata con l'IA.
 import * as THREE from '../vendor/three/three.module.min.js';
 import { mergeGeometries } from '../vendor/three/BufferGeometryUtils.js';
-import { heightAt } from './world.js?v=7ecb497c';
-import { rng } from './noise.js?v=7ecb497c';
-import { CFG } from './config.js?v=7ecb497c';
+import { heightAt } from './world.js?v=54d20f2c';
+import { rng } from './noise.js?v=54d20f2c';
+import { CFG } from './config.js?v=54d20f2c';
 
 const rand = rng(77);
 const R = (a, b) => a + (b - a) * rand();
@@ -143,7 +143,8 @@ export function buildFish(scene, q) {
       f.push({ home: h, p: new THREE.Vector3(h.x + R(-3, 3), h.y + R(-1, 1), h.z + R(-3, 3)), v: new THREE.Vector3(R(-1, 1), 0, R(-1, 1)).multiplyScalar(0.3),
         off: new THREE.Vector3(R(-1, 1) * opt.spread, R(-0.4, 0.4) * opt.spread, R(-1, 1) * opt.spread), s: R(0.85, 1.2), ph: R(0, 7), q: new THREE.Quaternion() });
     }
-    groups.push({ im, f, opt });
+    im.userData.noSolid = true;   // i pesci si scansano da soli (vedi update)
+    groups.push({ im, f, opt, len: sp.len });
   };
   const H = (x, z, dy) => new THREE.Vector3(x, heightAt(x, z) + dy, z);
   const P = CFG.places;
@@ -170,6 +171,8 @@ export function buildFish(scene, q) {
         if (sp > mx) f.v.multiplyScalar(mx / sp);
         f.p.addScaledVector(f.v, dt);
         const fl = heightAt(f.p.x, f.p.z) + 0.35; if (f.p.y < fl) f.p.y = fl;
+        // nessun pesce attraversa il sub: resta sempre fuori dalla sua sagoma
+        { const d = f.p.distanceTo(cam.position), md = 0.55 + gr.len * f.s * 0.5; if (d < md && d > 1e-4) f.p.sub(cam.position).multiplyScalar(md / d).add(cam.position); }
         if (f.v.lengthSq() > 1e-5) { L.lookAt(f.p, tgt.copy(f.p).sub(f.v), up); Qt.setFromRotationMatrix(L); f.q.slerp(Qt, Math.min(1, dt * 4)); }
         S.setScalar(f.s); M.compose(f.p, f.q, S); gr.im.setMatrixAt(i, M);
       });

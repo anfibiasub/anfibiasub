@@ -13,6 +13,7 @@ import { buildShark, buildBabyShark } from './shark.js';
 import { buildAds, buildStatues, buildServiceSigns } from './ads.js';
 import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js';
 import { createControls } from './controls.js';
+import { createSolids } from './solid.js';
 import { createAudio } from './audio.js';
 
 const $ = (s) => document.querySelector(s);
@@ -142,12 +143,21 @@ const adsReady = buildAds(scene, wreck, tex, CFG.ads);
 let bags = null;
 const bagsReady = adsReady.then((o) => { bags = buildLiftBags(scene, tex, CFG.liftBags, o && o.pallone); });
 const planeReady = buildPlane(scene, world, tex, CFG.plane);
-const decoReady = buildDeco(scene, world, CFG.deco).then((d) => { world.updaters.push((dt, t) => d.update(dt, t)); });
+let turtle = null;
+const decoReady = buildDeco(scene, world, CFG.deco).then((d) => { world.updaters.push((dt, t) => d.update(dt, t)); turtle = d.turtle || null; });
 let gate = null;
 const gateReady = buildGate(scene, world, tex, CFG.gate, { title: tr('gate_t'), sub: tr('gate_s') }).then((g) => { gate = g.userData.gate; });
 // in prima persona: mano con l'erogatore (getto d'aria) e fiocina; arpione
 const VM = buildViewModels(camera);
 const spear = createSpear(scene);
+const solids = createSolids();
+{ // animali: capsule lungo il corpo (si muovono, la forma esatta non serve)
+  const ax = new THREE.Vector3(), A = new THREE.Vector3(), B = new THREE.Vector3();
+  const cap = (g, half, r) => () => { if (!g || !g.visible) return null; ax.set(0, 0, 1).applyQuaternion(g.quaternion); A.copy(g.position).addScaledVector(ax, -half); B.copy(g.position).addScaledVector(ax, half); return { a: A, b: B, r }; };
+  solids.addShape(cap(shark.group, 1.0, 0.45));
+  solids.addShape(cap(baby.group, 0.35, 0.16));
+  solids.addShape(() => turtle ? cap(turtle, 0.35, 0.4)() : null);
+}
 const signsReady = buildServiceSigns(scene, world, tex, CFG.serviceSigns, TX.srv || [], TX.srv_head || '');
 // rotta e distanza scritte nel giornale di bordo: calcolate dalla posizione vera di poppa e arco
 const LOG = (() => { const a = wreck.sternWorld(), b = arts.casket.home.pos; return { deg: bearing(a, b), m: Math.hypot(b.x - a.x, b.z - a.z) }; })();
@@ -629,6 +639,8 @@ function tick() {
     before.copy(P.pos).addScaledVector(P.vel, dt);
     P.pos.copy(before);
     collideWorld(world, P.pos, CFG.swim.radius);
+    solids.collide(P.pos, CFG.swim.radius);          // ogni oggetto e animale ha la sua forma solida
+    collideWorld(world, P.pos, CFG.swim.radius);
     wreck.collide(P.pos, CFG.swim.radius);
     const corr = before.sub(P.pos);                  // vettore della correzione (invertito)
     if (corr.lengthSq() > 1e-8) { corr.normalize(); const vn = P.vel.dot(corr); if (vn > 0) P.vel.addScaledVector(corr, -vn); }
@@ -707,7 +719,7 @@ function tick() {
   if (inShip && !S.wasIn && !S.torch) toggleTorch(true);
   S.wasIn = inShip;
   S.inK += ((inShip ? 1 : 0) - S.inK) * Math.min(1, dt * 3);
-  torch.intensity = S.torch ? TORCH_I * flick * (1 + 3 * S.inK) : 0;
+  torch.intensity = S.torch ? TORCH_I * (1 + (flick - 1) * (1 - S.inK)) * (1 + 3 * S.inK) : 0;   // dentro la nave niente tremolio
   torch.angle = CFG.torch.angle + 0.4 * S.inK; torch.penumbra = 0.6 + 0.3 * S.inK; torch.decay = 1.4 - 0.7 * S.inK;
   torch.position.copy(camera.position).addScaledVector(right, 0.18).addScaledVector(UP, -0.15);
   torch.target.position.copy(camera.position).addScaledVector(fwd, 10);
@@ -859,8 +871,12 @@ requestAnimationFrame(tick);
 Promise.allSettled([adsReady, signsReady, bagsReady, planeReady, gateReady, shark.ready, baby.ready, decoReady, ...photos, ...modelsReady]).then(() => {
   const inChamber = (o) => { for (let p = o; p; p = p.parent) if (p.name === 'chamber') return true; return false; };
   addCaustics(scene, inChamber);
+  // tutti gli oggetti diventano solidi con la loro forma vera; restano solo gli ellissoidi del ponte di terra e del cancello
+  shark.group.userData.noSolid = true; baby.group.userData.noSolid = true;
+  solids.add(scene);
+  for (let i = world.colliders.length - 1; i >= 0; i--) if (!world.colliders[i].keep) world.colliders.splice(i, 1);
   renderer.compile(scene, camera); ready();
 });
 
 // per i test automatici (nessun effetto sul gioco)
-window.__abyss = { get gate() { return gate; }, baby, VM, spear, fire, controls, finish, get bags() { return bags; }, shark, die, fish, THREE, scene, S, P, CODE, LOG, wreck, arts, spots, camera, pickup, toast, openHatch, openLog, setPos: (x, y, z, yaw, pitch) => { P.pos.set(x, y, z); P.vel.set(0, 0, 0); if (yaw !== undefined) { P.yaw = P.tyaw = yaw; P.pitch = P.tpitch = pitch; } } };
+window.__abyss = { solids, get gate() { return gate; }, baby, VM, spear, fire, controls, finish, get bags() { return bags; }, shark, die, fish, THREE, scene, S, P, CODE, LOG, wreck, arts, spots, camera, pickup, toast, openHatch, openLog, setPos: (x, y, z, yaw, pitch) => { P.pos.set(x, y, z); P.vel.set(0, 0, 0); if (yaw !== undefined) { P.yaw = P.tyaw = yaw; P.pitch = P.tpitch = pitch; } } };
