@@ -1,19 +1,19 @@
 // ABYSS — Il relitto dimenticato. Motore principale e macchina a stati.
 import * as THREE from '../vendor/three/three.module.min.js';
-import { CFG, CODE, bearing } from './config.js?v=a77beef3';
-import { t as tr, L as TX } from './i18n.js?v=a77beef3';
-import { addCaustics, makeBeam, CAUSTIC } from './look.js?v=a77beef3';
-import { makeTextures, logbookPage } from './textures.js?v=a77beef3';
-import { buildWorld, collideWorld } from './world.js?v=a77beef3';
-import { buildWreck, makeHelmet } from './wreck.js?v=a77beef3';
-import { buildArtifacts } from './artifacts.js?v=a77beef3';
-import { buildLandmarks, modelsReady } from './landmarks.js?v=a77beef3';
-import { buildFish } from './fish.js?v=a77beef3';
-import { buildShark, buildBabyShark } from './shark.js?v=a77beef3';
-import { buildAds, buildStatues, buildServiceSigns } from './ads.js?v=a77beef3';
-import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js?v=a77beef3';
-import { createControls } from './controls.js?v=a77beef3';
-import { createAudio } from './audio.js?v=a77beef3';
+import { CFG, CODE, bearing } from './config.js?v=ff48b2ff';
+import { t as tr, L as TX } from './i18n.js?v=ff48b2ff';
+import { addCaustics, makeBeam, CAUSTIC } from './look.js?v=ff48b2ff';
+import { makeTextures, logbookPage } from './textures.js?v=ff48b2ff';
+import { buildWorld, collideWorld } from './world.js?v=ff48b2ff';
+import { buildWreck, makeHelmet } from './wreck.js?v=ff48b2ff';
+import { buildArtifacts } from './artifacts.js?v=ff48b2ff';
+import { buildLandmarks, modelsReady } from './landmarks.js?v=ff48b2ff';
+import { buildFish } from './fish.js?v=ff48b2ff';
+import { buildShark, buildBabyShark } from './shark.js?v=ff48b2ff';
+import { buildAds, buildStatues, buildServiceSigns } from './ads.js?v=ff48b2ff';
+import { buildLiftBags, buildPlane, buildGate, buildViewModels, createSpear, buildDeco } from './extras.js?v=ff48b2ff';
+import { createControls } from './controls.js?v=ff48b2ff';
+import { createAudio } from './audio.js?v=ff48b2ff';
 
 const $ = (s) => document.querySelector(s);
 const root = $('#abyss');

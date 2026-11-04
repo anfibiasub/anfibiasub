@@ -2,10 +2,10 @@
 // Geometria generata via codice (costole, fasciame, ponte, cabina, ancora, catena, botola, camera nascosta).
 import * as THREE from '../vendor/three/three.module.min.js';
 import { mergeGeometries } from '../vendor/three/BufferGeometryUtils.js';
-import { noise2, rng } from './noise.js?v=a77beef3';
-import { heightAt } from './world.js?v=a77beef3';
-import { dialTex, symbolPlate, logbookTex } from './textures.js?v=a77beef3';
-import { CFG } from './config.js?v=a77beef3';
+import { noise2, rng } from './noise.js?v=ff48b2ff';
+import { heightAt } from './world.js?v=ff48b2ff';
+import { dialTex, symbolPlate, logbookTex } from './textures.js?v=ff48b2ff';
+import { CFG } from './config.js?v=ff48b2ff';
 
 const rand = rng(31);
 const R = (a, b) => a + (b - a) * rand();
@@ -334,6 +334,32 @@ export function buildWreck(scene, tex) {
     const nf = (arr) => arr.map((g) => { const n = g.index ? g.toNonIndexed() : g; for (const a of Object.keys(n.attributes)) if (!['position', 'normal', 'uv'].includes(a)) n.deleteAttribute(a); return n; });
     const mk = (arr, m) => { const me = new THREE.Mesh(mergeGeometries(nf(arr)), m); me.receiveShadow = true; chamber.add(me); return me; };
     mk(wallG, wallM); mk(floorG, floorM); mk(furnG, wallM); mk(ironG, rust);
+    // telai metallici chiari intorno a ogni passaggio (si vedono anche al buio) e anta aperta accanto
+    const frameG = [], leafG = [];
+    for (const [ax, at, a0, a1, h] of DOORS) {
+      const broken = h < 1.5, T = 0.09, D = 0.26, yt = Y0 + h;
+      const put = (u, v, w, hh, d) => { const g = new THREE.BoxGeometry(ax === 'x' ? d : w, hh, ax === 'x' ? w : d); g.translate(ax === 'x' ? at : u, v, ax === 'x' ? u : at); frameG.push(g); };
+      put(a0 - T / 2, Y0 + h / 2, T, h + T, D); put(a1 + T / 2, Y0 + h / 2, T, h + T, D);
+      put((a0 + a1) / 2, yt + T / 2, a1 - a0 + 2 * T, T, D);
+      put((a0 + a1) / 2, Y0 + 0.015, a1 - a0, 0.03, D);
+      if (broken) {   // paratia sfondata: schegge di tavole intorno al buco
+        for (let i = 0; i < 4; i++) { const g = new THREE.BoxGeometry(ax === 'x' ? 0.04 : 0.1, R(0.25, 0.5), ax === 'x' ? 0.1 : 0.04); g.rotateX(ax === 'x' ? R(-0.6, 0.6) : 0); g.rotateZ(ax === 'z' ? R(-0.6, 0.6) : 0); const u = a0 + (i + 0.5) * (a1 - a0) / 4; g.translate(ax === 'x' ? at : u, yt + 0.12, ax === 'x' ? u : at); leafG.push(g); }
+        continue;
+      }
+      // anta aperta del tutto, appoggiata alla paratia di fianco al passaggio, dentro una stanza (mai nel corridoio)
+      const w = a1 - a0, inRoom = (u0, u1, c) => Object.entries(ROOMS).some(([kk, [x0, x1, z0, z1]]) => kk !== 'C' && (ax === 'z' ? (u0 >= x0 && u1 <= x1 && c > z0 && c < z1) : (u0 >= z0 && u1 <= z1 && c > x0 && c < x1)));
+      let done = false;
+      for (const sd of [1, -1]) for (const [u0, u1] of [[a0 - w - 0.1, a0 - 0.1], [a1 + 0.1, a1 + w + 0.1]]) {
+        const c = at + sd * 0.12; if (done || !inRoom(u0, u1, c)) continue;
+        const g = new THREE.BoxGeometry(ax === 'z' ? w - 0.04 : 0.04, h - 0.06, ax === 'z' ? 0.04 : w - 0.04);
+        g.translate(ax === 'z' ? (u0 + u1) / 2 : c, Y0 + 0.03 + (h - 0.06) / 2, ax === 'z' ? c : (u0 + u1) / 2); leafG.push(g); done = true;
+      }
+      // maniglia d'ottone sul telaio
+      const hd = new THREE.BoxGeometry(0.05, 0.14, 0.05); hd.translate(ax === 'x' ? at : a1 + 0.05, Y0 + 0.9, ax === 'x' ? a1 + 0.05 : at); frameG.push(hd);
+    }
+    const frameM = new THREE.MeshStandardMaterial({ map: tex.rust.map, normalMap: tex.rust.normalMap, color: 0xd8a368, roughness: 0.7, metalness: 0.3, emissive: 0xa8713a, emissiveMap: tex.rust.map, emissiveIntensity: 1.6 });
+    mk(frameG, frameM); mk(leafG, wallM);
+
     const light = new THREE.PointLight(0xffd59a, 0, 7, 1.6); light.position.set(HATCH.x, Y0 + 1.6, 0.2); chamber.add(light);
     // un filo di luce dall'oblò della cabina del capitano: si intravede il leggio
     const glow = new THREE.PointLight(0x9fd8e6, 0, 4, 1.4); glow.position.set(-8.6, Y0 + 1.6, 0.9); chamber.add(glow);

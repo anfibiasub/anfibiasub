@@ -1,9 +1,9 @@
 // Ambiente: fondale, rocce, gorgonie, cima d'ormeggio, superficie, raggi, particelle, bolle, pesci
 import * as THREE from '../vendor/three/three.module.min.js';
 import { mergeGeometries } from '../vendor/three/BufferGeometryUtils.js';
-import { fbm2, fbm3, noise2, rng } from './noise.js?v=a77beef3';
-import { CFG } from './config.js?v=a77beef3';
-import { causticTexture } from './look.js?v=a77beef3';
+import { fbm2, fbm3, noise2, rng } from './noise.js?v=ff48b2ff';
+import { CFG } from './config.js?v=ff48b2ff';
+import { causticTexture } from './look.js?v=ff48b2ff';
 
 export function heightAt(x, z) {
   let h = CFG.seabed + (fbm2(x * 0.022 + 10, z * 0.022 + 4) - 0.5) * 5 + (fbm2(x * 0.11, z * 0.11) - 0.5) * 1.1;
