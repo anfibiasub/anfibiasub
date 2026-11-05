@@ -51,6 +51,7 @@ app.use((req, res, next) => {
     const to = OLD_URLS[p] || OLD_URLS[p + '/'];
     if (to) return res.redirect(301, to);
     if (/^\/en\/.+/.test(p) && !/\.[a-z0-9]+$/i.test(p) && !require('fs').existsSync(path.join(__dirname, 'public', p + '.html'))) return res.redirect(301, '/en/');
+    if (/^\/it\/.+/.test(p)) return res.redirect(301, '/'); // altri vecchi indirizzi Joomla in italiano: alla home
   }
   next();
 });

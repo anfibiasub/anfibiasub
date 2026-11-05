@@ -693,6 +693,7 @@ def old_redirects():
         # pagina Rimorchiatore tolta (ottobre 2026)
         '/rimorchiatore.html': '/', '/rimorchiatore': '/', '/en/tug.html': '/en/', '/en/tug': '/en/',
         '/es/remolcador.html': '/es/', '/es/remolcador': '/es/', '/de/schlepper.html': '/de/', '/de/schlepper': '/de/',
+        '/it/servizi-marittimi': '/servizi.html', '/it/lavori-eseguiti': '/lavori.html', '/it/utilita': '/utilita.html',
         '/it/utilita/vento': '/utilita.html#vento', '/it/utilita/cime': '/utilita.html#cime', '/it/utilita/cavi': '/utilita.html#cavi', '/it/utilita/catene': '/utilita.html#catene',
     }
     svc = {'lavori-edili-subacquei': 'edili', 'metalmeccanica-subacquea': 'metalmeccanica', 'recuperi': 'recuperi', 'alaggi-e-vari': 'alaggi',
