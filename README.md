@@ -72,25 +72,23 @@ Semafori (modificabili): pulizia verde fino a 6 mesi, giallo fino a 12, poi ross
 
 ---
 
-## 3. Messa online su anfibiasub.it
+## 3. Come è messo online (dal 5/11/2026)
 
-Il dominio è registrato con DominioFaiDaTe, ma DNS, sito ed email stanno su **HostGator** (nameserver `ns445/ns446.websitewelcome.com`). Si lavora nel cPanel di HostGator.
+Tutto sta su account intestati ad Anfibiasub (le password sono nel pannello **Impostazioni → Accessi** del sito):
 
-### 3.1 Sito pubblico su HostGator
-1. Backup del vecchio Joomla: File Manager → `public_html` → seleziona tutto → *Compress* → scarica lo zip. Poi *Backup* → scarica il database MySQL.
-2. Sposta tutto il contenuto di `public_html` in una cartella `backup-joomla` **fuori** da `public_html`.
-3. Carica in `public_html` il contenuto di `dist-hostgator/` (zip → *Upload* → *Extract*). `index.html` e `.htaccess` devono stare direttamente in `public_html`.
-   Il file `.htaccess` è nascosto: in File Manager attiva *Settings → Show Hidden Files*.
-4. Prima, controlla in cPanel → *SSL/TLS Status* che `www.anfibiasub.it` abbia il certificato (AutoSSL). Il `.htaccess` porta tutti su `https://www.`.
-5. Le email non si toccano: stanno nel server, non in `public_html`.
+| Cosa | Dove |
+|---|---|
+| Codice | GitHub `anfibiasub/anfibiasub` (Ivano `takforce` è collaboratore) |
+| Sito + area clienti + database | Railway, account dei Cuvato, piano Hobby, servizio `anfibiasub` + Postgres |
+| Dominio `anfibiasub.it` | registrato su dominiofaidate.com (scadenza 31/08/2027), nameserver Cloudflare `ben.ns.cloudflare.com` / `surina.ns.cloudflare.com` |
+| DNS | Cloudflare (piano Free): `www` CNAME → Railway (DNS only); `anfibiasub.it` proxied con regola "Redirect from root to WWW" → `https://www.anfibiasub.it/...` |
+| Email del sito | Brevo, mittente `anfibiaanfibia@gmail.com` |
 
-`dist-hostgator` contiene già i reindirizzamenti dai vecchi indirizzi Joomla (`/it/servizi-marittimi/...` ecc.), `sitemap.xml` e `robots.txt`.
-Per rigenerarla dopo una modifica ai testi: `python3 sito/build.py --prod`.
+Variabili su Railway: `DATABASE_URL`, `SESSION_SECRET` (non cambiarla: cifra le password del pannello Accessi), `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `APP_URL=https://www.anfibiasub.it`, `BREVO_API_KEY`, `MAIL_FROM`, `MAIL_FROM_NAME`, `NODE_ENV=production`, `TZ=Europe/Rome`.
 
-### 3.2 Area clienti su clienti.anfibiasub.it
-1. Railway → servizio → **Settings → Networking → Custom Domain** → `clienti.anfibiasub.it`. Railway mostra i record DNS da creare.
-2. cPanel HostGator → **Zone Editor** → `anfibiasub.it` → aggiungi i record indicati da Railway (un **CNAME** `clienti` e, se lo chiede, un **TXT** di verifica). Non toccare i record **MX**.
-3. Su Railway imposta `SERVE_SITE=off` (la radice porta all'area clienti), `APP_URL=https://clienti.anfibiasub.it` e `SITE_URL=https://www.anfibiasub.it` (i link al sito e alla privacy dall'area clienti).
+Aggiornare il sito: `git push` sul repository → Railway pubblica da solo in un paio di minuti.
+Il vecchio sito Joomla su HostGator è dismesso; i suoi vecchi indirizzi (`/it/...`) portano alle pagine nuove (`src/redirects.json`).
+`python3 sito/build.py` genera il sito ONLINE (indicizzabile, con `sitemap.xml`); `--prova` lo nasconde a Google.
 
 ---
 

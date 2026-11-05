@@ -1,7 +1,8 @@
 # Genera il sito pubblico statico (italiano, inglese, spagnolo, tedesco).
 #
-#   python3 sito/build.py          -> versione di prova in public/ (servita dall'app su Railway)
-#   python3 sito/build.py --prod   -> versione per anfibiasub.it in dist-hostgator/ (da caricare su HostGator)
+#   python3 sito/build.py          -> sito ONLINE in public/ (servito dall'app su Railway su www.anfibiasub.it)
+#   python3 sito/build.py --prova  -> come sopra ma nascosto ai motori di ricerca (noindex, robots Disallow)
+#   python3 sito/build.py --prod   -> vecchia versione per HostGator in dist-hostgator/ (non più usata)
 #
 import os, sys, shutil, html, datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -15,6 +16,7 @@ import json as _json
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROD = '--prod' in sys.argv
+PROVA = '--prova' in sys.argv  # solo per un sito di prova da tenere fuori da Google
 OUT = os.path.join(ROOT, 'dist-hostgator' if PROD else 'public')
 SITE_URL = 'https://www.anfibiasub.it'
 # Indirizzo dell'area clienti: in prova sta sullo stesso server, online sul sottodominio
@@ -303,7 +305,7 @@ def page(key, lang, title, desc, body, overlay=False, og='porto-loano'):
     fname = PAGES[key][lang]
     alternates = ''.join(f'<link rel="alternate" hreflang="{l}" href="{SITE_URL + url(key, l)}">\n' for l in LANGS)
     locale = {'it': 'it_IT', 'en': 'en_GB', 'es': 'es_ES', 'de': 'de_DE'}[lang]
-    robots = '' if PROD else '<meta name="robots" content="noindex, nofollow">\n'
+    robots = '<meta name="robots" content="noindex, nofollow">\n' if PROVA else ''
     doc = f'''<!doctype html>
 <html lang="{lang}">
 <head>
@@ -724,10 +726,15 @@ def extras_prod():
               'ErrorDocument 404 /index.html']
     with open(os.path.join(OUT, '.htaccess'), 'w') as f:
         f.write('\n'.join(l for l in lines if l is not None) + '\n')
+    write_seo()
+
+
+# robots.txt e sitemap.xml del sito online (l'area clienti e la gestione restano fuori da Google)
+def write_seo():
     with open(os.path.join(OUT, 'robots.txt'), 'w') as f:
-        f.write(f'User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n')
+        f.write(f'User-agent: *\nAllow: /\nDisallow: /area/\nDisallow: /admin/\nSitemap: {SITE_URL}/sitemap.xml\n')
     today = datetime.date.today().isoformat()
-    urls = ''.join(f'<url><loc>{SITE_URL}{url(k, l)}</loc><lastmod>{today}</lastmod></url>' for k in PAGES for l in LANGS)
+    urls = ''.join(f'<url><loc>{SITE_URL}{url(k, l)}</loc><lastmod>{today}</lastmod></url>' for l in LANGS for k in PAGES)
     with open(os.path.join(OUT, 'sitemap.xml'), 'w') as f:
         f.write(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n')
 
@@ -748,7 +755,7 @@ def build_abyss():
     from abyss_testi import H as AH, J as AJ
     # sondaggio di fine partita: online il sito sta su HostGator e l'API sull'area clienti
     api = 'https://clienti.anfibiasub.it/api/abyss/voto' if PROD else '/api/abyss/voto'
-    robots = '' if PROD else '<meta name="robots" content="noindex, nofollow">\n'
+    robots = '<meta name="robots" content="noindex, nofollow">\n' if PROVA else ''
     META = {'it': ('ABYSS · Il relitto dimenticato · Anfibiasub', 'ABYSS: esplorazione subacquea in 3D di un relitto sul fondale del Mediterraneo. Un minigioco di Anfibiasub.'),
             'en': ('ABYSS · The forgotten wreck · Anfibiasub', 'ABYSS: a 3D underwater exploration of a wreck on the Mediterranean seabed. A mini game by Anfibiasub.'),
             'es': ('ABYSS · El pecio olvidado · Anfibiasub', 'ABYSS: exploración submarina en 3D de un pecio en el fondo del Mediterráneo. Un minijuego de Anfibiasub.'),
@@ -814,7 +821,11 @@ if __name__ == '__main__':
         json.dump({l: TX['priv_body'][l] for l in LANGS}, f, ensure_ascii=False, indent=1)
     if PROD:
         extras_prod()
-    else:
+    elif PROVA:
         with open(os.path.join(OUT, 'robots.txt'), 'w') as f:
             f.write('User-agent: *\nDisallow: /\n')
-    print(('PRODUZIONE' if PROD else 'PROVA') + ' ->', OUT)
+        if os.path.exists(os.path.join(OUT, 'sitemap.xml')):
+            os.remove(os.path.join(OUT, 'sitemap.xml'))
+    else:
+        write_seo()
+    print(('HOSTGATOR' if PROD else 'PROVA (nascosto a Google)' if PROVA else 'ONLINE') + ' ->', OUT)
