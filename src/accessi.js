@@ -31,8 +31,8 @@ const START = [
   { servizio: 'Railway (server del sito)', url: 'https://railway.com/dashboard', utente: '', note: 'Qui gira il sito con il database. Si entra con l\'account GitHub qui sotto. Piano Hobby: circa 5 $ al mese.' },
   { servizio: 'GitHub (codice del sito)', url: 'https://github.com/login', utente: '', note: 'Contiene il codice del sito. Serve anche per entrare in Railway.' },
   { servizio: 'Brevo (invio email)', url: 'https://app.brevo.com', utente: 'anfibiaanfibia@gmail.com', note: 'Manda le email del sito (gratis fino a 300 al giorno). Chiave API "railway-anfibiasub", salvata su Railway come BREVO_API_KEY. Account verificato con il cellulare.' },
-  { servizio: 'Gmail mittente', url: 'https://mail.google.com', utente: 'anfibiaanfibia@gmail.com', note: 'Indirizzo da cui partono le email del sito.' },
-  { servizio: 'Dominio anfibiasub.it', url: '', utente: '', note: 'Dove è registrato il dominio (gestione DNS, rinnovo annuale).' },
+  { servizio: 'Cloudflare (DNS del dominio)', url: 'https://dash.cloudflare.com', utente: 'anfibiaanfibia@gmail.com', note: 'Gestisce i DNS di anfibiasub.it: www punta al sito su Railway, anfibiasub.it senza www rinvia a www (regola "Redirect from root to WWW"). Si entra con "Continue with GitHub" (account GitHub anfibiasub). Piano Free.' },
+  { servizio: 'Dominio anfibiasub.it (dominiofaidate)', url: 'https://www.dominiofaidate.com/it/Login.aspx', utente: '', note: 'Registrazione del dominio, scadenza 31/08/2027 (da rinnovare ogni anno). Nameserver impostati su Cloudflare: ben.ns.cloudflare.com e surina.ns.cloudflare.com. Non cambiarli.' },
 ];
 
 async function seed() {
