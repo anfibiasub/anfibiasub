@@ -44,7 +44,7 @@ p{margin:0}
 .nav-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:20px;padding-bottom:20px}
 .logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--white)}
 .logo-img{width:64px;height:64px;flex:none;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
-@media (max-width:767px){.logo-img{width:52px;height:52px}}
+@media (max-width:1023px){.logo-img{width:52px;height:52px}}
 .logo-mark{width:46px;height:46px;border-radius:50%;background:var(--white);color:#08345C;display:inline-flex;align-items:center;justify-content:center;flex:none}
 .logo-txt{display:flex;flex-direction:column;line-height:1.05}
 .logo-name{font-weight:800;font-size:22px;letter-spacing:1px}
@@ -204,7 +204,7 @@ table.data tbody tr:nth-child(even) td{background:#0B1F33}
 .lv-ok{--lv:#5BF0B0}.lv-mid{--lv:#FFD45E}.lv-hi{--lv:#FF9A55}.lv-max{--lv:#FF5E6C}
 .mt-arr{flex:none}
 /* cellulare: si mostra solo la parte centrale dell'immagine (sassi + medusa), ingrandita */
-@media (max-width:767px){
+@media (max-width:1023px){
   .mb-frame{aspect-ratio:1080/724;border-radius:16px}
   .mb-art{position:absolute;top:0;width:201.1%;left:-51.85%}
   .mb-x,.mb-n{display:none}
@@ -253,7 +253,7 @@ table.data tbody tr:nth-child(even) td{background:#0B1F33}
   .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .foot-grid{grid-template-columns:1fr 1fr}
 }
-@media (max-width:1279px){
+@media (max-width:1023px){
   .menu-btn{display:inline-flex}
   .nav{display:none;position:absolute;left:0;right:0;top:86px;flex-direction:column;align-items:stretch;gap:0;background:var(--bg2);border-top:1px solid #12304A;border-bottom:1px solid #12304A;padding:10px 28px 20px}
   .nav.open{display:flex}
@@ -294,14 +294,14 @@ table.data tbody tr:nth-child(even) td{background:#0B1F33}
 
 /* header su due righe (desktop): logo + preventivo, sotto il menu */
 .nav-cta{padding:11px 22px;min-height:44px}
-@media (min-width:1280px){
+@media (min-width:1024px){
   .nav-row{flex-wrap:wrap;row-gap:0;padding-bottom:0}
   .nav{order:3;flex:0 0 100%;gap:34px;font-size:14px;margin-top:16px;padding:12px 0 14px;border-top:1px solid rgba(255,255,255,.1)}
   .dd-btn{font-size:14px}
   .nav .dd-lang{margin-left:auto}
   .nav-btn-mob{display:none}
 }
-@media (max-width:1279px){.nav-cta{display:none}}
+@media (max-width:1023px){.nav-cta{display:none}}
 
 /* pulsanti rapidi home: solo cellulare */
 .quick{display:none}
@@ -310,7 +310,7 @@ table.data tbody tr:nth-child(even) td{background:#0B1F33}
 .rim-list li::before{content:"";position:absolute;left:0;top:.55em;width:12px;height:12px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 4px rgba(34,184,240,.18)}
 .card-text{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .kick-m{display:none}
-@media (max-width:767px){
+@media (max-width:1023px){
   .m-hide{display:none}
   .kick-d{display:none}.kick-m{display:inline}
   .hero-body{padding-top:96px}
@@ -329,7 +329,7 @@ table.data tbody tr:nth-child(even) td{background:#0B1F33}
 .hero h1,.page-hero h1,.h2{hyphens:manual;-webkit-hyphens:manual}
 .hero h1{font-size:min(68px,4.6vw);overflow-wrap:normal;max-width:none}
 .hero h1 .fit{display:block;white-space:nowrap;width:max-content;max-width:100%}
-@media (max-width:767px){.hero h1{font-size:4.9vw}}
+@media (max-width:1023px){.hero h1{font-size:4.9vw}}
 @media (max-width:640px){.cam-card{aspect-ratio:16/10}}
 /* foto grandi: su schermi larghi restano al centro e si sfumano ai lati nel blu */
 .hero-img,.tow img,.page-hero>img{left:50%!important;right:auto!important;width:min(100%,1600px)!important;transform:translateX(-50%);
@@ -339,7 +339,7 @@ table.data tbody tr:nth-child(even) td{background:#0B1F33}
 .foot-brand img{width:80px;height:80px;object-fit:contain;margin-bottom:10px}
 .foot-brand p{margin-top:6px}
 .foot-tel>div+div{margin-top:18px}
-@media (max-width:767px){
+@media (max-width:1023px){
   .hero .badges,.hero-body>.btn{display:none}
   .hero-body{padding-bottom:8px}
   .hero::after{height:60px}
@@ -360,13 +360,13 @@ table.data tbody tr:nth-child(even) td{background:#0B1F33}
 /* cellulare: header sempre visibile e pagine interne più compatte */
 /* header sempre fisso in alto, su PC e cellulare */
 .site-header,.site-header.solid{position:sticky;top:0;z-index:40;background:rgba(8,24,42,.96);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid #12304A}
-@media (min-width:1280px){.hero-body{padding-top:70px}.nav-row{padding-top:14px}.nav{margin-top:12px;padding:8px 0 10px}}
-@media (max-width:1279px){
+@media (min-width:1024px){.hero-body{padding-top:70px}.nav-row{padding-top:14px}.nav{margin-top:12px;padding:8px 0 10px}}
+@media (max-width:1023px){
   .site-header .nav-row{padding-top:12px;padding-bottom:12px}
   .hero{margin-top:0}
   .hero-body{padding-top:28px}
 }
-@media (max-width:767px){
+@media (max-width:1023px){
   .page-hero{padding:26px 0 22px}
   .page-hero h1{font-size:clamp(28px,8vw,38px);margin-bottom:8px}
   .page-hero .eyebrow{margin-bottom:8px}
@@ -382,7 +382,7 @@ table.data tbody tr:nth-child(even) td{background:#0B1F33}
 .mb-stone>div{transform:translateY(-7%)}
 
 /* cellulare: 4 tasti fissi nell'header, spazio sopra ridotto; footer compatto */
-@media (max-width:767px){
+@media (max-width:1023px){
   .site-header .nav-row{padding-top:6px;padding-bottom:6px}
   .hero-body{padding-top:12px}
   .foot-grid{grid-template-columns:minmax(0,1fr) auto;gap:14px 10px}
@@ -411,7 +411,7 @@ table.data tbody tr:nth-child(even) td{background:#0B1F33}
   box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 3px 0 #061a2c,0 6px 12px rgba(0,0,0,.4)}
 .nav-sos svg{color:#3CC6F5}
 .nav-sos:hover{filter:brightness(1.15)}
-@media (max-width:767px){
+@media (max-width:1023px){
   .nav-sos{display:none}
   .q-tile.q-sos{cursor:pointer;font:inherit;color:inherit}
 }
@@ -464,7 +464,7 @@ table.data tbody tr:nth-child(even) td{background:#0B1F33}
 .gb-book:hover{filter:brightness(1.08)}
 .gb-no{display:block;padding:.75cqw 1.6cqw;border-radius:999px;background:#3a4a58;color:#c3d0db;font-weight:700;font-size:1.05cqw;white-space:nowrap}
 .gb-btns-m{display:none}
-@media (max-width:767px){
+@media (max-width:1023px){
   .gb{margin-top:18px}
   .gb-frame{border-radius:16px}
   .gb-art{aspect-ratio:1/1;background-size:auto 100%;background-position:50% 50%}
@@ -489,29 +489,29 @@ table.data tbody tr:nth-child(even) td{background:#0B1F33}
   .gb-btns-m .gb-book,.gb-btns-m .gb-no{font-size:13.5px;padding:11px 8px}
   .gb-btns-m .gb-no{grid-column:1/-1;text-align:center}
 }
-@media (max-width:767px){
+@media (max-width:1023px){
   .q-tile .beacon{display:inline-block}.q-tile .beacon span{display:block}
   .gb-day{flex-basis:68px}
   .gb-btns-m .gb-book{white-space:normal;font-size:12.5px;padding:11px 6px;line-height:1.25;display:flex;align-items:center;justify-content:center}
 }
 .gb-leg{background:rgba(4,18,32,.65);padding:.35cqw 1cqw;border-radius:999px}
-@media (max-width:767px){.gb-leg{padding:3px 10px;align-self:flex-start}}
+@media (max-width:1023px){.gb-leg{padding:3px 10px;align-self:flex-start}}
 /* scritte informative dentro le cornici, in basso a destra */
 .mb-frame .mb-upd{position:absolute;right:16px;bottom:10px;z-index:3;margin:0;max-width:70%;padding:3px 10px;border-radius:999px;background:rgba(4,14,26,.6);color:#c3d6e4;font-size:11.5px;line-height:1.4;text-align:right;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 .gb-frame .mb-upd{position:absolute;right:16px;bottom:10px;z-index:3;margin:0;max-width:70%;padding:3px 10px;border-radius:999px;background:rgba(4,14,26,.6);color:#c3d6e4;font-size:11.5px;line-height:1.4;text-align:right;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
-@media (max-width:767px){.mb-frame .mb-upd,.gb-frame .mb-upd{right:8px;bottom:6px;font-size:9.5px;padding:2px 8px;max-width:86%}}
+@media (max-width:1023px){.mb-frame .mb-upd,.gb-frame .mb-upd{right:8px;bottom:6px;font-size:9.5px;padding:2px 8px;max-width:86%}}
 /* foto grandi: larghe esattamente come i riquadri del sito, sfumate ai lati */
-@media (min-width:768px){
+@media (min-width:1024px){
   .hero-img,.tow img,.page-hero>img{width:calc(min(100%,var(--wrap)) - 56px)!important;
     -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 86%,transparent 100%)!important;mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 86%,transparent 100%)!important}
 }
-@media (max-width:767px){.mb-frame .mb-upd,.gb-frame .mb-upd{border-radius:8px}}
-@media (max-width:767px){.gb{display:none!important}}
-@media (min-width:1280px){.hero .badges{flex-wrap:nowrap;justify-content:space-between;gap:18px}.hero .badge{gap:10px}.hero .badge svg{width:26px;height:26px}.hero .badge span span{font-size:12.5px;white-space:nowrap}.hero .badge strong{white-space:nowrap}}
+@media (max-width:1023px){.mb-frame .mb-upd,.gb-frame .mb-upd{border-radius:8px}}
+@media (max-width:1023px){.gb{display:none!important}}
+@media (min-width:1024px){.hero .badges{flex-wrap:nowrap;justify-content:space-between;gap:18px}.hero .badge{gap:10px}.hero .badge svg{width:26px;height:26px}.hero .badge span span{font-size:12.5px;white-space:nowrap}.hero .badge strong{white-space:nowrap}}
 /* testate pagine interne: foto ben visibile, scura solo dietro al testo */
 .page-hero img{opacity:.95}
 .page-hero::before{background:linear-gradient(90deg,rgba(5,14,26,.9) 0,rgba(5,14,26,.7) 35%,rgba(5,14,26,.25) 70%,rgba(5,14,26,.1) 100%)}
-@media (max-width:767px){.page-hero::before{background:linear-gradient(90deg,rgba(5,14,26,.85),rgba(5,14,26,.5))}}
+@media (max-width:1023px){.page-hero::before{background:linear-gradient(90deg,rgba(5,14,26,.85),rgba(5,14,26,.5))}}
 
 /* ---------- SFONDO "DISCESA" (solo PC): superficie -> relitto, ai lati dei riquadri ---------- */
 .abyss-bg,.depth{display:none}
@@ -685,7 +685,7 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
 .mb-k{font-size:max(9px,.66cqw);padding:.08cqw .45cqw}
 .mb-wind .mb-v{font-size:max(19px,2.5cqw)}
 .mb-plaque{font-size:2.4cqw}
-@media (max-width:767px){
+@media (max-width:1023px){
   .mb-frame{aspect-ratio:1100/724}
   .mb-art{width:197.5%;left:-47.4%}
   .mb-stone b{font-size:8.5px}.mb-k{font-size:8px;padding:0 4px}.mb-k .mt-arr{display:none}
@@ -694,7 +694,7 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
 .mb-stone{color:#0a141b}
 .mb-stone b{font-weight:900;text-shadow:0 0 3px rgba(255,255,255,.55)}
 .mb-stone>div{transform:translateY(4%)}
-@media (max-width:767px){
+@media (max-width:1023px){
   .mb-bub .mb-s{display:none}
   .mb-v{font-size:16px}
   .mb-wind .mb-v{font-size:18px}
@@ -737,8 +737,8 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
 /* sfondo "discesa" con due immagini verticali ai lati (0-50 m) che scorrono con la pagina */
 @media (min-width:1024px){
   .abyss-bg .ab-l,.abyss-bg .ab-r{inset:auto;top:0;background-size:100% 100%;background-repeat:no-repeat;will-change:transform}
-  .abyss-bg .ab-l{left:0;background-image:url(/img/discesa-sx.webp?v=511e44)}
-  .abyss-bg .ab-r{right:0;background-image:url(/img/discesa-dx.webp?v=408592)}
+  .abyss-bg .ab-l{left:0;background-image:url(/img/discesa-sx.webp?v=59352f)}
+  .abyss-bg .ab-r{right:0;background-image:url(/img/discesa-dx.webp?v=43d982)}
 }
 
 /* ---------- PRIMA SCHERMATA DA PC: un solo mare da bordo a bordo, testo centrato, pulsanti ---------- */
@@ -748,7 +748,7 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
   .hero{overflow:visible}
   .hero .hero-img,.hero::after{display:none}
   .hero::before{display:block;left:50%;right:auto;width:100vw;transform:translateX(-50%);top:-160px;
-    background:linear-gradient(180deg,rgba(5,14,26,.2) 0,rgba(5,14,26,.45) 45%,rgba(5,14,26,0) 100%),url(/img/hero-luce.webp?v=6b5b44) center top/cover no-repeat;
+    background:linear-gradient(180deg,rgba(5,14,26,.2) 0,rgba(5,14,26,.45) 45%,rgba(5,14,26,0) 100%),url(/img/hero-luce.webp?v=c53c49) center top/cover no-repeat;
     -webkit-mask-image:linear-gradient(180deg,#000 0,#000 60%,transparent 100%);mask-image:linear-gradient(180deg,#000 0,#000 60%,transparent 100%)}
   .hero-body{text-align:center;padding-top:80px;padding-bottom:40px}
   .hero-kicker{justify-content:center;color:#fff;font-weight:700;text-shadow:0 1px 3px #000,0 0 14px rgba(0,0,0,.9)}
@@ -771,9 +771,9 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
 @media (min-width:1024px){body:has(.hero-cta) .nav-cta{display:none}}
 
 /* ---------- HOME DA CELLULARE: prima schermata sul mare, centrata, e i servizi ---------- */
-@media (max-width:767px){
+@media (max-width:1023px){
   .hero .hero-img{display:none}
-  .hero{background:url(/img/hero-luce.webp?v=6b5b44) center top/cover no-repeat}
+  .hero{background:url(/img/hero-luce.webp?v=c53c49) center top/cover no-repeat}
   .hero::before{background:linear-gradient(180deg,rgba(5,14,26,.25) 0,rgba(5,14,26,.55) 55%,var(--bg) 100%)}
   .hero::after{display:none}
   .hero-body{text-align:center;padding-top:34px;padding-bottom:18px}
@@ -795,7 +795,7 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
 
 /* ---------- HOME DA CELLULARE: meteo sotto i servizi, poi i lavori ---------- */
 .m-meteo{display:none}
-@media (max-width:767px){
+@media (max-width:1023px){
   .m-meteo{display:block;padding:6px 0 26px}
   .m-lav{padding-top:22px;padding-bottom:30px}
   .m-lav .sec-head{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;margin-bottom:18px}
@@ -821,7 +821,7 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
 
 /* cellulare: sub sul fondale in fondo alla home */
 .m-ok{display:none}
-@media (max-width:767px){
+@media (max-width:1023px){
   .m-ok{display:block;margin:0 auto -10px;max-width:420px}
   .m-ok video{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;
     -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 82%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 82%,transparent 100%)}
@@ -855,7 +855,7 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
     -webkit-mask-image:linear-gradient(180deg,#000 0,#000 60%,transparent 100%);mask-image:linear-gradient(180deg,#000 0,#000 60%,transparent 100%)}
   .hero::before{background:linear-gradient(180deg,rgba(5,14,26,.2) 0,rgba(5,14,26,.45) 45%,rgba(5,14,26,0) 100%)}
 }
-@media (max-width:767px){
+@media (max-width:1023px){
   .hero-vid{display:block;position:absolute;z-index:0;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;pointer-events:none}
 }
 /* relitto in fondo alla discesa (lato destro, PC): solo la luce si muove */
@@ -869,7 +869,7 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
 .dv-canvas,.dv-bub{display:none!important}
 
 /* scala del vento da cellulare: la colonna dell'effetto sul mare non si stringe (righe altissime), la tabella scorre di lato */
-@media (max-width:767px){.data.bf td:nth-child(5),.data.bf th:nth-child(5){min-width:320px}.data.bf td:nth-child(2){white-space:nowrap}}
+@media (max-width:1023px){.data.bf td:nth-child(5),.data.bf th:nth-child(5){min-width:320px}.data.bf td:nth-child(2){white-space:nowrap}}
 
 /* pagine interne da PC: in cima la superficie del mare che si muove (come nella Home), sfuma verso il basso */
 .ab-surf{display:none}
@@ -889,14 +889,14 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
 .sos-go svg,.btn-wa svg{color:#25D366}
 
 /* cellulare: immagine del meteo più leggera (metà dimensione) */
-@media (max-width:767px){.mb-art{background-image:url(/img/meteo-mare-m.webp?v=6fd04f)}}
+@media (max-width:1023px){.mb-art{background-image:url(/img/meteo-mare-m.webp?v=198d2a)}}
 
 /* firma del sito a piè pagina: "by" + logo IT di Ivano Taccucci, sulla stessa riga della Privacy */
 .foot-bottom{align-items:center}
 .foot-by{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.08em;color:var(--dim)}
 .foot-by img{width:70px;height:auto;display:block}
-@media (min-width:768px){.foot-by{order:3}.foot-bottom>a{margin-left:auto}}  /* PC: © a sinistra, Privacy e logo a destra */
-@media (max-width:767px){
+@media (min-width:1024px){.foot-by{order:3}.foot-bottom>a{margin-left:auto}}  /* PC: © a sinistra, Privacy e logo a destra */
+@media (max-width:1023px){
   .foot-bottom{flex-wrap:nowrap;justify-content:space-between;text-align:left;gap:8px;font-size:10.5px}
   .foot-by img{width:44px}
 }
@@ -907,7 +907,7 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
 
 /* Utilità da cellulare: tasto del gioco ABYSS sopra il meteo, largo come il meteo, con lo sfondo del gioco */
 .game-card{display:none}
-@media (max-width:767px){
+@media (max-width:1023px){
   .game-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;margin:0 0 14px;padding:18px 18px;min-height:150px;
     border-radius:16px;border:1px solid rgba(60,198,245,.45);overflow:hidden;text-decoration:none;color:#fff;
     background:linear-gradient(90deg,rgba(3,10,22,.92) 0%,rgba(3,10,22,.6) 45%,rgba(3,10,22,0) 75%),url(/img/abyss-card.webp?v=5fa48b) 70% 40%/cover no-repeat #04101e;
@@ -920,7 +920,7 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
 
 /* ---------- CHI SIAMO: le due schede della famiglia, più in rilievo, due per riga ---------- */
 .team-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px}
-@media (max-width:767px){.team-grid{grid-template-columns:1fr;gap:16px}}
+@media (max-width:1023px){.team-grid{grid-template-columns:1fr;gap:16px}}
 .team-grid .person{position:relative;overflow:hidden;gap:18px;padding:30px 32px 30px;border-radius:20px;
   background:linear-gradient(160deg,#17405f 0%,#0d2642 48%,#081a2e 100%);border:1px solid rgba(60,198,245,.38);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -3px 0 rgba(0,0,0,.35),0 4px 0 #04101d,0 20px 40px rgba(0,0,0,.55),0 0 30px rgba(60,198,245,.10);
@@ -942,7 +942,7 @@ h1,h2,h3,.fasi-list b{text-wrap:balance}
 .team-grid .person li::before{content:"";position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:6px;
   background:linear-gradient(180deg,#3CC6F5,#1d86c4);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 2px 4px rgba(0,0,0,.4)}
 .team-grid .person li::after{content:"";position:absolute;left:6px;top:5px;width:5px;height:9px;border:solid #04121e;border-width:0 2px 2px 0;transform:rotate(45deg)}
-@media (max-width:767px){.team-grid .person{padding:22px 20px}.team-grid .avatar{width:60px;height:60px;font-size:20px}.p-name{font-size:19px}.p-role{font-size:10px;letter-spacing:.03em;white-space:nowrap}}
+@media (max-width:1023px){.team-grid .person{padding:22px 20px}.team-grid .avatar{width:60px;height:60px;font-size:20px}.p-name{font-size:19px}.p-role{font-size:10px;letter-spacing:.03em;white-space:nowrap}}
 
 /* ---------- RIQUADRI DEL SITO IN RILIEVO (come le schede di Chi siamo) ---------- */
 :root{--r3d-bg:radial-gradient(120% 70% at 15% 0%,rgba(120,210,255,.13),rgba(120,210,255,0) 55%),linear-gradient(160deg,#17405f 0%,#0d2642 48%,#081a2e 100%);
@@ -965,8 +965,8 @@ a.card:hover{transform:translateY(-4px);box-shadow:var(--r3d-sh-h);border-color:
 .fs-ic{width:46px;height:46px;border-radius:50%;color:#fff;background:var(--ic3d-bg);border:2px solid rgba(60,198,245,.7);box-shadow:var(--ic3d-sh)}
 .fs-ic svg{width:22px;height:22px;filter:drop-shadow(0 0 4px rgba(60,198,245,.9))}
 .badge svg{box-sizing:content-box;width:24px;height:24px;padding:11px;border-radius:50%;color:#fff;background:var(--ic3d-bg);border:2px solid rgba(60,198,245,.7);box-shadow:var(--ic3d-sh)}
-@media (min-width:1280px){.hero .badge svg{width:22px;height:22px;padding:10px}}
-@media (max-width:767px){
+@media (min-width:1024px){.hero .badge svg{width:22px;height:22px;padding:10px}}
+@media (max-width:1023px){
   .q-tile svg{box-sizing:content-box;width:13px;height:13px;padding:6px;border-radius:50%;color:#fff;background:var(--ic3d-bg);border:1.5px solid rgba(60,198,245,.7);
     box-shadow:inset 0 2px 3px rgba(255,255,255,.28),inset 0 -3px 5px rgba(0,0,0,.45),0 3px 6px rgba(0,0,0,.5),0 0 10px rgba(60,198,245,.35);filter:none}
   .fasi-list li .fs-ic{width:40px;height:40px}
@@ -974,7 +974,7 @@ a.card:hover{transform:translateY(-4px);box-shadow:var(--r3d-sh-h);border-color:
 
 /* ---------- RIFINITURE (novembre 2026) ---------- */
 /* cellulare: testi allineati a sinistra (giustificati su colonna stretta lasciavano buchi tra le parole) */
-@media (max-width:767px){.hero-lead,.detail p,.card-text,.tool-sec p,.tool-sec .lead,.prose p,.sch-body p{text-align:left}}
+@media (max-width:1023px){.hero-lead,.detail p,.card-text,.tool-sec p,.tool-sec .lead,.prose p,.sch-body p{text-align:left}}
 /* pagina Utilità: titoli con scritta piccola sopra, come il resto del sito */
 .tool-sec>.eyebrow{margin-bottom:6px}
 /* schede dei lavori: due righe pulite e "Scopri" */
@@ -996,3 +996,9 @@ a.card:hover{transform:translateY(-4px);box-shadow:var(--r3d-sh-h);border-color:
   .site-header.scrolled .logo-img{width:46px;height:46px}
 }
 .rv-on a.card.rv.in:hover,.rv-on .team-grid .person.rv.in:hover{transform:translateY(-4px);transition-delay:0s;transition-duration:.25s}
+/* tablet orizzontale (1024-1279 px): stesso menu del PC, un po' più compatto per starci in larghezza */
+@media (min-width:1024px) and (max-width:1279px){
+  .nav{gap:13px;font-size:13px}
+  .dd-btn{font-size:13px}
+  .nav-sos{margin-left:6px}
+}

@@ -74,10 +74,10 @@ SERVIZI_ES_DE = {
     'alaggi': dict(
         es=dict(t='Varadas y botaduras', short='Varada y botadura de embarcaciones, también de gran tamaño, con travel lift u otros medios.',
                 body=['Realizamos varadas y botaduras de embarcaciones de gran tamaño con travel lift u otros medios.',
-                      'En el astillero W. Service del puerto de Savona trabajamos de forma continua: el buzo en el agua controla la posición de las cinchas bajo el casco.']),
+                      'Las realizamos en cualquier puerto o astillero: el buzo en el agua controla la posición de las cinchas bajo el casco.']),
         de=dict(t='Kranen und Einwassern', short='Aus- und Einwassern auch großer Boote mit Travellift oder anderen Mitteln.',
                 body=['Wir holen große Boote mit Travellift oder anderen Mitteln aus dem Wasser und setzen sie wieder ein.',
-                      'In der Werft W. Service im Hafen von Savona arbeiten wir regelmäßig: Der Taucher im Wasser kontrolliert die Lage der Gurte unter dem Rumpf.'])),
+                      'Wir führen sie in jedem Hafen und jeder Werft durch: Der Taucher im Wasser kontrolliert die Lage der Gurte unter dem Rumpf.'])),
     'foto-video': dict(
         es=dict(t='Fotos y vídeos', short='Grabaciones digitales para armadores y peritos, inspección de tuberías con ROV filoguiado.',
                 body=['Realizamos fotos y vídeos subacuáticos en digital, en el formato que prefieras, y te los enviamos por email.',

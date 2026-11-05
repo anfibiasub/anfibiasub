@@ -6,7 +6,7 @@
 .inst-btn:hover{filter:brightness(1.15)}
 .inst-btn[hidden]{display:none}
 .inst-s{display:none}
-@media (max-width:767px){
+@media (max-width:1023px){
   .nav-row:has(.inst-btn:not([hidden])){gap:10px}
   .inst-btn{padding:7px 12px;font-size:13px;min-height:40px;gap:6px}
   .inst-l{display:none}.inst-s{display:inline}
@@ -34,6 +34,6 @@
 @keyframes igB{50%{transform:translateY(8px)}}
 @media (prefers-reduced-motion:reduce){.ig-arrow{animation:none}}
 /* desktop: "Installa l'app" e "Dove sono" stessa larghezza, uno sopra l'altro, allineati a sinistra */
-@media (min-width:1280px){
+@media (min-width:1024px){
   .inst-btn,.nav-row:has(.inst-btn:not([hidden])) .nav-sos{box-sizing:border-box;width:184px;justify-content:flex-start;padding-left:18px;padding-right:18px}
 }

@@ -3,7 +3,7 @@
   var btn = document.querySelector('.menu-btn');
   var nav = document.getElementById('nav');
   if (!nav) return;
-  var mobile = function () { return window.matchMedia('(max-width: 1279px)').matches; };
+  var mobile = function () { return window.matchMedia('(max-width: 1023px)').matches; };
 
   if (btn) btn.addEventListener('click', function () {
     var open = nav.classList.toggle('open');
@@ -127,7 +127,7 @@ window.addEventListener('load', function () {
     }
     // pagine interne: in cima la superficie del mare si muove (stesso video della Home), poi sale via con la discesa
     if (surf) {
-      if (!surf.src && window.__ready) { surf.poster = '/img/superficie-3.webp?v=8fb661'; surf.src = surf.canPlayType('video/mp4; codecs="avc1.42E01E"') ? '/img/superficie-3.mp4' : '/img/superficie-3.webm'; }
+      if (!surf.src && window.__ready) { surf.poster = '/img/superficie-3.webp?v=0b132e'; surf.src = surf.canPlayType('video/mp4; codecs="avc1.42E01E"') ? '/img/superficie-3.mp4' : '/img/superficie-3.webm'; }
       var sy = fixed ? 0 : Math.round(-window.scrollY * 0.6);
       surf.style.transform = 'translate3d(0,' + sy + 'px,0)';
       var seen = sy + surf.offsetHeight > 0 && !document.hidden;

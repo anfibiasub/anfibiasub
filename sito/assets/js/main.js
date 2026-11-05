@@ -3,7 +3,7 @@
   var btn = document.querySelector('.menu-btn');
   var nav = document.getElementById('nav');
   if (!nav) return;
-  var mobile = function () { return window.matchMedia('(max-width: 1279px)').matches; };
+  var mobile = function () { return window.matchMedia('(max-width: 1023px)').matches; };
 
   if (btn) btn.addEventListener('click', function () {
     var open = nav.classList.toggle('open');

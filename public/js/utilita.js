@@ -278,7 +278,7 @@
       li.querySelector('button').addEventListener('click', function () {
         map.setView(pt.p, Math.max(map.getZoom(), 16), { animate: true });
         m.openPopup();
-        if (window.innerWidth < 768) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (window.innerWidth < 1024) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
       list.appendChild(li);
     }
