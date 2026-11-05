@@ -6,7 +6,7 @@ const { requireAdmin, flash, token, tempPassword } = require('../auth');
 const { loadBoat } = require('../boatdata');
 const { GROUPS, TIPI, fromBody } = require('../boatfields');
 const { upload, saveMany } = require('../photos');
-const { send, layout, enabled: mailEnabled, esc } = require('../mail');
+const { send, layout, enabled: mailEnabled, esc, splitMails } = require('../mail');
 const { cleaningStatus, anodesStatus } = require('../status');
 const { t, fill, fmtDate, LANGS } = require('../i18n');
 const { waLink } = require('../wa');
@@ -237,6 +237,7 @@ r.post('/impostazioni', async (req, res) => {
   for (const k of keys) {
     let v = clip(req.body[k], 500);
     if (k === 'whatsapp') v = v.replace(/\D/g, '');
+    if (k === 'admin_email' || k === 'controllo_email') v = splitMails(v).join('; ');
     if (k.endsWith('_mesi')) v = String(Math.max(1, Math.min(60, Number(v) || 0)) || '');
     if (v) await q('INSERT INTO settings(key,value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value', [k, v]);
   }

@@ -9,8 +9,8 @@
 <h2>Area clienti</h2>
 <label class="field">Link webcam Loano (pulsante "Webcam" dei clienti)<input type="url" name="webcam_url" value="<%= s.webcam_url %>" required></label>
 <label class="field">Numero WhatsApp per le richieste (con prefisso, es. 393470119832)<input name="whatsapp" value="<%= s.whatsapp %>" required></label>
-<label class="field">Email che riceve i promemoria<input type="email" name="admin_email" value="<%= s.admin_email %>" required></label>
-<label class="field">Email che riceve il controllo mensile<input type="email" name="controllo_email" value="<%= s.controllo_email %>" required></label>
+<label class="field">Email che ricevono i promemoria<input type="text" name="admin_email" value="<%= s.admin_email %>" required autocomplete="off" spellcheck="false"><span class="hint">Più indirizzi: separali con ;</span></label>
+<label class="field">Email che ricevono il controllo mensile<input type="text" name="controllo_email" value="<%= s.controllo_email %>" required autocomplete="off" spellcheck="false"><span class="hint">Più indirizzi: separali con ;</span></label>
 <h2 style="margin-top:10px">Semafori (mesi)</h2>
 <div class="grid2">
 <label class="field">Pulizia: giallo dopo<input type="number" min="1" max="60" name="pulizia_giallo_mesi" value="<%= s.pulizia_giallo_mesi %>"></label>

@@ -25,8 +25,13 @@ function layout(title, paragraphs, button, lang = 'it') {
 </td></tr></table></body></html>`;
 }
 
+// "a@x.it; b@y.it" -> ['a@x.it', 'b@y.it'] (anche con la virgola)
+const splitMails = (s) => String(s || '').split(/[;,\s]+/).map((x) => x.trim()).filter((x) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x));
+
 async function send(to, subject, html) {
-  if (!to) return false;
+  const list = splitMails(to);
+  if (!list.length) return false;
+  to = list.join('; ');
   if (process.env.MAIL_DRY === '1') { // solo per le prove in locale: non invia, registra nel log
     await q('INSERT INTO mail_log(to_email, subject, ok, info) VALUES ($1,$2,true,$3)', [to, subject, 'DRY ' + html.slice(0, 2000)]);
     return true;
@@ -42,7 +47,7 @@ async function send(to, subject, html) {
       headers: { 'api-key': process.env.BREVO_API_KEY, 'content-type': 'application/json', accept: 'application/json' },
       body: JSON.stringify({
         sender: { email: process.env.MAIL_FROM, name: process.env.MAIL_FROM_NAME || 'Anfibiasub' },
-        to: [{ email: to }],
+        to: list.map((email) => ({ email })),
         subject,
         htmlContent: html,
       }),
@@ -56,4 +61,4 @@ async function send(to, subject, html) {
   }
 }
 
-module.exports = { send, layout, enabled, esc };
+module.exports = { send, layout, enabled, esc, splitMails };
