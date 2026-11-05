@@ -25,6 +25,7 @@ const DEFAULT_SETTINGS = {
   webcam_url: 'https://www.windfinder.com/webcams/loano',
   whatsapp: '393470119832',
   admin_email: 'termoclino@libero.it',
+  controllo_email: 'ivano.taccucci@libero.it',
   pulizia_giallo_mesi: '6',
   pulizia_rosso_mesi: '12',
   anodi_giallo_mesi: '10',
@@ -42,6 +43,7 @@ async function migrate() {
     await q("UPDATE users SET name='Anfibiasub' WHERE role='admin' AND lower(email)='termoclino@libero.it'");
     await q("INSERT INTO settings(key, value) VALUES ('nomi_admin_v1','1') ON CONFLICT (key) DO NOTHING");
   }
+  await require('./accessi').seed();
 }
 
 async function settings() {

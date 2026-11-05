@@ -9,6 +9,8 @@ const { upload, saveMany } = require('../photos');
 const { send, layout, enabled: mailEnabled, esc } = require('../mail');
 const { cleaningStatus, anodesStatus } = require('../status');
 const { t, fill, fmtDate, LANGS } = require('../i18n');
+const { waLink } = require('../wa');
+const accessi = require('../accessi');
 
 const r = express.Router();
 r.use(requireAdmin);
@@ -19,12 +21,27 @@ const dateOrNull = (v) => (DATE.test(v || '') ? v : null);
 const clip = (v, n = 200) => String(v ?? '').trim().slice(0, n);
 const id = (v) => Number(v) || 0;
 const base = (req) => (process.env.APP_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+const clientPhone = (u, b) => u.phone || (b && b.armatore_cell) || '';
+
+// Messaggio WhatsApp per un intervento, nella lingua del cliente, con il link alle foto
+function jobWa(req, u, b, c) {
+  const L = t(u.lang);
+  const text = fill(L.wa_job, {
+    name: u.name, boat: b.nome, date: fmtDate(c.data, u.lang), what: c.tipo ? ` · ${c.tipo}` : '',
+    note: c.note ? `\n${c.note}` : '', url: `${base(req)}/condividi/${c.share_token}`,
+  });
+  return waLink(clientPhone(u, b), text);
+}
 
 async function credentialsMail(req, u, pw) {
   const M = t(u.lang);
   return send(u.email, M.m_cred_subj, layout(M.m_cred_title,
     [fill(M.m_cred_intro, { name: esc(u.name) }), `${esc(M.email)}: <b>${esc(u.email)}</b><br>${esc(M.password)}: <b>${esc(pw)}</b>`, M.m_cred_first],
     { label: M.m_signin, url: base(req) + '/area/login' }, u.lang));
+}
+
+function credWa(req, u, pw, b) {
+  return waLink(clientPhone(u, b), fill(t(u.lang).wa_cred, { url: base(req) + '/area/login', email: u.email, pw }));
 }
 
 // ---------- elenco ----------
@@ -56,8 +73,8 @@ r.post('/clienti/nuovo', async (req, res) => {
     [v.email, await bcrypt.hash(pw, 12), v.name, v.phone, v.lang]);
   const b = await one(`INSERT INTO boats(owner_id, nome, targa, tipo, posto_barca, armatore_nome, armatore_cell, armatore_email) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
     [u.id, v.nome, v.targa, v.tipo, v.posto_barca, v.name, v.phone, v.email]);
-  const mailed = req.body.invia ? await credentialsMail(req, u, pw) : false;
-  res.render('admin/credenziali', { u, pw, mailed, boatId: b.id, loginUrl: base(req) + '/area/login' });
+  const mailed = ['1', 'email', 'entrambi'].includes(req.body.invia) ? await credentialsMail(req, u, pw) : false;
+  res.render('admin/credenziali', { u, pw, mailed, boatId: b.id, loginUrl: base(req) + '/area/login', wa: credWa(req, u, pw) });
 });
 
 // ---------- scheda barca (vista Anfibiasub) ----------
@@ -69,7 +86,9 @@ r.get('/barca/:id', async (req, res) => {
   const owner = await one('SELECT * FROM users WHERE id=$1', [d.boat.owner_id]);
   const others = await all('SELECT id, nome FROM boats WHERE owner_id=$1 AND id<>$2', [owner.id, d.boat.id]);
   const reqs = await all('SELECT * FROM requests WHERE boat_id=$1 ORDER BY created_at DESC LIMIT 10', [d.boat.id]);
-  res.render('admin/barca', { d, owner, others, reqs, GROUPS, TIPI, tab: req.query.tab || 'interventi', newPw: null });
+  for (const c of d.cleanings) c.wa = jobWa(req, owner, d.boat, c);
+  const hasPhone = Boolean(waLink(clientPhone(owner, d.boat), 'x'));
+  res.render('admin/barca', { d, owner, others, reqs, GROUPS, TIPI, hasPhone, tab: req.query.tab || 'interventi', newPw: null });
 });
 
 r.post('/barca/:id/pulizia', upload.array('foto', 40), async (req, res) => {
@@ -82,8 +101,11 @@ r.post('/barca/:id/pulizia', upload.array('foto', 40), async (req, res) => {
   // un nuovo intervento azzera il promemoria del cliente già scaduto
   await q('UPDATE boats SET prox_pulizia = CASE WHEN prox_pulizia <= $2 THEN NULL ELSE prox_pulizia END WHERE id=$1', [b.id, data]);
   let msg = `Intervento salvato con ${n} foto.`;
-  if (req.body.notifica) {
-    const u = await one('SELECT * FROM users WHERE id=$1', [b.owner_id]);
+  // avviso al cliente: 'email', 'wa', 'entrambi' oppure nessuno
+  const avvisa = ['email', 'wa', 'entrambi'].includes(req.body.avvisa) ? req.body.avvisa : (req.body.notifica ? 'email' : '');
+  const u = await one('SELECT * FROM users WHERE id=$1', [b.owner_id]);
+  let wa = '';
+  if (avvisa === 'email' || avvisa === 'entrambi') {
     const L = t(u.lang);
     const ok = await send(u.email, fill(L.m_job_subj, { boat: b.nome }), layout(L.m_job_title,
       [fill(L.m_job_intro, { name: esc(u.name), boat: esc(b.nome) }),
@@ -93,7 +115,12 @@ r.post('/barca/:id/pulizia', upload.array('foto', 40), async (req, res) => {
     if (ok) { await q('UPDATE cleanings SET notified=true WHERE id=$1', [c.id]); msg += ' Email inviata al cliente.'; }
     else msg += mailEnabled() ? ' Email NON inviata: controlla il registro email.' : ' Email non inviata: Brevo non è ancora configurato.';
   }
+  if (avvisa === 'wa' || avvisa === 'entrambi') {
+    wa = jobWa(req, u, b, c);
+    msg += wa ? ' Ora tocca il pulsante verde per mandarlo su WhatsApp.' : ' WhatsApp non preparato: il cliente non ha un numero di cellulare (aggiungilo nella scheda Cliente).';
+  }
   flash(req, 'ok', msg);
+  if (wa) req.session.flash.wa = wa;
   res.redirect(`/admin/barca/${b.id}?tab=interventi`);
 });
 
@@ -183,9 +210,9 @@ r.post('/cliente/:id/password', async (req, res) => {
   if (!u) return res.sendStatus(404);
   const pw = tempPassword();
   await q('UPDATE users SET password_hash=$1, must_change_password=true WHERE id=$2', [await bcrypt.hash(pw, 12), u.id]);
-  const mailed = req.body.invia ? await credentialsMail(req, u, pw) : false;
-  const boat = await one('SELECT id FROM boats WHERE owner_id=$1 ORDER BY id LIMIT 1', [u.id]);
-  res.render('admin/credenziali', { u, pw, mailed, boatId: boat?.id, loginUrl: base(req) + '/area/login' });
+  const mailed = ['1', 'email', 'entrambi'].includes(req.body.invia) ? await credentialsMail(req, u, pw) : false;
+  const boat = await one('SELECT id, armatore_cell FROM boats WHERE owner_id=$1 ORDER BY id LIMIT 1', [u.id]);
+  res.render('admin/credenziali', { u, pw, mailed, boatId: boat?.id, loginUrl: base(req) + '/area/login', wa: credWa(req, u, pw, boat) });
 });
 
 r.post('/cliente/:id/barca', async (req, res) => {
@@ -203,10 +230,10 @@ r.get('/guida', (req, res) => res.render('guida', { G: require('../guida').GESTI
 r.get('/impostazioni', async (req, res) => {
   const admins = await all("SELECT id, name, email, last_login FROM users WHERE role='admin' ORDER BY id");
   const mails = await all('SELECT * FROM mail_log ORDER BY created_at DESC LIMIT 15');
-  res.render('admin/impostazioni', { admins, mails, adminPw: null });
+  res.render('admin/impostazioni', { admins, mails, adminPw: null, acc: await accessi.list() });
 });
 r.post('/impostazioni', async (req, res) => {
-  const keys = ['webcam_url', 'whatsapp', 'admin_email', 'pulizia_giallo_mesi', 'pulizia_rosso_mesi', 'anodi_giallo_mesi', 'anodi_rosso_mesi'];
+  const keys = ['webcam_url', 'whatsapp', 'admin_email', 'controllo_email', 'pulizia_giallo_mesi', 'pulizia_rosso_mesi', 'anodi_giallo_mesi', 'anodi_rosso_mesi'];
   for (const k of keys) {
     let v = clip(req.body[k], 500);
     if (k === 'whatsapp') v = v.replace(/\D/g, '');
@@ -225,12 +252,34 @@ r.post('/impostazioni/admin', async (req, res) => {
   await q("INSERT INTO users(email, password_hash, name, role, must_change_password) VALUES ($1,$2,$3,'admin',true)", [email, await bcrypt.hash(pw, 12), clip(req.body.name)]);
   const admins = await all("SELECT id, name, email, last_login FROM users WHERE role='admin' ORDER BY id");
   const mails = await all('SELECT * FROM mail_log ORDER BY created_at DESC LIMIT 15');
-  res.render('admin/impostazioni', { admins, mails, adminPw: { email, pw } });
+  res.render('admin/impostazioni', { admins, mails, adminPw: { email, pw }, acc: await accessi.list() });
 });
 r.post('/impostazioni/test-email', async (req, res) => {
   const ok = await send(res.locals.user.email, 'Prova email Anfibiasub', layout('Prova riuscita', ['Se leggi questo messaggio, l\'invio delle email funziona.']));
   flash(req, ok ? 'ok' : 'err', ok ? `Email di prova inviata a ${res.locals.user.email}.` : 'Invio non riuscito: guarda il registro qui sotto.');
   res.redirect('/admin/impostazioni');
+});
+
+r.post('/impostazioni/controllo', async (req, res) => {
+  const ok = await require('../reminders').monthly(true);
+  flash(req, ok ? 'ok' : 'err', ok ? 'Email di controllo mensile inviata.' : 'Invio non riuscito: guarda il registro email.');
+  res.redirect('/admin/impostazioni#controllo');
+});
+
+// ---------- accessi (siti e password del sito) ----------
+r.post('/accessi', async (req, res) => {
+  const v = { servizio: clip(req.body.servizio, 80), url: clip(req.body.url, 300), utente: clip(req.body.utente, 200), password: clip(req.body.password, 300), note: clip(req.body.note, 1000) };
+  if (!v.servizio) { flash(req, 'err', 'Scrivi almeno il nome del servizio.'); return res.redirect('/admin/impostazioni#accessi'); }
+  const eid = id(req.body.id);
+  if (eid) await accessi.update(eid, v, res.locals.user.name || res.locals.user.email);
+  else await accessi.add(v, res.locals.user.name || res.locals.user.email);
+  flash(req, 'ok', `Accesso "${v.servizio}" salvato.`);
+  res.redirect('/admin/impostazioni#accessi');
+});
+r.post('/accessi/:id/elimina', async (req, res) => {
+  await accessi.remove(id(req.params.id));
+  flash(req, 'ok', 'Accesso eliminato.');
+  res.redirect('/admin/impostazioni#accessi');
 });
 
 // ---------- statistiche del gioco ABYSS (dati anonimi) ----------

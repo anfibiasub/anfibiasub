@@ -69,7 +69,9 @@ const GESTIONE = [
     t: 'Caricare un intervento con le foto',
     p: ['Apri la barca dall\'elenco. Nella scheda degli interventi compila data e tipo di lavoro, per esempio "Carena più eliche".',
       'In "Foto" puoi scegliere molte foto insieme direttamente dal telefono: il sito le riduce da solo.',
-      'Aggiungi le note per il cliente e tocca "Salva intervento". Se spunti "Avvisa il cliente via email" e le email sono attive, il cliente riceve un avviso con il link alle foto.',
+      'Aggiungi le note per il cliente e in "Avvisa il cliente" scegli Email, WhatsApp, Entrambi o Nessuno. Poi tocca "Salva intervento".',
+      'Con Email il cliente riceve l\'avviso da solo. Con WhatsApp, dopo il salvataggio compare un pulsante verde "Invia su WhatsApp": toccalo e si apre WhatsApp con il numero del cliente e il messaggio già scritto nella sua lingua, con il link alle foto. Basta premere Invia.',
+      'WhatsApp funziona solo se il cliente ha il cellulare salvato nella scheda Cliente. Nello storico ogni intervento ha anche il pulsante "Manda al cliente su WhatsApp" per rimandarlo.',
       'Ogni intervento si può modificare, aggiungere altre foto o eliminare.'],
   },
   {
@@ -83,12 +85,14 @@ const GESTIONE = [
     t: 'Impostazioni',
     p: ['In Impostazioni scegli il numero WhatsApp che riceve le richieste, l\'email che riceve i promemoria e dopo quanti mesi i semafori diventano gialli e rossi.',
       'Il riquadro "Email automatiche" dice se le email sono attive. Con "Manda un\'email di prova a me" controlli che arrivino.',
+      'Il riquadro "Controllo mensile" manda ogni primo del mese un riepilogo all\'email indicata: se smette di arrivare, qualcosa non va.',
+      'In fondo alla pagina c\'è il pannello "Accessi": tutti i siti e le password che servono per gestire il sito, come Railway, GitHub, Brevo e il dominio. Tocca "Mostra" per vedere una password e "Copia" per copiarla. Quando cambi una password, aggiornala anche qui.',
       'In "Amministratori" puoi aggiungere un\'altra persona che gestisce l\'area: riceve una password provvisoria.'],
   },
   {
     t: 'Email automatiche',
     p: ['Quando le email sono attive, il sito manda da solo:'],
-    li: ['le credenziali ai nuovi clienti;', 'l\'avviso di nuovo intervento con le foto, se spunti "Avvisa il cliente via email";', 'il promemoria degli anodi alla data scelta;', 'il promemoria della prossima pulizia;', 'l\'avviso di scadenza dell\'assicurazione, trenta giorni prima.'],
+    li: ['le credenziali ai nuovi clienti;', 'l\'avviso di nuovo intervento con le foto, se scegli Email o Entrambi;', 'il promemoria degli anodi alla data scelta;', 'il promemoria della prossima pulizia;', 'l\'avviso di scadenza dell\'assicurazione, trenta giorni prima.'],
     p2: ['Una copia dei promemoria arriva anche all\'email di Anfibiasub indicata nelle impostazioni.'],
   },
 ];

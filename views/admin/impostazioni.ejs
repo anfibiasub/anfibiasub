@@ -10,6 +10,7 @@
 <label class="field">Link webcam Loano (pulsante "Webcam" dei clienti)<input type="url" name="webcam_url" value="<%= s.webcam_url %>" required></label>
 <label class="field">Numero WhatsApp per le richieste (con prefisso, es. 393470119832)<input name="whatsapp" value="<%= s.whatsapp %>" required></label>
 <label class="field">Email che riceve i promemoria<input type="email" name="admin_email" value="<%= s.admin_email %>" required></label>
+<label class="field">Email che riceve il controllo mensile<input type="email" name="controllo_email" value="<%= s.controllo_email %>" required></label>
 <h2 style="margin-top:10px">Semafori (mesi)</h2>
 <div class="grid2">
 <label class="field">Pulizia: giallo dopo<input type="number" min="1" max="60" name="pulizia_giallo_mesi" value="<%= s.pulizia_giallo_mesi %>"></label>
@@ -35,6 +36,12 @@
 </tbody></table></div>
 <% } %>
 </section>
+<section class="panel stack" id="controllo">
+<h2>Controllo mensile</h2>
+<p class="hint">Il primo giorno di ogni mese il sito manda un riepilogo a <strong><%= s.controllo_email %></strong>: interventi, accessi dei clienti, email non riuscite. Così ci si accorge subito se qualcosa non va, e la chiave di Brevo resta sempre attiva (scade dopo 90 giorni senza invii).</p>
+<p class="hint">Ultimo invio: <%= s.controllo_mese || 'mai' %></p>
+<% if (mailOn) { %><form method="post" action="/admin/impostazioni/controllo"><button class="btn btn-ghost" type="submit">Mandalo adesso</button></form><% } %>
+</section>
 <section class="panel stack">
 <h2>Amministratori</h2>
 <% for (const a of admins) { %><div class="row-kv"><span><%= a.name || a.email %></span><span class="hint"><%= a.email %></span></div><% } %>
@@ -43,5 +50,45 @@
 </section>
 </div>
 </div>
+
+<section class="panel stack" id="accessi" style="margin-top:22px">
+<div class="panel-head"><h2>Accessi</h2><span class="hint">Tutti i siti e le password che servono per gestire il sito. Le vedono solo gli amministratori; nel database sono cifrate.</span></div>
+<div class="acc-list">
+<% for (const a of acc) { %>
+<div class="acc">
+<h3><%= a.servizio %></h3>
+<% if (a.url) { %><div class="acc-row"><span>Sito</span><code><a href="<%= a.url %>" target="_blank" rel="noopener noreferrer"><%= a.url.replace(/^https?:\/\//, '') %></a></code></div><% } %>
+<% if (a.utente) { %><div class="acc-row"><span>Utente</span><input id="u<%= a.id %>" value="<%= a.utente %>" readonly><button class="linkbtn" type="button" data-copytext="u<%= a.id %>">Copia</button></div><% } %>
+<% if (a.password) { %><div class="acc-row"><span>Password</span><input id="p<%= a.id %>" type="password" value="<%= a.password %>" readonly><button class="linkbtn" type="button" data-reveal="p<%= a.id %>">Mostra</button><button class="linkbtn" type="button" data-copytext="p<%= a.id %>">Copia</button></div>
+<% } else if (a.broken) { %><p class="warn">Password non leggibile (è cambiata SESSION_SECRET su Railway): reinseriscila.</p>
+<% } else { %><p class="warn">Password non ancora inserita.</p><% } %>
+<% if (a.note) { %><p class="hint" style="margin:0"><%= a.note %></p><% } %>
+<p class="hint" style="margin:0;font-size:12px">Modificato da <%= a.updated_by || '—' %> il <%= new Date(a.updated_at).toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' }) %></p>
+<details class="edit"><summary>Modifica</summary>
+<form class="stack" method="post" action="/admin/accessi">
+<input type="hidden" name="id" value="<%= a.id %>">
+<label class="field">Servizio<input name="servizio" value="<%= a.servizio %>" required></label>
+<label class="field">Indirizzo del sito<input name="url" value="<%= a.url %>"></label>
+<label class="field">Utente / email<input name="utente" value="<%= a.utente %>" autocomplete="off"></label>
+<label class="field">Password<input name="password" value="<%= a.password %>" autocomplete="off"></label>
+<label class="field">Note<textarea name="note"><%= a.note %></textarea></label>
+<button class="btn" type="submit" style="align-self:flex-start">Salva</button>
+</form>
+<form method="post" action="/admin/accessi/<%= a.id %>/elimina" data-confirm="Eliminare l'accesso <%= a.servizio %>?" style="margin-top:10px"><button class="danger">Elimina</button></form>
+</details>
+</div>
+<% } %>
+</div>
+<details class="edit"><summary>Aggiungi un accesso</summary>
+<form class="stack" method="post" action="/admin/accessi" style="max-width:520px">
+<label class="field">Servizio<input name="servizio" placeholder="es. Google Business" required></label>
+<label class="field">Indirizzo del sito<input name="url" placeholder="https://..."></label>
+<label class="field">Utente / email<input name="utente" autocomplete="off"></label>
+<label class="field">Password<input name="password" autocomplete="off"></label>
+<label class="field">Note<textarea name="note"></textarea></label>
+<button class="btn" type="submit" style="align-self:flex-start">Aggiungi</button>
+</form>
+</details>
+</section>
 </main>
 <%- include('../partials/bottom') %>

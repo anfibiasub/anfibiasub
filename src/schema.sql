@@ -161,3 +161,16 @@ CREATE TABLE IF NOT EXISTS abyss_partite (
 );
 CREATE INDEX IF NOT EXISTS abyss_partite_started ON abyss_partite(started_at);
 ALTER TABLE abyss_feedback ADD COLUMN IF NOT EXISTS partita TEXT;
+
+-- Accessi: siti e password per gestire il sito (password cifrate dall'applicazione)
+CREATE TABLE IF NOT EXISTS accessi (
+  id           SERIAL PRIMARY KEY,
+  servizio     TEXT NOT NULL,
+  url          TEXT NOT NULL DEFAULT '',
+  utente       TEXT NOT NULL DEFAULT '',
+  password_enc TEXT NOT NULL DEFAULT '',
+  note         TEXT NOT NULL DEFAULT '',
+  ordine       INT NOT NULL DEFAULT 0,
+  updated_by   TEXT NOT NULL DEFAULT '',
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);

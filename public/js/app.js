@@ -22,6 +22,25 @@
     });
   });
 
+  // Accessi: mostra/nascondi password e copia testo
+  document.querySelectorAll('[data-reveal]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var i = document.getElementById(b.getAttribute('data-reveal'));
+      var show = i.type === 'password';
+      i.type = show ? 'text' : 'password';
+      b.textContent = show ? 'Nascondi' : 'Mostra';
+    });
+  });
+  document.querySelectorAll('[data-copytext]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var el = document.getElementById(b.getAttribute('data-copytext'));
+      var v = el.value !== undefined ? el.value : el.textContent;
+      var done = function () { var t = b.textContent; b.textContent = 'Copiato'; setTimeout(function () { b.textContent = t; }, 1500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(v).then(done, function () { prompt('', v); });
+      else prompt('', v);
+    });
+  });
+
   // Condividi: menu di condivisione del telefono, altrimenti WhatsApp con il link
   document.querySelectorAll('[data-share]').forEach(function (a) {
     var url = abs(a.getAttribute('data-url'));

@@ -7,11 +7,10 @@
 <div class="field">Indirizzo<div class="cred"><%= loginUrl %></div></div>
 <div class="field">Email<div class="cred"><%= u.email %></div></div>
 <div class="field">Password provvisoria<div class="cred"><%= pw %></div></div>
-<% if (mailed) { %><div class="msg ok">Credenziali inviate via email a <%= u.email %>.</div>
-<% } else { %><p class="hint">Mandale al cliente su WhatsApp:</p>
-<% let dg = (u.phone || '').replace(/\D/g, ''); if (dg.length === 10 && dg[0] === '3') dg = '39' + dg; %>
-<a class="btn btn-wa" style="align-self:flex-start" href="https://wa.me/<%= dg %>?text=<%= encodeURIComponent(fill(tr(u.lang).wa_cred, { url: loginUrl, email: u.email, pw })) %>" target="_blank" rel="noopener">Invia su WhatsApp</a>
-<% } %>
+<% if (mailed) { %><div class="msg ok">Credenziali inviate via email a <%= u.email %>.</div><% } %>
+<% if (wa) { %><p class="hint"><%= mailed ? 'Puoi mandarle anche su WhatsApp:' : 'Mandale al cliente su WhatsApp:' %></p>
+<a class="btn btn-wa" style="align-self:flex-start" href="<%= wa %>" target="_blank" rel="noopener">Invia su WhatsApp</a>
+<% } else if (!mailed) { %><p class="hint">Il cliente non ha un cellulare salvato: copia i dati qui sopra e mandaglieli come preferisci.</p><% } %>
 </div>
 <p style="margin-top:22px"><a class="btn" href="<%= boatId ? '/admin/barca/' + boatId : '/admin' %>">Vai alla barca →</a></p>
 </main>

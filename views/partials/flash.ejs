@@ -1,1 +1,1 @@
-<% if (flash) { %><div class="msg <%= flash.type === 'ok' ? 'ok' : 'err' %>" role="status"><%= flash.msg %></div><% } %>
+<% if (flash) { %><div class="msg <%= flash.type === 'ok' ? 'ok' : 'err' %>" role="status"><%= flash.msg %><% if (flash.wa) { %><p style="margin:12px 0 0"><a class="btn btn-wa" href="<%= flash.wa %>" target="_blank" rel="noopener">Invia su WhatsApp</a></p><% } %></div><% } %>

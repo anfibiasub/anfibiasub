@@ -195,3 +195,18 @@ details.edit[open] summary{margin-bottom:14px}
 .login-art > img{object-position:58% 50%}
 @media (min-width:900px){.login-art::before{background:linear-gradient(90deg,rgba(5,14,26,.88) 0,rgba(5,14,26,.6) 38%,rgba(5,14,26,.15) 75%,rgba(5,14,26,.05) 100%)}}
 *{hyphens:manual!important;-webkit-hyphens:manual!important}p,li{text-wrap:pretty}
+/* Avviso cliente (email / WhatsApp) e pannello Accessi */
+fieldset.avvisa{border:0;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:8px}
+fieldset.avvisa legend{font-size:13px;color:var(--muted);margin-bottom:8px;padding:0}
+.choice:has(input:disabled){opacity:.45;cursor:not-allowed}
+.btn-sm{padding:8px 14px;font-size:13px;min-height:0}
+.btn.btn-wa{background:#25D366;color:#06331A}
+.btn.btn-wa:hover{background:#3BE07A;color:#06331A}
+.acc-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.acc{border:1px solid var(--line2);border-radius:14px;background:var(--card2);padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.acc h3{margin:0;font-size:16px;color:#fff}
+.acc-row{display:flex;gap:8px;align-items:center;min-width:0}
+.acc-row span{font-size:12px;color:var(--muted);width:62px;flex:none}
+.acc-row code,.acc-row input{flex:1;min-width:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;color:#fff;background:#081A2C;border:1px solid var(--field);border-radius:8px;padding:7px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc-row button{flex:none}
+.acc .warn{color:#FFC75A;font-size:13px}

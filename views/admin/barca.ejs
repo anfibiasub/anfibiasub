@@ -34,7 +34,14 @@
 <datalist id="tipi"><option value="Carena + eliche"><option value="Pulizia eliche"><option value="Pulizia carena"><option value="Ispezione video"><option value="Sostituzione anodi"></datalist>
 <label class="field">Foto (anche molte insieme, dal telefono)<input type="file" name="foto" accept="image/*" multiple></label>
 <label class="field">Note per il cliente<textarea name="note"></textarea></label>
-<label class="choice" style="align-self:flex-start"><input type="checkbox" name="notifica" value="1" checked>Avvisa il cliente via email</label>
+<fieldset class="avvisa"><legend>Avvisa il cliente</legend>
+<% const def = hasPhone ? (mailOn ? 'entrambi' : 'wa') : (mailOn ? 'email' : ''); %>
+<label class="choice"><input type="radio" name="avvisa" value="email"<%= def === 'email' ? ' checked' : '' %><%= mailOn ? '' : ' disabled' %>>Email</label>
+<label class="choice"><input type="radio" name="avvisa" value="wa"<%= def === 'wa' ? ' checked' : '' %><%= hasPhone ? '' : ' disabled' %>>WhatsApp</label>
+<label class="choice"><input type="radio" name="avvisa" value="entrambi"<%= def === 'entrambi' ? ' checked' : '' %><%= hasPhone && mailOn ? '' : ' disabled' %>>Entrambi</label>
+<label class="choice"><input type="radio" name="avvisa" value=""<%= def === '' ? ' checked' : '' %>>Nessuno</label>
+</fieldset>
+<% if (!hasPhone) { %><p class="hint">WhatsApp non disponibile: il cliente non ha un cellulare. Aggiungilo nella scheda <a href="?tab=cliente">Cliente</a>.</p><% } %>
 <button class="btn" type="submit" style="align-self:flex-start">Salva intervento</button>
 <p class="hint">Le foto vengono ridotte automaticamente: puoi caricarle così come escono dal telefono.</p>
 </form>
@@ -59,7 +66,7 @@
 </form>
 <form method="post" action="/admin/pulizia/<%= c.id %>/elimina" data-confirm="Eliminare l'intervento e tutte le sue foto?" style="margin-top:12px"><button class="danger">Elimina intervento</button></form>
 </details>
-<p class="hint" style="margin-top:6px;font-size:12px">Link pubblico per WhatsApp: <a href="/area/condividi/<%= c.share_token %>" target="_blank" rel="noopener">apri</a></p>
+<p class="hint" style="margin-top:8px;font-size:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><% if (c.wa) { %><a class="btn btn-wa btn-sm" href="<%= c.wa %>" target="_blank" rel="noopener">Manda al cliente su WhatsApp</a><% } %><span>Link pubblico delle foto: <a href="/area/condividi/<%= c.share_token %>" target="_blank" rel="noopener">apri</a></span></p>
 </div>
 <% } %>
 </section>
@@ -118,9 +125,9 @@
 <div class="stack">
 <section class="panel stack">
 <h2>Password</h2>
-<p class="hint">Genera una nuova password provvisoria: al primo accesso il cliente ne sceglie una sua.</p>
+<p class="hint">Genera una nuova password provvisoria: al primo accesso il cliente ne sceglie una sua. Nella pagina successiva c'è il pulsante per mandarla su WhatsApp.</p>
 <form method="post" action="/admin/cliente/<%= owner.id %>/password" class="chips-sm" data-confirm="Generare una nuova password? Quella attuale smetterà di funzionare.">
-<label class="choice"><input type="checkbox" name="invia" value="1"<%= mailOn ? ' checked' : ' disabled' %>>Invia via email</label>
+<label class="choice"><input type="checkbox" name="invia" value="1"<%= mailOn ? ' checked' : ' disabled' %>>Invia anche via email</label>
 <button class="btn" type="submit">Nuova password</button>
 </form>
 </section>
