@@ -28,12 +28,13 @@ function layout(title, paragraphs, button, lang = 'it') {
 // "a@x.it; b@y.it" -> ['a@x.it', 'b@y.it'] (anche con la virgola)
 const splitMails = (s) => String(s || '').split(/[;,\s]+/).map((x) => x.trim()).filter((x) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x));
 
-async function send(to, subject, html) {
+// attachments: [{ name: 'file.xlsx', content: Buffer }]
+async function send(to, subject, html, attachments = []) {
   const list = splitMails(to);
   if (!list.length) return false;
   to = list.join('; ');
   if (process.env.MAIL_DRY === '1') { // solo per le prove in locale: non invia, registra nel log
-    await q('INSERT INTO mail_log(to_email, subject, ok, info) VALUES ($1,$2,true,$3)', [to, subject, 'DRY ' + html.slice(0, 2000)]);
+    await q('INSERT INTO mail_log(to_email, subject, ok, info) VALUES ($1,$2,true,$3)', [to, subject, 'DRY ' + (attachments.length ? `[allegati: ${attachments.map((a) => a.name).join(', ')}] ` : '') + html.slice(0, 2000)]);
     return true;
   }
   if (!enabled()) {
@@ -50,6 +51,7 @@ async function send(to, subject, html) {
         to: list.map((email) => ({ email })),
         subject,
         htmlContent: html,
+        ...(attachments.length ? { attachment: attachments.map((a) => ({ name: a.name, content: a.content.toString('base64') })) } : {}),
       }),
     });
     const info = res.ok ? 'ok' : `HTTP ${res.status} ${(await res.text()).slice(0, 300)}`;

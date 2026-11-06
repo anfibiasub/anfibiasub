@@ -267,6 +267,15 @@ r.post('/impostazioni/controllo', async (req, res) => {
   res.redirect('/admin/impostazioni#controllo');
 });
 
+// ---------- esportazione Excel di tutto l'archivio ----------
+r.get('/export.xlsx', async (req, res) => {
+  const x = await require('../export').buildExcel();
+  res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.set('Content-Disposition', `attachment; filename="${x.filename}"`);
+  res.set('Cache-Control', 'no-store');
+  res.send(x.buffer);
+});
+
 // ---------- accessi (siti e password del sito) ----------
 r.post('/accessi', async (req, res) => {
   const v = { servizio: clip(req.body.servizio, 80), url: clip(req.body.url, 300), utente: clip(req.body.utente, 200), password: clip(req.body.password, 300), note: clip(req.body.note, 1000) };

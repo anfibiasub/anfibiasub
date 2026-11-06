@@ -73,7 +73,16 @@ async function monthly(force) {
   ];
   if (errori.length) righe.push('<b>Email non riuscite</b><br>' + errori.map((e) => `${esc(new Date(e.created_at).toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' }))} · ${esc(e.to_email)} · ${esc(e.info)}`).join('<br>'));
   if (n.senza_pw) righe.push(`Nel pannello Accessi ci sono ${n.senza_pw} voci senza password: completale finché te le ricordi.`);
-  const ok = await send(to, `Controllo mensile sito Anfibiasub · ${mese}`, layout('Controllo mensile', righe, { label: 'Apri la gestione', url: appUrl() + '/admin/impostazioni' }));
+  // backup: tutto l'archivio in Excel, allegato
+  const attachments = [];
+  try {
+    const x = await require('./export').buildExcel();
+    attachments.push({ name: x.filename, content: x.buffer });
+    righe.push(`<b>Backup</b><br>In allegato <b>${esc(x.filename)}</b>: tutti i clienti, le barche, gli interventi e gli anodi in Excel. Conservalo: se un giorno servisse, da lì si recupera tutto (le foto restano nel sito).`);
+  } catch (e) {
+    righe.push(`<b>Backup</b><br>Questo mese l'Excel non è stato creato (${esc(e.message)}): scaricalo a mano dalla gestione.`);
+  }
+  const ok = await send(to, `Controllo mensile sito Anfibiasub · ${mese}`, layout('Controllo mensile', righe, { label: 'Apri la gestione', url: appUrl() + '/admin/impostazioni' }), attachments);
   if (ok) await q("INSERT INTO settings(key,value) VALUES ('controllo_mese',$1) ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value", [mese]);
   return ok;
 }

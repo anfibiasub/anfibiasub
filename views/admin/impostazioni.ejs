@@ -37,10 +37,11 @@
 <% } %>
 </section>
 <section class="panel stack" id="controllo">
-<h2>Controllo mensile</h2>
+<h2>Controllo mensile e backup</h2>
 <p class="hint">Il primo giorno di ogni mese il sito manda un riepilogo a <strong><%= s.controllo_email %></strong>: interventi, accessi dei clienti, email non riuscite. Così ci si accorge subito se qualcosa non va, e la chiave di Brevo resta sempre attiva (scade dopo 90 giorni senza invii).</p>
+<p class="hint">In allegato c'è sempre l'<strong>Excel con tutto l'archivio</strong> (clienti, barche, interventi, anodi, richieste): è il backup mensile. Le foto restano nel sito.</p>
 <p class="hint">Ultimo invio: <%= s.controllo_mese || 'mai' %></p>
-<% if (mailOn) { %><form method="post" action="/admin/impostazioni/controllo"><button class="btn btn-ghost" type="submit">Mandalo adesso</button></form><% } %>
+<div style="display:flex;gap:10px;flex-wrap:wrap"><% if (mailOn) { %><form method="post" action="/admin/impostazioni/controllo"><button class="btn btn-ghost" type="submit">Mandalo adesso</button></form><% } %><a class="btn btn-ghost" href="/admin/export.xlsx" download>Scarica Excel</a></div>
 </section>
 <section class="panel stack">
 <h2>Amministratori</h2>
