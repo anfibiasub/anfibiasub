@@ -210,3 +210,13 @@ fieldset.avvisa legend{font-size:13px;color:var(--muted);margin-bottom:8px;paddi
 .acc-row code,.acc-row input{flex:1;min-width:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;color:#fff;background:#081A2C;border:1px solid var(--field);border-radius:8px;padding:7px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .acc-row button{flex:none}
 .acc .warn{color:#FFC75A;font-size:13px}
+/* Impostazioni: tutto a sinistra, a destra solo il registro email (alto quanto la colonna di sinistra, poi scorre) */
+.tiles.set-grid{align-items:stretch}
+.mail-col{position:relative;min-height:360px}
+.mail-panel{position:absolute;inset:0;display:flex;flex-direction:column}
+.mail-scroll{flex:1;min-height:0;overflow:auto;margin:0 -8px;padding:0 8px}
+.mail-scroll .tbl{font-size:13px}
+.mail-scroll .tbl th{position:sticky;top:0;background:#0C1F33;z-index:1}
+.mail-scroll .tbl td{padding:10px 8px;vertical-align:top;overflow-wrap:anywhere}
+.set-grid #accessi .acc-list{grid-template-columns:1fr}
+@media (max-width:960px){.mail-col{min-height:0}.mail-panel{position:static}.mail-scroll{max-height:520px}}

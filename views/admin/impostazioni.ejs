@@ -4,7 +4,8 @@
 <%- include('../partials/flash') %>
 <p class="eyebrow">Gestione</p>
 <h1 class="h2" style="font-size:36px;margin-bottom:24px">Impostazioni</h1>
-<div class="tiles cols2">
+<div class="tiles cols2 set-grid">
+<div class="stack">
 <form class="panel stack" method="post" action="/admin/impostazioni">
 <h2>Area clienti</h2>
 <label class="field">Link webcam Loano (pulsante "Webcam" dei clienti)<input type="url" name="webcam_url" value="<%= s.webcam_url %>" required></label>
@@ -20,22 +21,6 @@
 </div>
 <button class="btn" type="submit" style="align-self:flex-start">Salva</button>
 </form>
-<div class="stack">
-<section class="panel stack">
-<h2>Email automatiche</h2>
-<% if (mailOn) { %>
-<p class="dot" style="color:#6EE08F">● Attive</p>
-<form method="post" action="/admin/impostazioni/test-email"><button class="btn btn-ghost" type="submit">Manda un'email di prova a me</button></form>
-<% } else { %>
-<p class="dot" style="color:#FFC75A">● Non ancora attive</p>
-<p class="hint">Servono le variabili BREVO_API_KEY e MAIL_FROM su Railway (vedi la guida). Finché mancano, il sito funziona ma le email non partono.</p>
-<% } %>
-<% if (mails.length) { %>
-<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Quando</th><th>A</th><th>Oggetto</th><th>Esito</th></tr></thead><tbody>
-<% for (const m of mails) { %><tr><td class="hint"><%= new Date(m.created_at).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) %></td><td><%= m.to_email %></td><td><%= m.subject %></td><td style="color:<%= m.ok ? '#6EE08F' : '#FFC75A' %>"><%= m.ok ? 'inviata' : m.info %></td></tr><% } %>
-</tbody></table></div>
-<% } %>
-</section>
 <section class="panel stack" id="controllo">
 <h2>Controllo mensile e backup</h2>
 <p class="hint">Il primo giorno di ogni mese il sito manda un riepilogo a <strong><%= s.controllo_email %></strong>: interventi, accessi dei clienti, email non riuscite. Così ci si accorge subito se qualcosa non va, e la chiave di Brevo resta sempre attiva (scade dopo 90 giorni senza invii).</p>
@@ -49,10 +34,7 @@
 <% if (adminPw) { %><div class="msg ok">Creato <%= adminPw.email %>. Password provvisoria: <span class="cred" style="display:inline-block;font-size:16px;padding:4px 10px"><%= adminPw.pw %></span></div><% } %>
 <form method="post" action="/admin/impostazioni/admin" class="search"><input name="name" placeholder="Nome" required><input type="email" name="email" placeholder="Email" required><button class="btn btn-ghost" type="submit">Aggiungi</button></form>
 </section>
-</div>
-</div>
-
-<section class="panel stack" id="accessi" style="margin-top:22px">
+<section class="panel stack" id="accessi">
 <div class="panel-head"><h2>Accessi</h2><span class="hint">Tutti i siti e le password che servono per gestire il sito. Le vedono solo gli amministratori; nel database sono cifrate.</span></div>
 <div class="acc-list">
 <% for (const a of acc) { %>
@@ -91,5 +73,24 @@
 </form>
 </details>
 </section>
+</div>
+<div class="mail-col">
+<section class="panel stack mail-panel">
+<h2>Email automatiche</h2>
+<% if (mailOn) { %>
+<p class="dot" style="color:#6EE08F">● Attive</p>
+<form method="post" action="/admin/impostazioni/test-email"><button class="btn btn-ghost" type="submit">Manda un'email di prova a me</button></form>
+<% } else { %>
+<p class="dot" style="color:#FFC75A">● Non ancora attive</p>
+<p class="hint">Servono le variabili BREVO_API_KEY e MAIL_FROM su Railway (vedi la guida). Finché mancano, il sito funziona ma le email non partono.</p>
+<% } %>
+<% if (mails.length) { %>
+<div class="mail-scroll"><table class="tbl"><thead><tr><th>Quando</th><th>A</th><th>Oggetto</th><th>Esito</th></tr></thead><tbody>
+<% for (const m of mails) { %><tr><td class="hint"><%= new Date(m.created_at).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) %></td><td><%= m.to_email %></td><td><%= m.subject %></td><td style="color:<%= m.ok ? '#6EE08F' : '#FFC75A' %>"><%= m.ok ? 'inviata' : m.info %></td></tr><% } %>
+</tbody></table></div>
+<% } %>
+</section>
+</div>
+</div>
 </main>
 <%- include('../partials/bottom') %>
