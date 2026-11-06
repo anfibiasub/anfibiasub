@@ -50,11 +50,15 @@
 <section class="panel stack">
 <h2>Storico (<%= d.cleanings.length %>)</h2>
 <% if (!d.cleanings.length) { %><p class="hint">Nessun intervento registrato.</p><% } %>
-<% for (const c of d.cleanings) { %>
+<% const SHOW_JOBS = 10, SHOW_PH = 8; %>
+<% d.cleanings.forEach((c, ci) => { %>
+<% if (ci === SHOW_JOBS) { %><details class="edit more-jobs"><summary>Mostra interventi precedenti (<%= d.cleanings.length - SHOW_JOBS %>)</summary><% } %>
 <div class="hist" id="pulizia-<%= c.id %>">
 <div class="panel-head" style="margin-bottom:8px"><strong style="color:#fff"><%= fmtDate(c.data) %> · <%= c.tipo || 'Pulizia' %></strong><span class="hint"><%= c.photos.length %> foto<%= c.notified ? ' · email inviata' : '' %></span></div>
 <% if (c.photos.length) { %>
-<div class="gallery"><% for (const p of c.photos) { %><figure><a href="/area/foto/<%= p %>" target="_blank" rel="noopener"><img src="/area/foto/<%= p %>?t=1" alt=""></a><form method="post" action="/admin/foto/<%= p %>/elimina" data-confirm="Eliminare questa foto?"><button class="linkbtn" style="margin-top:6px;font-size:12px;padding:4px 10px">Elimina</button></form></figure><% } %></div>
+<% const fig = (p) => `<figure><a href="/area/foto/${p}" target="_blank" rel="noopener"><img src="/area/foto/${p}?t=1" alt="" loading="lazy" decoding="async"></a><form method="post" action="/admin/foto/${p}/elimina" data-confirm="Eliminare questa foto?"><button class="linkbtn" style="margin-top:6px;font-size:12px;padding:4px 10px">Elimina</button></form></figure>`; %>
+<div class="gallery"><%- c.photos.slice(0, SHOW_PH).map(fig).join('') %></div>
+<% if (c.photos.length > SHOW_PH) { %><details class="edit more-photos"><summary>Mostra tutte le <%= c.photos.length %> foto</summary><div class="gallery"><%- c.photos.slice(SHOW_PH).map(fig).join('') %></div></details><% } %>
 <% } %>
 <% if (c.note) { %><p class="hint" style="margin-top:8px"><%= c.note %></p><% } %>
 <details class="edit"><summary>Modifica o aggiungi foto</summary>
@@ -68,7 +72,8 @@
 </details>
 <p class="hint" style="margin-top:8px;font-size:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><% if (c.wa) { %><a class="btn btn-wa btn-sm" href="<%= c.wa %>" target="_blank" rel="noopener">Manda al cliente su WhatsApp</a><% } %><span>Link pubblico delle foto: <a href="/area/condividi/<%= c.share_token %>" target="_blank" rel="noopener">apri</a></span></p>
 </div>
-<% } %>
+<% }) %>
+<% if (d.cleanings.length > SHOW_JOBS) { %></details><% } %>
 </section>
 </div>
 <% } %>
@@ -82,14 +87,14 @@
 <% if (!d.anodes.length) { %><p class="hint">Nessun anodo registrato.</p><% } %>
 <% for (const a of d.anodes) { %>
 <div class="anode" id="anodo-<%= a.id %>">
-<% if (a.photos.length) { %><img class="anode-img" src="/area/foto/<%= a.photos[0] %>?t=1" alt=""><% } else { %><span class="anode-ph">Nessuna foto</span><% } %>
+<% if (a.photos.length) { %><img class="anode-img" src="/area/foto/<%= a.photos[0] %>?t=1" alt="" loading="lazy" decoding="async"><% } else { %><span class="anode-ph">Nessuna foto</span><% } %>
 <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
 <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><strong style="color:#fff"><%= a.posizione %></strong><span class="dot" style="color:<%= COLORS[a.status] %>;font-size:13px">● <%= S[a.status] %></span></div>
 <span class="hint"><%= [a.codice ? 'Cod. ' + a.codice : '', a.dati].filter(Boolean).join(' · ') %></span>
 <span class="hint">Montato <%= a.data_montaggio ? fmtDate(a.data_montaggio) : '—' %> · Avviso <%= a.data_alert ? fmtDate(a.data_alert) : '—' %><%= a.alert_sent ? ' (inviato)' : '' %> · ultima modifica: <%= a.updated_by === 'anfibiasub' ? 'Anfibiasub' : 'cliente' %></span>
 <details class="edit"><summary>Modifica</summary>
 <%- include('../partials/anodeform', { a, action: '/admin/anodi/' + a.id }) %>
-<% if (a.photos.length) { %><div class="gallery" style="margin-top:12px"><% for (const p of a.photos) { %><figure><img src="/area/foto/<%= p %>?t=1" alt=""><form method="post" action="/admin/foto/<%= p %>/elimina" data-confirm="Eliminare questa foto?"><button class="linkbtn" style="margin-top:6px;font-size:12px;padding:4px 10px">Elimina</button></form></figure><% } %></div><% } %>
+<% if (a.photos.length) { %><div class="gallery" style="margin-top:12px"><% for (const p of a.photos) { %><figure><img src="/area/foto/<%= p %>?t=1" alt="" loading="lazy" decoding="async"><form method="post" action="/admin/foto/<%= p %>/elimina" data-confirm="Eliminare questa foto?"><button class="linkbtn" style="margin-top:6px;font-size:12px;padding:4px 10px">Elimina</button></form></figure><% } %></div><% } %>
 <form method="post" action="/admin/anodi/<%= a.id %>/elimina" data-confirm="Eliminare questo anodo?" style="margin-top:12px"><button class="danger">Elimina anodo</button></form>
 </details>
 </div>

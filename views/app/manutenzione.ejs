@@ -1,5 +1,6 @@
 <%- include('../partials/top', { title: L.maintenance }) %>
 <% const b = d.boat; const S = { ok: L.st_ok, warn: L.st_warn, bad: L.st_bad, none: L.st_none }; const host = (typeof shareBase !== 'undefined' ? shareBase : ''); %>
+<% const SHOW_PH = 8, SHOW_JOBS = 10; const ph = (p, i) => `<a href="/area/foto/${p}" target="_blank" rel="noopener"><img src="/area/foto/${p}?t=1" alt="${L.photo_n} ${i + 1}" loading="lazy" decoding="async"></a>`; %>
 <main class="app-main" id="main">
 <%- include('../partials/boatpicker') %>
 <%- include('../partials/flash') %>
@@ -19,9 +20,8 @@
 <div>
 <div class="panel-head" style="margin-bottom:10px"><strong style="color:#fff;font-weight:600"><%= L.cleaning_photos %></strong><span class="hint"><%= L.by_anf %></span></div>
 <% if (d.last.photos.length) { %>
-<div class="gallery">
-<% d.last.photos.forEach((p, i) => { %><a href="/area/foto/<%= p %>" target="_blank" rel="noopener"><img src="/area/foto/<%= p %>?t=1" alt="<%= L.photo_n %> <%= i + 1 %>" loading="lazy"></a><% }) %>
-</div>
+<div class="gallery"><%- d.last.photos.slice(0, SHOW_PH).map(ph).join('') %></div>
+<% if (d.last.photos.length > SHOW_PH) { %><details class="edit more-photos"><summary><%= fill(L.show_all_photos, { n: d.last.photos.length }) %></summary><div class="gallery"><%- d.last.photos.slice(SHOW_PH).map((p, i) => ph(p, i + SHOW_PH)).join('') %></div></details><% } %>
 <% } else { %><p class="hint">—</p><% } %>
 <% if (d.last.note) { %><p class="hint" style="margin-top:10px"><%= d.last.note %></p><% } %>
 </div>
@@ -41,16 +41,18 @@
 <% if (d.cleanings.length > 1) { %>
 <div>
 <strong style="color:#fff;font-weight:600;display:block;margin-bottom:4px"><%= L.history %></strong>
-<% for (const c of d.cleanings.slice(1)) { %>
+<% d.cleanings.slice(1).forEach((c, ci) => { %>
+<% if (ci === SHOW_JOBS) { %><details class="edit more-jobs"><summary><%= L.older_jobs %> (<%= d.cleanings.length - 1 - SHOW_JOBS %>)</summary><% } %>
 <details class="hist edit">
 <summary><span style="color:var(--txt)"><%= fmtDate(c.data) %></span> · <span class="hint"><%= c.tipo || L.cleaning %> · <%= c.photos.length %> <%= L.photos %></span></summary>
-<% if (c.photos.length) { %><div class="gallery"><% c.photos.forEach((p, i) => { %><a href="/area/foto/<%= p %>" target="_blank" rel="noopener"><img src="/area/foto/<%= p %>?t=1" alt="<%= L.photo_n %> <%= i + 1 %>" loading="lazy"></a><% }) %></div><% } %>
+<% if (c.photos.length) { %><div class="gallery"><%- c.photos.map(ph).join('') %></div><% } %>
 <% if (c.note) { %><p class="hint" style="margin-top:8px"><%= c.note %></p><% } %>
 <div class="chips-sm" style="margin-top:10px">
 <a class="chip-sm" data-share href="https://wa.me/?text=<%= encodeURIComponent(b.nome + ' ' + fmtDate(c.data) + ': ') %>" data-url="/area/condividi/<%= c.share_token %>" data-title="<%= b.nome %>" target="_blank" rel="noopener"><%= L.share_wa %></a>
 </div>
 </details>
-<% } %>
+<% }) %>
+<% if (d.cleanings.length - 1 > SHOW_JOBS) { %></details><% } %>
 </div>
 <% } %>
 </section>
@@ -61,7 +63,7 @@
 <% if (!d.anodes.length) { %><p class="hint"><%= L.no_anodes %></p><% } %>
 <% for (const a of d.anodes) { %>
 <div class="anode" id="anodo-<%= a.id %>">
-<% if (a.photos.length) { %><a href="/area/foto/<%= a.photos[0] %>" target="_blank" rel="noopener"><img class="anode-img" src="/area/foto/<%= a.photos[0] %>?t=1" alt="<%= L.a_foto %> <%= a.posizione %>"></a><% } else { %><span class="anode-ph"><%= L.a_foto %></span><% } %>
+<% if (a.photos.length) { %><a href="/area/foto/<%= a.photos[0] %>" target="_blank" rel="noopener"><img class="anode-img" src="/area/foto/<%= a.photos[0] %>?t=1" alt="<%= L.a_foto %> <%= a.posizione %>" loading="lazy" decoding="async"></a><% } else { %><span class="anode-ph"><%= L.a_foto %></span><% } %>
 <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
 <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><strong style="color:#fff;font-weight:600"><%= a.posizione || '—' %></strong><span class="dot" style="color:<%= COLORS[a.status] %>;font-size:13px">● <%= S[a.status] %></span></div>
 <span class="hint"><%= [a.codice ? L.code + ' ' + a.codice : '', a.dati].filter(Boolean).join(' · ') %></span>
@@ -72,7 +74,7 @@
 <%- include('../partials/anodeform', { a, action: '/area/anodi/' + a.id }) %>
 <% if (a.photos.length > 1 || a.photos.length) { %>
 <div class="gallery" style="margin-top:12px">
-<% for (const p of a.photos) { %><figure><img src="/area/foto/<%= p %>?t=1" alt=""><form method="post" action="/area/foto/<%= p %>/elimina" data-confirm="<%= L.confirm_delete %>"><button class="linkbtn" style="margin-top:6px;font-size:12px;padding:4px 10px"><%= L.delete %></button></form></figure><% } %>
+<% for (const p of a.photos) { %><figure><img src="/area/foto/<%= p %>?t=1" alt="" loading="lazy" decoding="async"><form method="post" action="/area/foto/<%= p %>/elimina" data-confirm="<%= L.confirm_delete %>"><button class="linkbtn" style="margin-top:6px;font-size:12px;padding:4px 10px"><%= L.delete %></button></form></figure><% } %>
 </div>
 <% } %>
 <form method="post" action="/area/anodi/<%= a.id %>/elimina" data-confirm="<%= L.confirm_delete %>" style="margin-top:14px"><button class="danger" type="submit"><%= L.delete %></button></form>
