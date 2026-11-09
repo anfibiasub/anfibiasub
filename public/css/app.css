@@ -358,10 +358,10 @@ details.edit summary{display:inline-block;padding:6px 0;min-height:30px}
 }
 /* telefoni stretti: logo più piccolo così il tasto Menu resta sulla stessa riga */
 @media (max-width:400px){
-  .app-header .nav-row{flex-wrap:nowrap;gap:8px}
-  .app-header .logo{min-width:0;gap:8px}
+  .app-header .nav-row{flex-wrap:wrap;gap:0 8px}
+  .app-header .logo{flex:1 1 0;min-width:0;gap:8px;overflow:hidden}
   .app-header .logo-img{width:40px!important;height:40px!important}
-  .app-header .logo-name{font-size:17px;letter-spacing:.5px}
+  .app-header .logo-name{font-size:17px;letter-spacing:.5px;white-space:nowrap}
   .app-menu-btn{padding:8px 12px;gap:8px;flex:none}
   .btn-row>.btn,.btn-row button{font-size:14px;white-space:nowrap;padding-left:8px;padding-right:8px}
   .choices .choice{flex-direction:column;gap:6px;border-radius:14px;font-size:12.5px;padding:10px 3px;letter-spacing:0}
