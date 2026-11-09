@@ -99,6 +99,38 @@
     upd();
   });
 
+  // Menu da telefono: si apre e si chiude con il pulsante "Menu"
+  var mb = document.querySelector('[data-app-menu]'), mn = document.getElementById('app-nav');
+  if (mb && mn) {
+    mb.addEventListener('click', function () {
+      var open = !mn.classList.contains('open');
+      mn.classList.toggle('open', open);
+      mb.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && mn.classList.contains('open')) mb.click(); });
+  }
+
+  // Scelta foto: pulsante uguale agli altri e, sotto, quante foto sono state scelte
+  var LG = (document.documentElement.lang || 'it').slice(0, 2);
+  var FT = {
+    it: ['Scegli foto', '1 foto scelta', '{n} foto scelte'], en: ['Choose photos', '1 photo chosen', '{n} photos chosen'],
+    es: ['Elegir fotos', '1 foto elegida', '{n} fotos elegidas'], de: ['Fotos auswählen', '1 Foto ausgewählt', '{n} Fotos ausgewählt'],
+  }[LG] || ['Scegli foto', '1 foto scelta', '{n} foto scelte'];
+  document.querySelectorAll('input[type=file]').forEach(function (inp) {
+    var box = document.createElement('span'); box.className = 'file-pick';
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'btn btn-sm file-btn';
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2.5"/><circle cx="9" cy="11" r="2"/><path d="m21 17-5-5-8 8"/></svg><span></span>';
+    b.querySelector('span').textContent = FT[0];
+    var info = document.createElement('span'); info.className = 'file-info'; info.setAttribute('aria-live', 'polite');
+    inp.classList.add('file-hidden'); inp.tabIndex = -1;
+    inp.parentNode.insertBefore(box, inp.nextSibling); box.appendChild(b); box.appendChild(info);
+    b.addEventListener('click', function () { inp.click(); });
+    inp.addEventListener('change', function () {
+      var n = inp.files ? inp.files.length : 0;
+      info.textContent = n === 0 ? '' : n === 1 ? FT[1] : FT[2].replace('{n}', n);
+    });
+  });
+
   // Mappe (Leaflet + OpenStreetMap)
   if (window.L) {
     var LOANO = [44.1286, 8.2589];

@@ -1,0 +1,63 @@
+# Controllo automatico del sito a ogni push: telefono, tablet e PC, con Chrome e Safari (WebKit).
+# Se trova problemi il controllo fallisce e GitHub manda una mail; il resoconto con le schermate
+# si scarica dalla pagina "Actions" del repository (riquadro "Artifacts").
+name: Controllo sito
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  controllo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: prova
+          POSTGRES_DB: anf
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:prova@localhost:5432/anf
+      SESSION_SECRET: prova-prova-prova-prova-prova-prova
+      ADMIN_EMAIL: admin@prova.it
+      ADMIN_PASSWORD: prova1234
+      PORT: '3000'
+      TZ: Europe/Rome
+      MAIL_DRY: '1'
+      APP_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Playwright (solo per il controllo, non va sul server)
+        run: |
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium webkit
+      - name: Avvio del server
+        run: |
+          node server.js > server.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:3000/ > /dev/null && break; sleep 1; done
+      - name: Controllo
+        run: node test/controllo.js
+        env:
+          BASE: http://localhost:3000
+          MOTORI: chromium,webkit
+          SCHERMATE: '1'
+      - name: Resoconto
+        if: always()
+        run: |
+          cat test/risultati/resoconto.md >> "$GITHUB_STEP_SUMMARY" || true
+          echo '--- log del server ---'; tail -n 80 server.log || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resoconto-controllo
+          path: test/risultati
+          retention-days: 14

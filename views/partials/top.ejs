@@ -18,7 +18,8 @@
 <img class="logo-img" src="/img/logo-libero.png" alt="" width="52" height="52" style="width:52px;height:52px">
 <span class="logo-name">ANFIBIA<span class="hl">SUB</span></span><span class="app-tag"><%= admin ? 'GESTIONE' : L.area.toUpperCase() %></span>
 </a>
-<nav class="app-nav" aria-label="<%= L.area %>">
+<button class="btn app-menu-btn" type="button" aria-expanded="false" aria-controls="app-nav" data-app-menu><span class="am-ico" aria-hidden="true"><i></i><i></i><i></i></span><span>Menu</span></button>
+<nav class="app-nav" id="app-nav" aria-label="<%= L.area %>">
 <% if (admin) { %>
 <a href="/admin"<%- path === '/admin' || path.startsWith('/admin/barca') ? ' aria-current="page"' : '' %>>Clienti e barche</a>
 <a href="/admin/clienti/nuovo"<%- path === '/admin/clienti/nuovo' ? ' aria-current="page"' : '' %>>Nuovo cliente</a>

@@ -6,3 +6,6 @@ __pycache__/
 
 # immagini e video di lavoro per le IA (non vanno sul sito)
 video-ia/
+
+# resoconti del controllo automatico
+test/risultati/

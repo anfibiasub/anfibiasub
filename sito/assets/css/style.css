@@ -1002,3 +1002,17 @@ a.card:hover{transform:translateY(-4px);box-shadow:var(--r3d-sh-h);border-color:
   .dd-btn{font-size:13px}
   .nav-sos{margin-left:6px}
 }
+
+/* telefoni stretti (iPhone SE, 320-380 px): niente testi tagliati o parole spezzate in spagnolo e tedesco */
+@media (max-width:380px){
+  .q-tile{padding:0 4px;gap:3px}
+  .q-tile strong{white-space:normal;font-size:9.5px;line-height:1.05;text-align:center;letter-spacing:0;overflow-wrap:normal}
+  .q-tile svg{width:11px;height:11px;padding:4px}
+  .h2{font-size:25px}
+  h1,h2,h3{overflow-wrap:anywhere}
+  /* parole composte tedesche lunghissime (il sito non usa i trattini): titoli un po' più piccoli */
+  html[lang=de] h2,html[lang=de] .h2{font-size:21px}
+}
+@media (max-width:1023px){
+  .sch-btn{min-height:28px}
+}

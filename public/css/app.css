@@ -126,9 +126,6 @@ details.edit[open] summary{margin-bottom:14px}
   .login-art{min-height:300px}
   .login-art .in{padding:32px 24px}
   .login-form{padding:36px 24px;border-left:0}
-  .app-header .nav-row{flex-wrap:wrap;row-gap:10px}
-  .app-nav{gap:18px;width:100%;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;white-space:nowrap}
-  .app-nav form{margin-left:auto}
 }
 @media (max-width:640px){
   .app-main{padding:28px 16px 70px}
@@ -298,3 +295,49 @@ fieldset.avvisa legend{font-size:13px;color:var(--muted);margin-bottom:8px;paddi
   .pd-tools-btns{gap:6px}
   .pd-tools-btns button{font-size:12px;padding:8px 6px}
 }
+
+/* telefoni stretti: schede dello storico, titoli, pulsanti da toccare */
+details.edit summary{display:inline-block;padding:6px 0;min-height:30px}
+@media (max-width:400px){
+  .app-main h1.h2{font-size:28px !important;overflow-wrap:anywhere}
+  .job-card{gap:8px;padding:8px}
+  .job-thumbs{gap:4px}
+  .job-th{width:46px;height:46px}
+  .job-th em{font-size:8px;letter-spacing:.04em}
+  .job-info strong{font-size:14px;white-space:nowrap}
+  .job-info span{font-size:12px}
+  .pd-check{width:18px;height:18px;top:4px;left:4px}
+  .pd-pick input:checked ~ .pd-check::after{font-size:11px}
+  .pd-zoom{width:20px;height:20px;top:4px;right:4px;font-size:12px}
+  .pd-star{left:4px;bottom:4px;font-size:13px}
+}
+
+/* menu dell'area clienti e della gestione: da PC in riga; da telefono e tablet verticale un pulsante "Menu"
+   che apre tutte le voci come pulsanti (niente barra da scorrere) */
+.app-menu-btn{display:none}
+@media (max-width:1023px){
+  .app-header .nav-row{flex-wrap:wrap;row-gap:0;align-items:center}
+  .app-menu-btn{display:inline-flex;margin-left:auto;padding:8px 16px;min-height:44px;font-size:14px;gap:10px}
+  .am-ico{display:inline-flex;flex-direction:column;justify-content:center;gap:4px;width:18px}
+  .am-ico i{display:block;height:2px;border-radius:2px;background:currentColor;transition:transform .2s,opacity .2s}
+  .app-menu-btn[aria-expanded=true] .am-ico i:nth-child(1){transform:translateY(6px) rotate(45deg)}
+  .app-menu-btn[aria-expanded=true] .am-ico i:nth-child(2){opacity:0}
+  .app-menu-btn[aria-expanded=true] .am-ico i:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+  .app-nav{display:none;width:100%;grid-template-columns:1fr 1fr;gap:8px;padding:14px 0 4px;font-size:14px}
+  .app-nav.open{display:grid}
+  .app-nav a,.app-nav form .linkbtn{display:flex;align-items:center;justify-content:center;text-align:center;min-height:46px;padding:8px 10px;border-radius:24px;
+    background:linear-gradient(180deg,#14507E,#0B2F4E);border:1px solid rgba(60,198,245,.35);color:#fff;font-weight:600;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 3px 0 #061a2c,0 6px 12px rgba(0,0,0,.35)}
+  .app-nav a[aria-current=page]{background:linear-gradient(180deg,#2BB8EE,#1689C0);color:#03263F;border-color:#7FDCFF}
+  .app-nav form{grid-column:1 / -1}
+  .app-nav form .linkbtn{width:100%;font-size:14px;background:none;box-shadow:none;border-color:var(--field)}
+  .app-tag{display:none}
+}
+
+/* scelta delle foto: pulsante come gli altri del sito al posto di "Scegli file / Nessun file selezionato" */
+.file-hidden{position:absolute!important;width:1px!important;height:1px!important;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
+.file-pick{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.file-btn{gap:8px}
+.file-btn svg{width:18px;height:18px}
+.file-info{font-size:13px;color:#6EE08F}
+.file-info:empty{display:none}

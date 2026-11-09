@@ -381,9 +381,17 @@ window.addEventListener('load', function () {
     if (!diver.offsetWidth) { if (cur) cur.pause(); return; }
     if (!started) { if (window.__ready) start(); return; }
     if (cur && cur.paused && !cur.ended) play(cur);
-    if (depth > 35 && !vo.src) { vo.preload = 'auto'; vo.src = '/img/sub-ok-a.webm'; } // il segno OK si scarica solo verso il fondo
+    if (depth > 20 && !vo.src) { vo.preload = 'auto'; vo.src = '/img/sub-ok-a.webm'; } // il segno OK si scarica in anticipo
     if (depth < 45) armed = true;                       // risalito: al prossimo arrivo sul fondo lo rifà
-    if (depth >= 49.9 && armed && cur === vg) { armed = false; vg.loop = false; }
+    if (depth >= 49.9 && armed && cur === vg) {
+      armed = false;
+      if (vo.readyState >= 2) {                         // pronto: l'OK parte subito, senza aspettare la fine del giro
+        vg.loop = true;
+        try { vo.currentTime = 0; } catch (e) {}
+        whenFrame(vo, function () { show(vo); vg.pause(); });
+        play(vo);
+      } else vg.loop = false;                           // non ancora scaricato: parte alla fine del giro
+    }
   };
   document.addEventListener('visibilitychange', function () { if (document.hidden && cur) cur.pause(); else if (cur && diver.offsetWidth) play(cur); });
 })();
@@ -403,25 +411,45 @@ window.addEventListener('load', function () {
   };
 })();
 
-// ---------- Cellulare: in fondo alla home il sub fa OK in continuo (parte solo quando è visibile) ----------
+// ---------- Cellulare: in fondo alla home il sub fa OK ----------
+// Il video si scarica in anticipo; parte appena la caviglia del sub entra nello schermo, direttamente dal punto
+// in cui alza la mano (nel video l'OK arriva verso l'undicesimo secondo). Uscito dallo schermo si ferma e si riarma.
 (function () {
   var box = document.querySelector('.m-ok'), v = box && box.querySelector('video');
-  if (!v || !('IntersectionObserver' in window)) return;
+  if (!v) return;
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var io = new IntersectionObserver(function (es) {
-    es.forEach(function (e) {
-      if (!box.offsetWidth) return;
-      if (e.isIntersecting) {
-        if (!v.src) { v.preload = 'auto'; v.src = v.canPlayType('video/mp4; codecs="avc1.42E01E"') ? '/img/sub-mobile-3.mp4' : '/img/sub-mobile-3.webm'; }
-        var p = v.play(); if (p && p.catch) p.catch(function () {});
-      } else if (v.src) v.pause();
-    });
-  }, { rootMargin: '200px 0px' });
-  io.observe(box);
-  // con il risparmio energetico iPhone blocca l'avvio automatico: riprova al primo tocco o scorrimento
-  function retry() { if (v.src && v.paused && box.getBoundingClientRect().top < innerHeight && box.getBoundingClientRect().bottom > 0) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } }
-  window.addEventListener('touchstart', retry, { passive: true });
-  window.addEventListener('scroll', retry, { passive: true });
+  var OK_DA = 10.2;      // secondo del video da cui partire: un attimo prima che alzi la mano
+  var CAVIGLIA = 0.8;    // altezza della caviglia nel riquadro (0 = sopra, 1 = sotto)
+  var carico = false, partito = false;
+  function carica() {
+    if (carico) return; carico = true;
+    v.preload = 'auto';
+    v.src = v.canPlayType('video/mp4; codecs="avc1.42E01E"') ? '/img/sub-mobile-3.mp4' : '/img/sub-mobile-3.webm';
+    v.addEventListener('loadedmetadata', function () { if (!partito) { try { v.currentTime = OK_DA; } catch (e) {} } }, { once: true });
+    v.load();
+  }
+  function play() { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+  function controlla() {
+    if (!box.offsetWidth) return;
+    var r = box.getBoundingClientRect(), h = innerHeight;
+    if (r.top < h + 1500 && r.bottom > -1500) carica();                    // vicino: scarico il video
+    var caviglia = r.top + r.height * CAVIGLIA;
+    if (!partito && caviglia <= h && r.bottom > 0) {                        // la caviglia è nello schermo: via
+      partito = true;
+      try { v.currentTime = OK_DA; } catch (e) {}
+      play();
+    } else if (partito && (r.bottom < 0 || r.top > h)) {                    // uscito dallo schermo: fermo e riarmo
+      partito = false; v.pause();
+      try { v.currentTime = OK_DA; } catch (e) {}
+    } else if (partito && v.paused) play();                                 // iPhone in risparmio energetico: riprova
+  }
+  var att = false;
+  function presto() { if (!att) { att = true; requestAnimationFrame(function () { att = false; controlla(); }); } }
+  window.addEventListener('scroll', presto, { passive: true });
+  window.addEventListener('resize', presto, { passive: true });
+  window.addEventListener('touchstart', presto, { passive: true });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) v.pause(); else presto(); });
+  controlla();
 })();
 
 // ---------- Rifiniture: comparsa morbida dei riquadri e intestazione compatta quando si scende ----------
