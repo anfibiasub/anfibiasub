@@ -32,7 +32,7 @@
 <label class="field">Tipo<input name="tipo" list="tipi" placeholder="Carena + eliche"></label>
 </div>
 <datalist id="tipi"><option value="Carena + eliche"><option value="Pulizia eliche"><option value="Pulizia carena"><option value="Ispezione video"><option value="Sostituzione anodi"></datalist>
-<label class="field">Foto (anche molte insieme, dal telefono)<input type="file" name="foto" accept="image/*" multiple></label>
+<div class="grid2"><label class="field">Foto PRIMA dell'intervento<input type="file" name="foto_prima" accept="image/*" multiple></label><label class="field">Foto DOPO l'intervento<input type="file" name="foto_dopo" accept="image/*" multiple></label></div>
 <label class="field">Note per il cliente<textarea name="note"></textarea></label>
 <fieldset class="avvisa"><legend>Avvisa il cliente</legend>
 <% const def = hasPhone ? (mailOn ? 'entrambi' : 'wa') : (mailOn ? 'email' : ''); %>
@@ -49,22 +49,21 @@
 </section>
 <section class="panel stack">
 <h2>Storico (<%= d.cleanings.length %>)</h2>
-<% if (!d.cleanings.length) { %><p class="hint">Nessun intervento registrato.</p><% } %>
-<% const SHOW_JOBS = 10, SHOW_PH = 8; %>
+<% if (!d.cleanings.length) { %><p class="hint">Nessun intervento registrato.</p><% } else { %>
+<div class="jobs" data-jobs>
+<%- include('../partials/jobsearch', { jobs: d.cleanings, ph: 'Cerca per data o tipo (es. 05/11/2026, eliche)', allTypes: 'Tutti i tipi', none: 'Nessun intervento trovato.' }) %>
 <% d.cleanings.forEach((c, ci) => { %>
-<% if (ci === SHOW_JOBS) { %><details class="edit more-jobs"><summary>Mostra interventi precedenti (<%= d.cleanings.length - SHOW_JOBS %>)</summary><% } %>
-<div class="hist" id="pulizia-<%= c.id %>">
-<div class="panel-head" style="margin-bottom:8px"><strong style="color:#fff"><%= fmtDate(c.data) %> · <%= c.tipo || 'Pulizia' %></strong><span class="hint"><%= c.photos.length %> foto<%= c.notified ? ' · email inviata' : '' %></span></div>
+<details class="job<%= ci >= 10 ? ' job-more' : '' %>" id="pulizia-<%= c.id %>" data-q="<%= [fmtDate(c.data), isoDate(c.data), c.tipo || 'Pulizia', c.note || ''].join(' ').toLowerCase() %>" data-tipo="<%= (c.tipo || '').trim().toLowerCase() %>">
+<summary class="job-card"><%- include('../partials/jobhead', { c, base: '/area/foto/', dateTxt: fmtDate(c.data), tipoTxt: c.tipo || 'Pulizia', before: 'Prima', after: 'Dopo', photosWord: 'foto', extra: c.notified ? 'email inviata' : '' }) %></summary>
+<div class="job-body">
 <% if (c.photos.length) { %>
-<% const fig = (p) => `<figure><a href="/area/foto/${p}" target="_blank" rel="noopener"><img src="/area/foto/${p}?t=1" alt="" loading="lazy" decoding="async"></a><form method="post" action="/admin/foto/${p}/elimina" data-confirm="Eliminare questa foto?"><button class="linkbtn" style="margin-top:6px;font-size:12px;padding:4px 10px">Elimina</button></form></figure>`; %>
-<div class="gallery"><%- c.photos.slice(0, SHOW_PH).map(fig).join('') %></div>
-<% if (c.photos.length > SHOW_PH) { %><details class="edit more-photos"><summary>Mostra tutte le <%= c.photos.length %> foto</summary><div class="gallery"><%- c.photos.slice(SHOW_PH).map(fig).join('') %></div></details><% } %>
+<%- include('../partials/primadopo', { prima: c.prima, dopo: c.dopo, base: '/area/foto/', admin: true, covers: { prima: c.coverPrima, dopo: c.coverDopo }, before: 'Prima', after: 'Dopo', showAll: 'Mostra tutte le {n} foto', photoN: 'Foto' }) %>
 <% } %>
 <% if (c.note) { %><p class="hint" style="margin-top:8px"><%= c.note %></p><% } %>
 <details class="edit"><summary>Modifica o aggiungi foto</summary>
 <form class="stack" method="post" action="/admin/pulizia/<%= c.id %>" enctype="multipart/form-data">
 <div class="grid2"><label class="field">Data<input type="date" name="data" value="<%= isoDate(c.data) %>"></label><label class="field">Tipo<input name="tipo" value="<%= c.tipo %>" list="tipi"></label></div>
-<label class="field">Aggiungi foto<input type="file" name="foto" accept="image/*" multiple></label>
+<div class="grid2"><label class="field">Aggiungi foto PRIMA<input type="file" name="foto_prima" accept="image/*" multiple></label><label class="field">Aggiungi foto DOPO<input type="file" name="foto_dopo" accept="image/*" multiple></label></div>
 <label class="field">Note<textarea name="note"><%= c.note %></textarea></label>
 <button class="btn" type="submit" style="align-self:flex-start">Salva</button>
 </form>
@@ -72,8 +71,11 @@
 </details>
 <p class="hint" style="margin-top:8px;font-size:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><% if (c.wa) { %><a class="btn btn-wa btn-sm" href="<%= c.wa %>" target="_blank" rel="noopener">Manda al cliente su WhatsApp</a><% } %><span>Link pubblico delle foto: <a href="/area/condividi/<%= c.share_token %>" target="_blank" rel="noopener">apri</a></span></p>
 </div>
+</details>
 <% }) %>
-<% if (d.cleanings.length > SHOW_JOBS) { %></details><% } %>
+<% if (d.cleanings.length > 10) { %><button class="btn btn-ghost btn-sm job-more-btn" type="button" data-job-more>Carica altri 10</button><% } %>
+</div>
+<% } %>
 </section>
 </div>
 <% } %>

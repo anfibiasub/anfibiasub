@@ -53,6 +53,34 @@
     });
   });
 
+  // Storico interventi: ricerca per data/tipo e "Carica altri 10"
+  document.querySelectorAll('[data-jobs]').forEach(function (box) {
+    var jobs = [].slice.call(box.querySelectorAll('.job'));
+    var q = box.querySelector('[data-job-q]'), tipo = box.querySelector('[data-job-tipo]');
+    var none = box.querySelector('[data-job-none]'), more = box.querySelector('[data-job-more]');
+    function hidden() { return jobs.filter(function (j) { return j.classList.contains('job-more'); }); }
+    function filter() {
+      var s = (q && q.value || '').trim().toLowerCase(), t = tipo ? tipo.value : '';
+      var on = s || t, n = 0;
+      jobs.forEach(function (j) {
+        var ok = (!s || j.getAttribute('data-q').indexOf(s) >= 0) && (!t || j.getAttribute('data-tipo') === t);
+        if (on) { if (ok) { j.removeAttribute('data-off'); j.style.display = 'block'; n++; } else { j.setAttribute('data-off', ''); j.style.display = ''; } }
+        else { j.removeAttribute('data-off'); j.style.display = ''; }
+      });
+      if (none) none.hidden = !on || n > 0;
+      if (more) more.hidden = on || !hidden().length;
+    }
+    if (q) q.addEventListener('input', filter);
+    if (tipo) tipo.addEventListener('change', filter);
+    if (more) more.addEventListener('click', function () {
+      hidden().slice(0, 10).forEach(function (j) { j.classList.remove('job-more'); });
+      more.hidden = !hidden().length;
+    });
+    // dopo un salvataggio si torna su #pulizia-N: apro quell'intervento
+    var h = location.hash && box.querySelector(location.hash.replace(/[^#\w-]/g, ''));
+    if (h && h.classList.contains('job')) { h.classList.remove('job-more'); h.open = true; h.scrollIntoView({ block: 'start' }); }
+  });
+
   // Mappe (Leaflet + OpenStreetMap)
   if (window.L) {
     var LOANO = [44.1286, 8.2589];

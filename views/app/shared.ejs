@@ -4,9 +4,7 @@
 <p class="eyebrow"><%= L.shared_title %> · <%= fmtDate(c.data) %></p>
 <h1 class="h2" style="font-size:36px"><%= c.nome %></h1>
 <p class="sub" style="margin-bottom:24px"><%= c.tipo %><%= c.note ? ' · ' + c.note : '' %></p>
-<div class="shared-grid">
-<% photos.forEach((p, i) => { %><a href="/area/condividi/<%= c.share_token %>/foto/<%= p.id %>" target="_blank" rel="noopener"><img src="/area/condividi/<%= c.share_token %>/foto/<%= p.id %>?t=1" alt="<%= L.photo_n %> <%= i + 1 %>" loading="lazy"></a><% }) %>
-</div>
+<%- include('../partials/primadopo', { prima: c.prima, dopo: c.dopo, base: '/area/condividi/' + c.share_token + '/foto/', admin: false, before: L.before, after: L.after, showAll: L.show_all_photos, photoN: L.photo_n }) %>
 <p class="hint" style="margin-top:30px"><%= L.shared_by %> · <a href="/">anfibiasub.it</a></p>
 </main>
 <%- include('../partials/bottom') %>

@@ -1,0 +1,19 @@
+<%#
+  Foto di un intervento: PRIMA a sinistra, DOPO a destra, 4 per parte (le altre in "Mostra tutte").
+  Parametri: prima, dopo (id delle foto), base (es. '/area/foto/'), admin (true = pulsanti Elimina e Sposta),
+  before, after, showAll (testo con {n}), photoN (testo alt).
+%>
+<% const N = 4; const cover = (typeof covers !== 'undefined') ? covers : null;
+   const fig = (p, i, fase) => {
+     let h = `<figure><a href="${base}${p}" target="_blank" rel="noopener"><img src="${base}${p}?t=1" alt="${photoN} ${i + 1}" loading="lazy" decoding="async"></a>`;
+     if (admin) h += `<div class="pd-act"><form method="post" action="/admin/foto/${p}/sposta"><button class="linkbtn pd-btn" type="submit" title="${fase === 'prima' ? 'Sposta in Dopo' : 'Sposta in Prima'}">${fase === 'prima' ? 'Dopo →' : '← Prima'}</button></form>${cover && cover[fase] === p ? '<span class="pd-cover">★ Anteprima</span>' : `<form method="post" action="/admin/foto/${p}/anteprima"><button class="linkbtn pd-btn" type="submit" title="Usa come anteprima nello storico">☆ Anteprima</button></form>`}<form method="post" action="/admin/foto/${p}/elimina" data-confirm="Eliminare questa foto?"><button class="linkbtn pd-btn" type="submit">Elimina</button></form></div>`;
+     return h + '</figure>';
+   };
+   const col = (list, title, fase) => {
+     let h = `<div class="pd-col pd-${fase}"><div class="pd-h"><span>${title}</span><span class="hint">${list.length}</span></div>`;
+     if (!list.length) return h + '<p class="hint pd-none">—</p></div>';
+     h += `<div class="pd-grid">${list.slice(0, N).map((p, i) => fig(p, i, fase)).join('')}</div>`;
+     if (list.length > N) h += `<details class="edit more-photos"><summary>${showAll.replace('{n}', list.length)}</summary><div class="pd-grid">${list.slice(N).map((p, i) => fig(p, i + N, fase)).join('')}</div></details>`;
+     return h + '</div>';
+   }; %>
+<div class="pd"><%- col(prima, before, 'prima') %><%- col(dopo, after, 'dopo') %></div>

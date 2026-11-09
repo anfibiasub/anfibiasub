@@ -154,7 +154,9 @@ r.post('/reset/:tk', async (req, res) => {
 r.get('/condividi/:tk', async (req, res) => {
   const c = await one('SELECT c.*, b.nome FROM cleanings c JOIN boats b ON b.id=c.boat_id WHERE c.share_token=$1', [req.params.tk]);
   if (!c) return res.status(404).render('error', { code: 404, message: res.locals.L.not_found });
-  const photos = await all('SELECT id FROM photos WHERE cleaning_id=$1 ORDER BY id', [c.id]);
+  const photos = await all('SELECT id, fase FROM photos WHERE cleaning_id=$1 ORDER BY id', [c.id]);
+  c.prima = photos.filter((p) => p.fase !== 'dopo').map((p) => p.id);
+  c.dopo = photos.filter((p) => p.fase === 'dopo').map((p) => p.id);
   res.render('app/shared', { c, photos });
 });
 r.get('/condividi/:tk/foto/:id', async (req, res) => {

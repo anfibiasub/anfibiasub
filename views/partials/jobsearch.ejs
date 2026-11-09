@@ -1,0 +1,7 @@
+<%# Barra di ricerca dello storico: testo libero (data o tipo) + menu dei tipi. Parametri: jobs, ph, allTypes, none %>
+<% const tipi = [...new Set(jobs.map((j) => (j.tipo || '').trim()).filter(Boolean))].sort(); %>
+<div class="job-search" role="search">
+<input type="search" data-job-q placeholder="<%= ph %>" aria-label="<%= ph %>" autocomplete="off">
+<% if (tipi.length > 1) { %><select data-job-tipo aria-label="<%= allTypes %>"><option value=""><%= allTypes %></option><% for (const t of tipi) { %><option value="<%= t.toLowerCase() %>"><%= t %></option><% } %></select><% } %>
+</div>
+<p class="hint" data-job-none hidden><%= none %></p>

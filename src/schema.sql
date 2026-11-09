@@ -174,3 +174,9 @@ CREATE TABLE IF NOT EXISTS accessi (
   updated_by   TEXT NOT NULL DEFAULT '',
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Foto degli interventi divise in prima / dopo (le foto vecchie partono da 'prima')
+ALTER TABLE photos ADD COLUMN IF NOT EXISTS fase TEXT NOT NULL DEFAULT 'prima';
+-- Anteprima dell'intervento nello storico (se vuota: la prima foto caricata)
+ALTER TABLE cleanings ADD COLUMN IF NOT EXISTS cover_prima INTEGER;
+ALTER TABLE cleanings ADD COLUMN IF NOT EXISTS cover_dopo INTEGER;

@@ -6,6 +6,14 @@ const { requireAdmin, flash, token, tempPassword } = require('../auth');
 const { loadBoat } = require('../boatdata');
 const { GROUPS, TIPI, fromBody } = require('../boatfields');
 const { upload, saveMany } = require('../photos');
+// foto dell'intervento: due campi separati, prima e dopo ('foto' = vecchio campo unico, va in prima)
+const jobPhotos = upload.fields([{ name: 'foto_prima', maxCount: 40 }, { name: 'foto_dopo', maxCount: 40 }, { name: 'foto', maxCount: 40 }]);
+async function saveJobPhotos(files, boatId, cleaningId) {
+  const f = files || {};
+  return (await saveMany(f.foto_prima, { boatId, cleaningId, fase: 'prima' }))
+    + (await saveMany(f.foto, { boatId, cleaningId, fase: 'prima' }))
+    + (await saveMany(f.foto_dopo, { boatId, cleaningId, fase: 'dopo' }));
+}
 const { send, layout, enabled: mailEnabled, esc, splitMails } = require('../mail');
 const { cleaningStatus, anodesStatus } = require('../status');
 const { t, fill, fmtDate, LANGS } = require('../i18n');
@@ -91,13 +99,13 @@ r.get('/barca/:id', async (req, res) => {
   res.render('admin/barca', { d, owner, others, reqs, GROUPS, TIPI, hasPhone, tab: req.query.tab || 'interventi', newPw: null });
 });
 
-r.post('/barca/:id/pulizia', upload.array('foto', 40), async (req, res) => {
+r.post('/barca/:id/pulizia', jobPhotos, async (req, res) => {
   const b = await owned(id(req.params.id));
   if (!b) return res.sendStatus(404);
   const data = dateOrNull(req.body.data) || new Date().toISOString().slice(0, 10);
   const c = await one('INSERT INTO cleanings(boat_id, data, tipo, note, share_token) VALUES ($1,$2,$3,$4,$5) RETURNING *',
     [b.id, data, clip(req.body.tipo), clip(req.body.note, 2000), token(18)]);
-  const n = await saveMany(req.files, { boatId: b.id, cleaningId: c.id });
+  const n = await saveJobPhotos(req.files, b.id, c.id);
   // un nuovo intervento azzera il promemoria del cliente già scaduto
   await q('UPDATE boats SET prox_pulizia = CASE WHEN prox_pulizia <= $2 THEN NULL ELSE prox_pulizia END WHERE id=$1', [b.id, data]);
   let msg = `Intervento salvato con ${n} foto.`;
@@ -124,11 +132,11 @@ r.post('/barca/:id/pulizia', upload.array('foto', 40), async (req, res) => {
   res.redirect(`/admin/barca/${b.id}?tab=interventi`);
 });
 
-r.post('/pulizia/:id', upload.array('foto', 40), async (req, res) => {
+r.post('/pulizia/:id', jobPhotos, async (req, res) => {
   const c = await one('SELECT * FROM cleanings WHERE id=$1', [id(req.params.id)]);
   if (!c) return res.sendStatus(404);
   await q('UPDATE cleanings SET data=$1, tipo=$2, note=$3 WHERE id=$4', [dateOrNull(req.body.data) || c.data, clip(req.body.tipo), clip(req.body.note, 2000), c.id]);
-  const n = await saveMany(req.files, { boatId: c.boat_id, cleaningId: c.id });
+  const n = await saveJobPhotos(req.files, c.boat_id, c.id);
   flash(req, 'ok', `Intervento aggiornato${n ? `, aggiunte ${n} foto` : ''}.`);
   res.redirect(`/admin/barca/${c.boat_id}?tab=interventi#pulizia-${c.id}`);
 });
@@ -140,8 +148,21 @@ r.post('/pulizia/:id/elimina', async (req, res) => {
 });
 
 r.post('/foto/:id/elimina', async (req, res) => {
-  const p = await one('DELETE FROM photos WHERE id=$1 RETURNING boat_id, anode_id', [id(req.params.id)]);
-  res.redirect(p ? `/admin/barca/${p.boat_id}?tab=${p.anode_id ? 'anodi' : 'interventi'}` : '/admin');
+  const p = await one('DELETE FROM photos WHERE id=$1 RETURNING boat_id, anode_id, cleaning_id', [id(req.params.id)]);
+  res.redirect(p ? `/admin/barca/${p.boat_id}?tab=${p.anode_id ? 'anodi' : 'interventi'}${p.cleaning_id ? '#pulizia-' + p.cleaning_id : ''}` : '/admin');
+});
+// sceglie la foto di anteprima (prima o dopo) dell'intervento nello storico
+r.post('/foto/:id/anteprima', async (req, res) => {
+  const p = await one('SELECT id, boat_id, cleaning_id, fase FROM photos WHERE id=$1 AND cleaning_id IS NOT NULL', [id(req.params.id)]);
+  if (!p) return res.redirect('/admin');
+  await q(`UPDATE cleanings SET ${p.fase === 'dopo' ? 'cover_dopo' : 'cover_prima'}=$1 WHERE id=$2`, [p.id, p.cleaning_id]);
+  flash(req, 'ok', 'Anteprima aggiornata.');
+  res.redirect(`/admin/barca/${p.boat_id}?tab=interventi#pulizia-${p.cleaning_id}`);
+});
+// sposta una foto dell'intervento da "prima" a "dopo" o viceversa
+r.post('/foto/:id/sposta', async (req, res) => {
+  const p = await one("UPDATE photos SET fase = CASE WHEN fase='dopo' THEN 'prima' ELSE 'dopo' END WHERE id=$1 AND cleaning_id IS NOT NULL RETURNING boat_id, cleaning_id", [id(req.params.id)]);
+  res.redirect(p ? `/admin/barca/${p.boat_id}?tab=interventi#pulizia-${p.cleaning_id}` : '/admin');
 });
 
 // anodi (anche Anfibiasub può gestirli)

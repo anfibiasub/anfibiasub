@@ -1,6 +1,5 @@
 <%- include('../partials/top', { title: L.maintenance }) %>
 <% const b = d.boat; const S = { ok: L.st_ok, warn: L.st_warn, bad: L.st_bad, none: L.st_none }; const host = (typeof shareBase !== 'undefined' ? shareBase : ''); %>
-<% const SHOW_PH = 8, SHOW_JOBS = 10; const ph = (p, i) => `<a href="/area/foto/${p}" target="_blank" rel="noopener"><img src="/area/foto/${p}?t=1" alt="${L.photo_n} ${i + 1}" loading="lazy" decoding="async"></a>`; %>
 <main class="app-main" id="main">
 <%- include('../partials/boatpicker') %>
 <%- include('../partials/flash') %>
@@ -20,8 +19,7 @@
 <div>
 <div class="panel-head" style="margin-bottom:10px"><strong style="color:#fff;font-weight:600"><%= L.cleaning_photos %></strong><span class="hint"><%= L.by_anf %></span></div>
 <% if (d.last.photos.length) { %>
-<div class="gallery"><%- d.last.photos.slice(0, SHOW_PH).map(ph).join('') %></div>
-<% if (d.last.photos.length > SHOW_PH) { %><details class="edit more-photos"><summary><%= fill(L.show_all_photos, { n: d.last.photos.length }) %></summary><div class="gallery"><%- d.last.photos.slice(SHOW_PH).map((p, i) => ph(p, i + SHOW_PH)).join('') %></div></details><% } %>
+<%- include('../partials/primadopo', Object.assign({ prima: d.last.prima, dopo: d.last.dopo }, { base: '/area/foto/', admin: false, before: L.before, after: L.after, showAll: L.show_all_photos, photoN: L.photo_n })) %>
 <% } else { %><p class="hint">—</p><% } %>
 <% if (d.last.note) { %><p class="hint" style="margin-top:10px"><%= d.last.note %></p><% } %>
 </div>
@@ -41,18 +39,23 @@
 <% if (d.cleanings.length > 1) { %>
 <div>
 <strong style="color:#fff;font-weight:600;display:block;margin-bottom:4px"><%= L.history %></strong>
-<% d.cleanings.slice(1).forEach((c, ci) => { %>
-<% if (ci === SHOW_JOBS) { %><details class="edit more-jobs"><summary><%= L.older_jobs %> (<%= d.cleanings.length - 1 - SHOW_JOBS %>)</summary><% } %>
-<details class="hist edit">
-<summary><span style="color:var(--txt)"><%= fmtDate(c.data) %></span> · <span class="hint"><%= c.tipo || L.cleaning %> · <%= c.photos.length %> <%= L.photos %></span></summary>
-<% if (c.photos.length) { %><div class="gallery"><%- c.photos.map(ph).join('') %></div><% } %>
+<% const older = d.cleanings.slice(1); %>
+<div class="jobs" data-jobs>
+<%- include('../partials/jobsearch', { jobs: older, ph: L.search_jobs, allTypes: L.all_types, none: L.no_jobs }) %>
+<% older.forEach((c, ci) => { %>
+<details class="job<%= ci >= 10 ? ' job-more' : '' %>" id="pulizia-<%= c.id %>" data-q="<%= [fmtDate(c.data), isoDate(c.data), c.tipo || L.cleaning, c.note || ''].join(' ').toLowerCase() %>" data-tipo="<%= (c.tipo || '').trim().toLowerCase() %>">
+<summary class="job-card"><%- include('../partials/jobhead', { c, base: '/area/foto/', dateTxt: fmtDate(c.data), tipoTxt: c.tipo || L.cleaning, before: L.before, after: L.after, photosWord: L.photos }) %></summary>
+<div class="job-body">
+<% if (c.photos.length) { %><%- include('../partials/primadopo', { prima: c.prima, dopo: c.dopo, base: '/area/foto/', admin: false, before: L.before, after: L.after, showAll: L.show_all_photos, photoN: L.photo_n }) %><% } %>
 <% if (c.note) { %><p class="hint" style="margin-top:8px"><%= c.note %></p><% } %>
 <div class="chips-sm" style="margin-top:10px">
 <a class="chip-sm" data-share href="https://wa.me/?text=<%= encodeURIComponent(b.nome + ' ' + fmtDate(c.data) + ': ') %>" data-url="/area/condividi/<%= c.share_token %>" data-title="<%= b.nome %>" target="_blank" rel="noopener"><%= L.share_wa %></a>
 </div>
+</div>
 </details>
 <% }) %>
-<% if (d.cleanings.length - 1 > SHOW_JOBS) { %></details><% } %>
+<% if (older.length > 10) { %><button class="btn btn-ghost btn-sm job-more-btn" type="button" data-job-more><%= L.load_more %></button><% } %>
+</div>
 </div>
 <% } %>
 </section>

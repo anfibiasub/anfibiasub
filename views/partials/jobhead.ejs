@@ -1,0 +1,10 @@
+<%#
+  Riga chiusa di un intervento nello storico: anteprima PRIMA + anteprima DOPO, data, tipo, numero foto.
+  Parametri: c (con coverPrima, coverDopo, prima, dopo), base, dateTxt, tipoTxt, before, after, photosWord, extra (testo in più, opzionale)
+%>
+<% const th = (id, lbl, cls) => id
+     ? `<span class="job-th ${cls}"><img src="${base}${id}?t=1" alt="" loading="lazy" decoding="async"><em>${lbl}</em></span>`
+     : `<span class="job-th job-th-empty ${cls}"><em>${lbl}</em></span>`; %>
+<span class="job-thumbs"><%- th(c.coverPrima, before, 'is-prima') %><%- th(c.coverDopo, after, 'is-dopo') %></span>
+<span class="job-info"><strong><%= dateTxt %></strong><span><%= tipoTxt %></span><span class="hint"><%= c.photos.length %> <%= photosWord %> · <%= before %> <%= c.prima.length %> · <%= after %> <%= c.dopo.length %><%= typeof extra !== 'undefined' && extra ? ' · ' + extra : '' %></span></span>
+<span class="job-open" aria-hidden="true"></span>
