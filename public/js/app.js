@@ -56,21 +56,21 @@
   // Storico interventi: ricerca per data/tipo e "Carica altri 10"
   document.querySelectorAll('[data-jobs]').forEach(function (box) {
     var jobs = [].slice.call(box.querySelectorAll('.job'));
-    var q = box.querySelector('[data-job-q]'), tipo = box.querySelector('[data-job-tipo]');
+    var q = box.querySelector('[data-job-date]'), tipo = box.querySelector('[data-job-tipo]');
     var none = box.querySelector('[data-job-none]'), more = box.querySelector('[data-job-more]');
     function hidden() { return jobs.filter(function (j) { return j.classList.contains('job-more'); }); }
     function filter() {
-      var s = (q && q.value || '').trim().toLowerCase(), t = tipo ? tipo.value : '';
+      var s = q ? q.value : '', t = tipo ? tipo.value : '';
       var on = s || t, n = 0;
       jobs.forEach(function (j) {
-        var ok = (!s || j.getAttribute('data-q').indexOf(s) >= 0) && (!t || j.getAttribute('data-tipo') === t);
+        var ok = (!s || j.getAttribute('data-date') === s) && (!t || j.getAttribute('data-tipo') === t);
         if (on) { if (ok) { j.removeAttribute('data-off'); j.style.display = 'block'; n++; } else { j.setAttribute('data-off', ''); j.style.display = ''; } }
         else { j.removeAttribute('data-off'); j.style.display = ''; }
       });
       if (none) none.hidden = !on || n > 0;
       if (more) more.hidden = on || !hidden().length;
     }
-    if (q) q.addEventListener('input', filter);
+    if (q) { q.addEventListener('input', filter); q.addEventListener('change', filter); }
     if (tipo) tipo.addEventListener('change', filter);
     if (more) more.addEventListener('click', function () {
       hidden().slice(0, 10).forEach(function (j) { j.classList.remove('job-more'); });
@@ -79,6 +79,24 @@
     // dopo un salvataggio si torna su #pulizia-N: apro quell'intervento
     var h = location.hash && box.querySelector(location.hash.replace(/[^#\w-]/g, ''));
     if (h && h.classList.contains('job')) { h.classList.remove('job-more'); h.open = true; h.scrollIntoView({ block: 'start' }); }
+  });
+
+  // Foto di un intervento (admin): seleziona, poi un comando per tutte
+  document.querySelectorAll('[data-pd]').forEach(function (f) {
+    var boxes = [].slice.call(f.querySelectorAll('input[name=ids]'));
+    var btns = [].slice.call(f.querySelectorAll('button[name=azione]'));
+    var info = f.querySelector('[data-pd-count]');
+    function upd() {
+      var n = boxes.filter(function (b) { return b.checked; }).length;
+      btns.forEach(function (b) { b.disabled = !n; });
+      if (info) info.textContent = n ? info.getAttribute('data-some').replace('{n}', n) : info.getAttribute('data-none');
+    }
+    boxes.forEach(function (b) { b.addEventListener('change', upd); });
+    f.addEventListener('submit', function (e) {
+      var s = e.submitter;
+      if (s && s.getAttribute('data-ask') && !confirm(s.getAttribute('data-ask'))) e.preventDefault();
+    });
+    upd();
   });
 
   // Mappe (Leaflet + OpenStreetMap)

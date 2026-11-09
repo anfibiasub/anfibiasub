@@ -233,9 +233,6 @@ fieldset.avvisa legend{font-size:13px;color:var(--muted);margin-bottom:8px;paddi
 .pd-grid figure{margin:0;min-width:0}
 .pd-grid a{display:block}
 .pd-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block}
-.pd-act{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
-.pd-act form{margin:0}
-.pd-btn{font-size:11px;padding:4px 8px}
 .pd-none{margin:6px 0}
 .pd details.more-photos{margin-top:10px}
 @media (max-width:640px){
@@ -243,13 +240,10 @@ fieldset.avvisa legend{font-size:13px;color:var(--muted);margin-bottom:8px;paddi
   .pd-col{padding:8px}
   .pd-grid{gap:6px}
   .pd-h{font-size:11px;letter-spacing:.08em}
-  .pd-btn{font-size:10.5px;padding:3px 6px}
 }
 
 /* storico interventi: schede chiuse con anteprima prima/dopo, ricerca, "carica altri 10" */
 .jobs{display:flex;flex-direction:column;gap:10px}
-.job-search{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:4px}
-.job-search input,.job-search select{min-width:0}
 .job{background:#081A2C;border:1px solid var(--line);border-radius:12px}
 .job.job-more,.job[data-off]{display:none}
 .job-card{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px;cursor:pointer;list-style:none}
@@ -268,10 +262,33 @@ fieldset.avvisa legend{font-size:13px;color:var(--muted);margin-bottom:8px;paddi
 .job[open] .job-card{border-bottom:1px solid var(--line)}
 .job-body{padding:12px}
 .job-more-btn{align-self:flex-start}
-.pd-cover{font-size:11px;color:#FFC75A;padding:4px 2px;font-weight:600}
 @media (max-width:640px){
   .job-card{gap:10px;padding:10px}
   .job-th{width:58px;height:58px}
-  .job-search{grid-template-columns:1fr}
   .job-body{padding:10px}
+}
+
+/* selezione foto (admin): tocca per selezionare, poi un comando per tutte */
+.pd-fig{position:relative}
+.pd-pick{display:block;position:relative;cursor:pointer;border-radius:8px}
+.pd-pick input{position:absolute;opacity:0;width:1px;height:1px}
+.pd-pick img{transition:opacity .15s}
+.pd-check{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;border:2px solid #fff;background:rgba(5,14,26,.55)}
+.pd-pick input:checked ~ img{opacity:.55;outline:3px solid var(--cyan);outline-offset:-3px}
+.pd-pick input:checked ~ .pd-check{background:var(--cyan);border-color:var(--cyan)}
+.pd-pick input:checked ~ .pd-check::after{content:'✓';color:#06121F;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;height:100%}
+.pd-pick input:focus-visible ~ .pd-check{outline:2px solid #fff;outline-offset:2px}
+.pd-star{position:absolute;left:6px;bottom:6px;color:#FFC75A;font-size:16px;line-height:1;text-shadow:0 1px 3px #000}
+.pd-zoom{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:6px;background:rgba(5,14,26,.7);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.pd-tools{margin-top:12px}
+.pd-tools .hint{margin:0 0 8px}
+.pd-tools-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pd-tools-btns button{width:100%;min-height:40px;padding:8px 10px;text-align:center}
+.pd-tools-btns button:disabled{opacity:.4;cursor:default}
+.job-search{margin-bottom:4px;grid-template-columns:1fr 1fr}
+.job-search .field{min-width:0}
+.job-search input,.job-search select{min-width:0;width:100%}
+@media (max-width:640px){
+  .pd-tools-btns{gap:6px}
+  .pd-tools-btns button{font-size:12px;padding:8px 6px}
 }

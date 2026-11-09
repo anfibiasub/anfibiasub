@@ -1,7 +1,7 @@
-<%# Barra di ricerca dello storico: testo libero (data o tipo) + menu dei tipi. Parametri: jobs, ph, allTypes, none %>
+<%# Ricerca nello storico: una cella per la data e una per il tipo, con la stessa grafica dei campi del modulo. Parametri: jobs, lblDate, lblType, allTypes, none %>
 <% const tipi = [...new Set(jobs.map((j) => (j.tipo || '').trim()).filter(Boolean))].sort(); %>
-<div class="job-search" role="search">
-<input type="search" data-job-q placeholder="<%= ph %>" aria-label="<%= ph %>" autocomplete="off">
-<% if (tipi.length > 1) { %><select data-job-tipo aria-label="<%= allTypes %>"><option value=""><%= allTypes %></option><% for (const t of tipi) { %><option value="<%= t.toLowerCase() %>"><%= t %></option><% } %></select><% } %>
+<div class="grid2 job-search" role="search">
+<label class="field"><%= lblDate %><input type="date" data-job-date></label>
+<label class="field"><%= lblType %><select data-job-tipo><option value=""><%= allTypes %></option><% for (const t of tipi) { %><option value="<%= t.toLowerCase() %>"><%= t %></option><% } %></select></label>
 </div>
 <p class="hint" data-job-none hidden><%= none %></p>

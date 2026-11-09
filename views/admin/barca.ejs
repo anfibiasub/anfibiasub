@@ -51,13 +51,13 @@
 <h2>Storico (<%= d.cleanings.length %>)</h2>
 <% if (!d.cleanings.length) { %><p class="hint">Nessun intervento registrato.</p><% } else { %>
 <div class="jobs" data-jobs>
-<%- include('../partials/jobsearch', { jobs: d.cleanings, ph: 'Cerca per data o tipo (es. 05/11/2026, eliche)', allTypes: 'Tutti i tipi', none: 'Nessun intervento trovato.' }) %>
+<%- include('../partials/jobsearch', { jobs: d.cleanings, lblDate: 'Cerca per data', lblType: 'Cerca per tipo', allTypes: 'Tutti i tipi', none: 'Nessun intervento trovato.' }) %>
 <% d.cleanings.forEach((c, ci) => { %>
-<details class="job<%= ci >= 10 ? ' job-more' : '' %>" id="pulizia-<%= c.id %>" data-q="<%= [fmtDate(c.data), isoDate(c.data), c.tipo || 'Pulizia', c.note || ''].join(' ').toLowerCase() %>" data-tipo="<%= (c.tipo || '').trim().toLowerCase() %>">
+<details class="job<%= ci >= 10 ? ' job-more' : '' %>" id="pulizia-<%= c.id %>" data-date="<%= isoDate(c.data) %>" data-tipo="<%= (c.tipo || '').trim().toLowerCase() %>">
 <summary class="job-card"><%- include('../partials/jobhead', { c, base: '/area/foto/', dateTxt: fmtDate(c.data), tipoTxt: c.tipo || 'Pulizia', before: 'Prima', after: 'Dopo', photosWord: 'foto', extra: c.notified ? 'email inviata' : '' }) %></summary>
 <div class="job-body">
 <% if (c.photos.length) { %>
-<%- include('../partials/primadopo', { prima: c.prima, dopo: c.dopo, base: '/area/foto/', admin: true, covers: { prima: c.coverPrima, dopo: c.coverDopo }, before: 'Prima', after: 'Dopo', showAll: 'Mostra tutte le {n} foto', photoN: 'Foto' }) %>
+<%- include('../partials/primadopo', { prima: c.prima, dopo: c.dopo, base: '/area/foto/', admin: true, cleaningId: c.id, covers: { prima: c.coverPrima, dopo: c.coverDopo }, before: 'Prima', after: 'Dopo', showAll: 'Mostra tutte le {n} foto', photoN: 'Foto' }) %>
 <% } %>
 <% if (c.note) { %><p class="hint" style="margin-top:8px"><%= c.note %></p><% } %>
 <details class="edit"><summary>Modifica o aggiungi foto</summary>

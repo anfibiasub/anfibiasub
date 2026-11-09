@@ -41,9 +41,9 @@
 <strong style="color:#fff;font-weight:600;display:block;margin-bottom:4px"><%= L.history %></strong>
 <% const older = d.cleanings.slice(1); %>
 <div class="jobs" data-jobs>
-<%- include('../partials/jobsearch', { jobs: older, ph: L.search_jobs, allTypes: L.all_types, none: L.no_jobs }) %>
+<%- include('../partials/jobsearch', { jobs: older, lblDate: L.search_date, lblType: L.search_type, allTypes: L.all_types, none: L.no_jobs }) %>
 <% older.forEach((c, ci) => { %>
-<details class="job<%= ci >= 10 ? ' job-more' : '' %>" id="pulizia-<%= c.id %>" data-q="<%= [fmtDate(c.data), isoDate(c.data), c.tipo || L.cleaning, c.note || ''].join(' ').toLowerCase() %>" data-tipo="<%= (c.tipo || '').trim().toLowerCase() %>">
+<details class="job<%= ci >= 10 ? ' job-more' : '' %>" id="pulizia-<%= c.id %>" data-date="<%= isoDate(c.data) %>" data-tipo="<%= (c.tipo || '').trim().toLowerCase() %>">
 <summary class="job-card"><%- include('../partials/jobhead', { c, base: '/area/foto/', dateTxt: fmtDate(c.data), tipoTxt: c.tipo || L.cleaning, before: L.before, after: L.after, photosWord: L.photos }) %></summary>
 <div class="job-body">
 <% if (c.photos.length) { %><%- include('../partials/primadopo', { prima: c.prima, dopo: c.dopo, base: '/area/foto/', admin: false, before: L.before, after: L.after, showAll: L.show_all_photos, photoN: L.photo_n }) %><% } %>

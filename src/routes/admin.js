@@ -151,18 +151,30 @@ r.post('/foto/:id/elimina', async (req, res) => {
   const p = await one('DELETE FROM photos WHERE id=$1 RETURNING boat_id, anode_id, cleaning_id', [id(req.params.id)]);
   res.redirect(p ? `/admin/barca/${p.boat_id}?tab=${p.anode_id ? 'anodi' : 'interventi'}${p.cleaning_id ? '#pulizia-' + p.cleaning_id : ''}` : '/admin');
 });
-// sceglie la foto di anteprima (prima o dopo) dell'intervento nello storico
-r.post('/foto/:id/anteprima', async (req, res) => {
-  const p = await one('SELECT id, boat_id, cleaning_id, fase FROM photos WHERE id=$1 AND cleaning_id IS NOT NULL', [id(req.params.id)]);
-  if (!p) return res.redirect('/admin');
-  await q(`UPDATE cleanings SET ${p.fase === 'dopo' ? 'cover_dopo' : 'cover_prima'}=$1 WHERE id=$2`, [p.id, p.cleaning_id]);
-  flash(req, 'ok', 'Anteprima aggiornata.');
-  res.redirect(`/admin/barca/${p.boat_id}?tab=interventi#pulizia-${p.cleaning_id}`);
-});
-// sposta una foto dell'intervento da "prima" a "dopo" o viceversa
-r.post('/foto/:id/sposta', async (req, res) => {
-  const p = await one("UPDATE photos SET fase = CASE WHEN fase='dopo' THEN 'prima' ELSE 'dopo' END WHERE id=$1 AND cleaning_id IS NOT NULL RETURNING boat_id, cleaning_id", [id(req.params.id)]);
-  res.redirect(p ? `/admin/barca/${p.boat_id}?tab=interventi#pulizia-${p.cleaning_id}` : '/admin');
+// Foto selezionate di un intervento: un solo comando per tutte (sposta prima/dopo, anteprima, elimina)
+r.post('/foto/azione', async (req, res) => {
+  const cid = id(req.body.cleaning_id);
+  const c = await one('SELECT id, boat_id FROM cleanings WHERE id=$1', [cid]);
+  if (!c) return res.redirect('/admin');
+  const ids = [].concat(req.body.ids || []).map(id).filter(Boolean);
+  const back = `/admin/barca/${c.boat_id}?tab=interventi#pulizia-${c.id}`;
+  if (!ids.length) { flash(req, 'err', 'Seleziona almeno una foto.'); return res.redirect(back); }
+  const az = req.body.azione;
+  if (az === 'elimina') {
+    const del = await all('DELETE FROM photos WHERE id = ANY($1) AND cleaning_id=$2 RETURNING id', [ids, c.id]);
+    flash(req, 'ok', del.length === 1 ? 'Foto eliminata.' : `${del.length} foto eliminate.`);
+  } else if (az === 'sposta') {
+    const mv = await all("UPDATE photos SET fase = CASE WHEN fase='dopo' THEN 'prima' ELSE 'dopo' END WHERE id = ANY($1) AND cleaning_id=$2 RETURNING id", [ids, c.id]);
+    flash(req, 'ok', mv.length === 1 ? 'Foto spostata.' : `${mv.length} foto spostate.`);
+  } else if (az === 'anteprima') {
+    // la prima foto selezionata di ogni colonna diventa l'anteprima di quella colonna
+    const sel = await all('SELECT id, fase FROM photos WHERE id = ANY($1) AND cleaning_id=$2 ORDER BY id', [ids, c.id]);
+    const pr = sel.find((p) => p.fase !== 'dopo'), dp = sel.find((p) => p.fase === 'dopo');
+    if (pr) await q('UPDATE cleanings SET cover_prima=$1 WHERE id=$2', [pr.id, c.id]);
+    if (dp) await q('UPDATE cleanings SET cover_dopo=$1 WHERE id=$2', [dp.id, c.id]);
+    flash(req, 'ok', 'Anteprima aggiornata.');
+  }
+  res.redirect(back);
 });
 
 // anodi (anche Anfibiasub può gestirli)
