@@ -266,6 +266,32 @@ function controlliPagina() {
       if (r.height < 24 && k++ < 3) out.push(['avviso', `pulsante piccolo da toccare (${Math.round(r.height)}px): ${nome(e)}`]);
     }
   }
+  // righe di elementi affiancati (flex in riga) che sullo schermo finiscono tutti uno sotto l'altro
+  let ac = 0;
+  for (const e of document.querySelectorAll('body *')) {
+    if (ac > 6) break;
+    const cs = getComputedStyle(e);
+    if (!/flex/.test(cs.display) || !/^row/.test(cs.flexDirection) || cs.flexWrap === 'nowrap' || !visibile(e)) continue;
+    const figli = [...e.children].filter((c) => visibile(c) && getComputedStyle(c).position !== 'absolute' && c.getBoundingClientRect().width > 0);
+    if (figli.length < 2) continue;
+    const comando = (c) => c.matches('button,.btn,label.choice,.chip-sm,input,select,a.logo') || (c.tagName === 'FORM' && c.querySelector('button'));
+    if (e.matches('.site-header .nav-row') || e.querySelector('input[type=checkbox]')) continue; // intestazione del sito: logo sopra il menu è voluto; casella + tasto può andare sotto
+    if (!e.matches('.nav-row') && !figli.every(comando)) continue; // solo righe di tasti/campi (titoli e testi sopra i tasti vanno bene)
+    const rr = figli.map((c) => c.getBoundingClientRect());
+    let tutti = true;
+    for (let i = 1; i < rr.length; i++) if (rr[i].top < rr[i - 1].bottom - 2) { tutti = false; break; }
+    if (tutti) { out.push(['errore', `elementi andati a capo uno sotto l'altro: ${nome(e)} (${figli.map(nome).join(' / ')})`]); ac++; }
+  }
+  // modulo con un solo campo e un pulsante (ricerca, conferma…): il pulsante deve stare sulla stessa riga del campo
+  for (const f of document.querySelectorAll('form')) {
+    if (!visibile(f)) continue;
+    const campi = [...f.querySelectorAll('input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea')].filter(visibile);
+    const btn = [...f.querySelectorAll('button,input[type=submit]')].filter(visibile);
+    if (campi.length !== 1 || btn.length !== 1 || campi[0].tagName === 'TEXTAREA') continue;
+    if (campi[0].closest('.field') || f.closest('.app-nav')) continue; // campi con etichetta sopra: il pulsante sotto è voluto
+    const a = campi[0].getBoundingClientRect(), b = btn[0].getBoundingClientRect();
+    if (b.top >= a.bottom - 2) out.push(['errore', `pulsante andato a capo sotto il campo: ${nome(btn[0])}`]);
+  }
   return out;
 }
 

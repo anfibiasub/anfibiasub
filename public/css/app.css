@@ -102,7 +102,8 @@ details.edit[open] summary{margin-bottom:14px}
 .tabs a[aria-current=page]{background:#0F3552;color:#fff}
 .cred{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;color:#fff;background:#081A2C;border:1px dashed var(--field);border-radius:10px;padding:14px 18px;user-select:all}
 .search{display:flex;gap:10px;flex-wrap:wrap}
-.search input{min-height:44px;border-radius:22px;border:1px solid var(--field);background:#081A2C;color:#fff;padding:0 18px;font:inherit;min-width:260px}
+.search input{min-height:44px;border-radius:22px;border:1px solid var(--field);background:#081A2C;color:#fff;padding:0 18px;font:inherit;min-width:0;flex:1 1 100px;max-width:420px}
+.search>button,.search>.btn{flex:0 0 auto;padding-left:18px;padding-right:18px}
 
 /* login */
 .login{min-height:100vh;display:grid;grid-template-columns:1fr minmax(0,560px)}
@@ -342,3 +343,27 @@ details.edit summary{display:inline-block;padding:6px 0;min-height:30px}
 .file-btn svg{width:18px;height:18px}
 .file-info{font-size:13px;color:#6EE08F}
 .file-info:empty{display:none}
+
+/* righe di tasti: in linea, larghe uguali; da telefono due per riga senza andare a capo uno sotto l'altro */
+.btn-row{display:flex;gap:10px;flex-wrap:wrap}
+.btn-row form{display:contents}
+@media (max-width:1023px){
+  .page-top .btn-row{width:100%}
+  .btn-row{display:grid;grid-template-columns:1fr 1fr}
+  .btn-row>.btn,.btn-row button{width:100%;padding-left:10px;padding-right:10px;justify-content:center;text-align:center}
+  .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr))}
+  .choices .choice{justify-content:center;text-align:center;padding:10px 8px;line-height:1.2}
+  div.chips-sm{flex-wrap:nowrap}
+  div.chips-sm>*{flex:1 1 auto;min-width:0;justify-content:center;text-align:center;white-space:normal}
+  div.chips-sm>button{flex:0 0 auto;white-space:nowrap}
+}
+/* telefoni stretti: logo più piccolo così il tasto Menu resta sulla stessa riga */
+@media (max-width:400px){
+  .app-header .nav-row{flex-wrap:nowrap;gap:8px}
+  .app-header .logo{min-width:0;gap:8px}
+  .app-header .logo-img{width:40px!important;height:40px!important}
+  .app-header .logo-name{font-size:17px;letter-spacing:.5px}
+  .app-menu-btn{padding:8px 12px;gap:8px;flex:none}
+  .btn-row>.btn,.btn-row button{font-size:14px;white-space:nowrap;padding-left:8px;padding-right:8px}
+  .choices .choice{flex-direction:column;gap:6px;border-radius:14px;font-size:12.5px;padding:10px 3px;letter-spacing:0}
+}
