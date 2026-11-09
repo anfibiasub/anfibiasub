@@ -323,6 +323,22 @@ async function provaStorico2(page, ctx, admin) {
     const dopo = await page.evaluate(() => [...document.querySelectorAll('[data-jobs] .job')].filter((j) => getComputedStyle(j).display !== 'none').length);
     if (dopo <= vis) segnala('errore', ctx, '"Carica altri 10" non mostra altri interventi');
   }
+  // ricerca per intervallo di date: si vedono esattamente gli interventi tra "dal" e "al"; senza date tornano tutti
+  const da = page.locator('[data-job-from]'), al = page.locator('[data-job-to]');
+  if (await da.count() && await al.count()) {
+    const date = (await page.evaluate(() => [...document.querySelectorAll('[data-jobs] .job')].map((j) => j.getAttribute('data-date')))).sort();
+    if (date.length >= 3) {
+      const a = date[1], b = date[date.length - 2];
+      await da.fill(a); await al.fill(b);
+      const attesi = date.filter((d) => d >= a && d <= b).length;
+      const visti = await page.evaluate(() => [...document.querySelectorAll('[data-jobs] .job')].filter((j) => getComputedStyle(j).display !== 'none').length);
+      if (visti !== attesi) segnala('errore', ctx, `ricerca dal ${a} al ${b}: si vedono ${visti} interventi invece di ${attesi}`);
+      for (const p of await page.evaluate(controlliPagina)) segnala(p[0], ctx, p[1]);
+      await da.fill(''); await al.fill('');
+      const tutti = await page.evaluate(() => [...document.querySelectorAll('[data-jobs] .job')].filter((j) => getComputedStyle(j).display !== 'none').length);
+      if (tutti < Math.min(date.length, 10)) segnala('errore', ctx, 'tolte le date non tornano tutti gli interventi');
+    }
+  }
   if (admin) {
     const pick = primo.locator('.pd-pick').first();
     if (await pick.count()) {

@@ -41,7 +41,7 @@
 <strong style="color:#fff;font-weight:600;display:block;margin-bottom:4px"><%= L.history %></strong>
 <% const older = d.cleanings.slice(1); %>
 <div class="jobs" data-jobs>
-<%- include('../partials/jobsearch', { jobs: older, lblDate: L.search_date, lblType: L.search_type, allTypes: L.all_types, none: L.no_jobs }) %>
+<%- include('../partials/jobsearch', { jobs: older, lblFrom: L.date_from, lblTo: L.date_to, lblType: L.search_type, allTypes: L.all_types, none: L.no_jobs }) %>
 <% older.forEach((c, ci) => { %>
 <details class="job<%= ci >= 10 ? ' job-more' : '' %>" id="pulizia-<%= c.id %>" data-date="<%= isoDate(c.data) %>" data-tipo="<%= (c.tipo || '').trim().toLowerCase() %>">
 <summary class="job-sum"><span class="job-card"><%- include('../partials/jobhead', { c, base: '/area/foto/', dateTxt: fmtDate(c.data), tipoTxt: c.tipo || L.cleaning, before: L.before, after: L.after, photosWord: L.photos }) %></span></summary>

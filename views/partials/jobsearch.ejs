@@ -1,7 +1,10 @@
-<%# Ricerca nello storico: una cella per la data e una per il tipo, con la stessa grafica dei campi del modulo. Parametri: jobs, lblDate, lblType, allTypes, none %>
+<%# Ricerca nello storico: intervallo di date (dal / al) e tipo, con la stessa grafica dei campi del modulo.
+    Senza date: tutti gli interventi. Solo "dal": da quel giorno in poi. Solo "al": fino a quel giorno.
+    Parametri: jobs, lblFrom, lblTo, lblType, allTypes, none %>
 <% const tipi = [...new Set(jobs.map((j) => (j.tipo || '').trim()).filter(Boolean))].sort(); %>
-<div class="grid2 job-search" role="search">
-<label class="field"><%= lblDate %><input type="date" data-job-date></label>
-<label class="field"><%= lblType %><select data-job-tipo><option value=""><%= allTypes %></option><% for (const t of tipi) { %><option value="<%= t.toLowerCase() %>"><%= t %></option><% } %></select></label>
+<div class="job-search" role="search">
+<label class="field"><%= lblFrom %><input type="date" data-job-from></label>
+<label class="field"><%= lblTo %><input type="date" data-job-to></label>
+<label class="field job-search-tipo"><%= lblType %><select data-job-tipo><option value=""><%= allTypes %></option><% for (const t of tipi) { %><option value="<%= t.toLowerCase() %>"><%= t %></option><% } %></select></label>
 </div>
 <p class="hint" data-job-none hidden><%= none %></p>

@@ -288,7 +288,8 @@ fieldset.avvisa legend{font-size:13px;color:var(--muted);margin-bottom:8px;paddi
 .pd-tools-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .pd-tools-btns button{width:100%;min-height:40px;padding:8px 10px;text-align:center}
 .pd-tools-btns button:disabled{opacity:.4;cursor:default}
-.job-search{margin-bottom:4px;grid-template-columns:1fr 1fr;gap:12px 16px}
+.job-search{display:grid;margin-bottom:4px;grid-template-columns:1fr 1fr 1fr;gap:12px 16px}
+@media (max-width:1023px){.job-search{grid-template-columns:1fr 1fr}.job-search-tipo{grid-column:1 / -1}}
 .job-search .field{min-width:0}
 .job-search input,.job-search select{min-width:0;width:100%}
 @media (max-width:640px){

@@ -53,24 +53,27 @@
     });
   });
 
-  // Storico interventi: ricerca per data/tipo e "Carica altri 10"
+  // Storico interventi: ricerca per intervallo di date (dal/al) e tipo, e "Carica altri 10"
   document.querySelectorAll('[data-jobs]').forEach(function (box) {
     var jobs = [].slice.call(box.querySelectorAll('.job'));
-    var q = box.querySelector('[data-job-date]'), tipo = box.querySelector('[data-job-tipo]');
+    var da = box.querySelector('[data-job-from]'), al = box.querySelector('[data-job-to]'), tipo = box.querySelector('[data-job-tipo]');
     var none = box.querySelector('[data-job-none]'), more = box.querySelector('[data-job-more]');
     function hidden() { return jobs.filter(function (j) { return j.classList.contains('job-more'); }); }
     function filter() {
-      var s = q ? q.value : '', t = tipo ? tipo.value : '';
-      var on = s || t, n = 0;
+      var a = da ? da.value : '', b = al ? al.value : '', t = tipo ? tipo.value : '';
+      if (a && b && a > b) { var x = a; a = b; b = x; }               // date al contrario: le scambio
+      if (da && al) { al.min = da.value || ''; da.max = al.value || ''; }
+      var on = a || b || t, n = 0;
       jobs.forEach(function (j) {
-        var ok = (!s || j.getAttribute('data-date') === s) && (!t || j.getAttribute('data-tipo') === t);
+        var d = j.getAttribute('data-date') || '';
+        var ok = (!a || d >= a) && (!b || d <= b) && (!t || j.getAttribute('data-tipo') === t);
         if (on) { if (ok) { j.removeAttribute('data-off'); j.style.display = 'block'; n++; } else { j.setAttribute('data-off', ''); j.style.display = ''; } }
         else { j.removeAttribute('data-off'); j.style.display = ''; }
       });
       if (none) none.hidden = !on || n > 0;
       if (more) more.hidden = on || !hidden().length;
     }
-    if (q) { q.addEventListener('input', filter); q.addEventListener('change', filter); }
+    [da, al].forEach(function (q) { if (q) { q.addEventListener('input', filter); q.addEventListener('change', filter); } });
     if (tipo) tipo.addEventListener('change', filter);
     if (more) more.addEventListener('click', function () {
       hidden().slice(0, 10).forEach(function (j) { j.classList.remove('job-more'); });
