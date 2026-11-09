@@ -89,7 +89,7 @@
 <% if (!d.anodes.length) { %><p class="hint">Nessun anodo registrato.</p><% } %>
 <% for (const a of d.anodes) { %>
 <div class="anode" id="anodo-<%= a.id %>">
-<% if (a.photos.length) { %><img class="anode-img" src="/area/foto/<%= a.photos[0] %>?t=1" alt="" loading="lazy" decoding="async"><% } else { %><span class="anode-ph">Nessuna foto</span><% } %>
+<% if (a.photos.length) { %><a href="/area/foto/<%= a.photos[0] %>" data-lb data-cap="Anodo <%= a.posizione %>"><img class="anode-img" src="/area/foto/<%= a.photos[0] %>?t=1" alt="" loading="lazy" decoding="async"></a><% } else { %><span class="anode-ph">Nessuna foto</span><% } %>
 <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
 <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><strong style="color:#fff"><%= a.posizione %></strong><span class="dot" style="color:<%= COLORS[a.status] %>;font-size:13px">● <%= S[a.status] %></span></div>
 <span class="hint"><%= [a.codice ? 'Cod. ' + a.codice : '', a.dati].filter(Boolean).join(' · ') %></span>

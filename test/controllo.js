@@ -365,12 +365,33 @@ async function provaStorico2(page, ctx, admin) {
       if (tutti < Math.min(date.length, 10)) segnala('errore', ctx, 'tolte le date non tornano tutti gli interventi');
     }
   }
+  // visore: tocco sulla foto → si apre grande, la freccia passa alla successiva, la X chiude
+  const foto = primo.locator('a[data-lb]').first();
+  if (await foto.count()) {
+    await foto.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await foto.click();
+    const lb = page.locator('.lb');
+    if (!(await lb.isVisible().catch(() => false))) segnala('errore', ctx, 'toccando una foto non si apre il visore');
+    else {
+      const s1 = await page.locator('.lb img').getAttribute('src');
+      const avanti = page.locator('.lb-next');
+      if (await avanti.isVisible()) {
+        await avanti.click();
+        const s2 = await page.locator('.lb img').getAttribute('src');
+        if (s1 === s2) segnala('errore', ctx, 'nel visore la freccia non passa alla foto successiva');
+      }
+      for (const p of await page.evaluate(controlliPagina)) segnala(p[0], ctx, p[1] + ' (nel visore foto)');
+      await page.locator('.lb-x').click();
+      await page.waitForTimeout(200);
+      if (await lb.isVisible()) segnala('errore', ctx, 'la X non chiude il visore');
+    }
+  }
   if (admin) {
     const pick = primo.locator('.pd-pick').first();
     if (await pick.count()) {
-      await pick.scrollIntoViewIfNeeded();
-      const bb = await pick.boundingBox();
-      await page.mouse.click(bb.x + bb.width * 0.5, bb.y + bb.height * 0.75); // tocco nella foto, lontano dalle icone
+      await pick.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+      await pick.click(); // tocco sul cerchietto
+      if (await page.locator('.lb').isVisible().catch(() => false)) segnala('errore', ctx, 'toccando il cerchietto si apre il visore invece di selezionare');
       const ok = await primo.evaluate((d) => [...d.querySelectorAll('button[name=azione]')].every((b) => !b.disabled));
       if (!ok) segnala('errore', ctx, 'selezionando una foto i pulsanti Sposta/Anteprima/Elimina restano spenti');
     }

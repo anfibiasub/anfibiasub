@@ -1,18 +1,22 @@
 <%#
   Foto di un intervento: PRIMA a sinistra, DOPO a destra, 4 per parte (le altre in "Mostra tutte").
   Parametri: prima, dopo (id delle foto), base (es. '/area/foto/'), admin, before, after, showAll (testo con {n}), photoN.
-  Solo admin: covers { prima, dopo } e cleaningId. L'admin tocca le foto per selezionarle, poi usa i comandi sotto
+  Solo admin: covers { prima, dopo } e cleaningId. L'admin tocca il cerchietto della foto per selezionarla (toccando la foto si apre grande), poi usa i comandi sotto
   (Sposta, Anteprima, Elimina), uguali per tutte le foto selezionate.
 %>
 <% const N = 4; const cover = (typeof covers !== 'undefined') ? covers : null;
-   const fig = (p, i, fase) => admin
-     ? `<figure class="pd-fig"><label class="pd-pick"><input type="checkbox" name="ids" value="${p}"><img src="${base}${p}?t=1" alt="${photoN} ${i + 1}" loading="lazy" decoding="async"><span class="pd-check" aria-hidden="true"></span>${cover && cover[fase] === p ? '<span class="pd-star" title="Anteprima">★</span>' : ''}</label><a class="pd-zoom" href="${base}${p}" target="_blank" rel="noopener" title="Apri la foto grande" aria-label="Apri la foto grande">⤢</a></figure>`
-     : `<figure class="pd-fig"><a href="${base}${p}" target="_blank" rel="noopener"><img src="${base}${p}?t=1" alt="${photoN} ${i + 1}" loading="lazy" decoding="async"></a></figure>`;
+   // tocco sulla foto = si apre grande (visore con frecce e X); da admin il cerchietto nell'angolo la seleziona
+   const fig = (p, i, fase, tot, title) => {
+     const open = `<a class="pd-open" href="${base}${p}" data-lb data-cap="${title} ${i + 1}/${tot}"><img src="${base}${p}?t=1" alt="${photoN} ${i + 1}" loading="lazy" decoding="async"></a>`;
+     return admin
+       ? `<figure class="pd-fig">${open}<label class="pd-pick" title="Seleziona"><input type="checkbox" name="ids" value="${p}" aria-label="Seleziona ${photoN} ${i + 1}"><span class="pd-check" aria-hidden="true"></span></label>${cover && cover[fase] === p ? '<span class="pd-star" title="Anteprima">★</span>' : ''}</figure>`
+       : `<figure class="pd-fig">${open}</figure>`;
+   };
    const col = (list, title, fase) => {
      let h = `<div class="pd-col pd-${fase}"><div class="pd-h"><span>${title}</span><span class="hint">${list.length}</span></div>`;
      if (!list.length) return h + '<p class="hint pd-none">—</p></div>';
-     h += `<div class="pd-grid">${list.slice(0, N).map((p, i) => fig(p, i, fase)).join('')}</div>`;
-     if (list.length > N) h += `<details class="edit more-photos"><summary>${showAll.replace('{n}', list.length)}</summary><div class="pd-grid">${list.slice(N).map((p, i) => fig(p, i + N, fase)).join('')}</div></details>`;
+     h += `<div class="pd-grid">${list.slice(0, N).map((p, i) => fig(p, i, fase, list.length, title)).join('')}</div>`;
+     if (list.length > N) h += `<details class="edit more-photos"><summary>${showAll.replace('{n}', list.length)}</summary><div class="pd-grid">${list.slice(N).map((p, i) => fig(p, i + N, fase, list.length, title)).join('')}</div></details>`;
      return h + '</div>';
    }; %>
 <% if (admin) { %><form class="pd-form" method="post" action="/admin/foto/azione" data-pd>
@@ -20,7 +24,7 @@
 <div class="pd"><%- col(prima, before, 'prima') %><%- col(dopo, after, 'dopo') %></div>
 <% if (admin) { %>
 <div class="pd-tools">
-<p class="hint" data-pd-count data-none="Tocca le foto per selezionarle" data-some="Foto selezionate: {n}">Tocca le foto per selezionarle</p>
+<p class="hint" data-pd-count data-none="Tocca il cerchietto sulle foto per selezionarle" data-some="Foto selezionate: {n}">Tocca il cerchietto sulle foto per selezionarle</p>
 <div class="pd-tools-btns">
 <button class="linkbtn" type="submit" name="azione" value="sposta" disabled title="Sposta da Prima a Dopo o viceversa">⇄ Sposta</button>
 <button class="linkbtn" type="submit" name="azione" value="anteprima" disabled>★ Anteprima</button>

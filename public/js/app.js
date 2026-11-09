@@ -92,6 +92,7 @@
     function upd() {
       var n = boxes.filter(function (b) { return b.checked; }).length;
       btns.forEach(function (b) { b.disabled = !n; });
+      boxes.forEach(function (b) { var fg = b.closest('.pd-fig'); if (fg) fg.classList.toggle('is-sel', b.checked); });
       if (info) info.textContent = n ? info.getAttribute('data-some').replace('{n}', n) : info.getAttribute('data-none');
     }
     boxes.forEach(function (b) { b.addEventListener('change', upd); });
@@ -166,4 +167,72 @@
       });
     });
   }
+
+  // Visore foto: tocchi una foto e si apre grande; frecce (o scorrimento col dito) per sfogliare, X per chiudere.
+  // Sfoglia tutte le foto dello stesso intervento (Prima e Dopo, anche quelle in "Mostra tutte").
+  (function () {
+    var LBT = {
+      it: ['Chiudi', 'Foto precedente', 'Foto successiva'], en: ['Close', 'Previous photo', 'Next photo'],
+      es: ['Cerrar', 'Foto anterior', 'Foto siguiente'], de: ['Schließen', 'Vorheriges Foto', 'Nächstes Foto']
+    }[(document.documentElement.lang || 'it').slice(0, 2)] || ['Chiudi', 'Foto precedente', 'Foto successiva'];
+    var box, img, cap, list = [], at = 0, sx = null, sy = 0, aperto = false;
+    function ico(d) { return '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + d + '"/></svg>'; }
+    function crea() {
+      box = document.createElement('div');
+      box.className = 'lb'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.hidden = true;
+      box.innerHTML = '<button type="button" class="lb-btn lb-x" aria-label="' + LBT[0] + '">' + ico('M6 6l12 12M18 6L6 18') + '</button>' +
+        '<button type="button" class="lb-btn lb-prev" aria-label="' + LBT[1] + '">' + ico('M15 5l-7 7 7 7') + '</button>' +
+        '<figure class="lb-fig"><img alt=""><figcaption class="lb-cap"></figcaption></figure>' +
+        '<button type="button" class="lb-btn lb-next" aria-label="' + LBT[2] + '">' + ico('M9 5l7 7-7 7') + '</button>';
+      document.body.appendChild(box);
+      img = box.querySelector('img'); cap = box.querySelector('.lb-cap');
+      box.querySelector('.lb-x').addEventListener('click', function () { chiudi(); });
+      box.querySelector('.lb-prev').addEventListener('click', function () { vai(-1); });
+      box.querySelector('.lb-next').addEventListener('click', function () { vai(1); });
+      box.addEventListener('click', function (e) { if (e.target === box || e.target.classList.contains('lb-fig')) chiudi(); });
+      box.addEventListener('touchstart', function (e) { if (e.touches.length === 1) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; } else sx = null; }, { passive: true });
+      box.addEventListener('touchend', function (e) {
+        if (sx === null) return;
+        var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy; sx = null;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) vai(dx < 0 ? 1 : -1);
+        else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) chiudi();
+      });
+    }
+    function mostra() {
+      var a = list[at];
+      img.src = a.getAttribute('href');
+      img.alt = (a.querySelector('img') || {}).alt || '';
+      cap.textContent = a.getAttribute('data-cap') || '';
+      var multi = list.length > 1;
+      box.querySelector('.lb-prev').hidden = !multi; box.querySelector('.lb-next').hidden = !multi;
+      [at - 1, at + 1].forEach(function (k) { if (list[k]) { var p = new Image(); p.src = list[k].getAttribute('href'); } }); // precarica le vicine
+    }
+    function vai(d) { if (list.length < 2) return; at = (at + d + list.length) % list.length; mostra(); }
+    function apri(a) {
+      if (!box) crea();
+      var g = a.closest('.pd') || a.closest('[data-lb-group]');
+      list = g ? [].slice.call(g.querySelectorAll('a[data-lb]')) : [a];
+      at = Math.max(0, list.indexOf(a));
+      mostra(); box.hidden = false; aperto = true;
+      document.documentElement.classList.add('lb-on');
+      try { history.pushState({ lb: 1 }, ''); } catch (e) {}   // il tasto Indietro del telefono chiude il visore
+      box.querySelector('.lb-x').focus({ preventScroll: true });
+    }
+    function chiudi(daIndietro) {
+      if (!aperto) return;
+      aperto = false; box.hidden = true; img.removeAttribute('src');
+      document.documentElement.classList.remove('lb-on');
+      if (!daIndietro && history.state && history.state.lb) history.back();
+    }
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[data-lb]');
+      if (!a || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      e.preventDefault(); apri(a);
+    });
+    window.addEventListener('popstate', function () { chiudi(true); });
+    document.addEventListener('keydown', function (e) {
+      if (!aperto) return;
+      if (e.key === 'Escape') chiudi(); else if (e.key === 'ArrowRight') vai(1); else if (e.key === 'ArrowLeft') vai(-1);
+    });
+  })();
 })();

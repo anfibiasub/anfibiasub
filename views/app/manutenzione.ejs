@@ -66,7 +66,7 @@
 <% if (!d.anodes.length) { %><p class="hint"><%= L.no_anodes %></p><% } %>
 <% for (const a of d.anodes) { %>
 <div class="anode" id="anodo-<%= a.id %>">
-<% if (a.photos.length) { %><a href="/area/foto/<%= a.photos[0] %>" target="_blank" rel="noopener"><img class="anode-img" src="/area/foto/<%= a.photos[0] %>?t=1" alt="<%= L.a_foto %> <%= a.posizione %>" loading="lazy" decoding="async"></a><% } else { %><span class="anode-ph"><%= L.a_foto %></span><% } %>
+<% if (a.photos.length) { %><a href="/area/foto/<%= a.photos[0] %>" data-lb data-cap="<%= L.a_foto %> <%= a.posizione %>"><img class="anode-img" src="/area/foto/<%= a.photos[0] %>?t=1" alt="<%= L.a_foto %> <%= a.posizione %>" loading="lazy" decoding="async"></a><% } else { %><span class="anode-ph"><%= L.a_foto %></span><% } %>
 <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
 <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><strong style="color:#fff;font-weight:600"><%= a.posizione || '—' %></strong><span class="dot" style="color:<%= COLORS[a.status] %>;font-size:13px">● <%= S[a.status] %></span></div>
 <span class="hint"><%= [a.codice ? L.code + ' ' + a.codice : '', a.dati].filter(Boolean).join(' · ') %></span>

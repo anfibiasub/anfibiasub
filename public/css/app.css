@@ -274,20 +274,20 @@ fieldset.avvisa legend{font-size:13px;color:var(--muted);margin-bottom:8px;paddi
 
 /* selezione foto (admin): tocca per selezionare, poi un comando per tutte */
 .pd-fig{position:relative}
-.pd-pick{display:block;position:relative;cursor:pointer;border-radius:8px}
+.pd-open{display:block;border-radius:8px;cursor:zoom-in}
+.pd-open img{transition:opacity .15s}
+.pd-pick{position:absolute;top:0;left:0;width:40px;height:40px;cursor:pointer;z-index:2}
 .pd-pick input{position:absolute;opacity:0;width:1px;height:1px}
-.pd-pick img{transition:opacity .15s}
-.pd-check{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;border:2px solid #fff;background:rgba(5,14,26,.55)}
-.pd-pick input:checked ~ img{opacity:.55;outline:3px solid var(--cyan);outline-offset:-3px}
+.pd-check{position:absolute;top:6px;left:6px;width:24px;height:24px;border-radius:50%;border:2px solid #fff;background:rgba(5,14,26,.55);box-shadow:0 1px 4px rgba(0,0,0,.5)}
+.pd-fig.is-sel img{opacity:.55;outline:3px solid var(--cyan);outline-offset:-3px}
 .pd-pick input:checked ~ .pd-check{background:var(--cyan);border-color:var(--cyan)}
 .pd-pick input:checked ~ .pd-check::after{content:'✓';color:#06121F;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;height:100%}
 .pd-pick input:focus-visible ~ .pd-check{outline:2px solid #fff;outline-offset:2px}
-.pd-star{position:absolute;left:6px;bottom:6px;color:#FFC75A;font-size:16px;line-height:1;text-shadow:0 1px 3px #000}
-.pd-zoom{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:6px;background:rgba(5,14,26,.7);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.pd-star{pointer-events:none;position:absolute;left:6px;bottom:6px;color:#FFC75A;font-size:16px;line-height:1;text-shadow:0 1px 3px #000}
 .pd-tools{margin-top:12px}
 .pd-tools .hint{margin:0 0 8px}
 .pd-tools-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.pd-tools-btns button{width:100%;min-height:40px;padding:8px 10px;text-align:center}
+.pd-tools-btns button{width:100%;min-height:40px;padding:8px 10px;text-align:center;white-space:nowrap}
 .pd-tools-btns button:disabled{opacity:.4;cursor:default}
 .job-search{display:grid;margin-bottom:4px;grid-template-columns:1fr 1fr 1fr;gap:12px 16px}
 @media (max-width:1023px){.job-search{grid-template-columns:1fr 1fr}.job-search-tipo{grid-column:1 / -1}}
@@ -295,7 +295,7 @@ fieldset.avvisa legend{font-size:13px;color:var(--muted);margin-bottom:8px;paddi
 .job-search input,.job-search select{min-width:0;width:100%}
 @media (max-width:640px){
   .pd-tools-btns{gap:6px}
-  .pd-tools-btns button{font-size:12px;padding:8px 6px}
+  .pd-tools-btns button{font-size:12px;padding:8px 4px;letter-spacing:0}
 }
 
 /* telefoni stretti: schede dello storico, titoli, pulsanti da toccare */
@@ -308,9 +308,8 @@ details.edit summary{display:inline-block;padding:6px 0;min-height:30px}
   .job-th em{font-size:8px;letter-spacing:.04em}
   .job-info strong{font-size:14px;white-space:nowrap}
   .job-info span{font-size:12px}
-  .pd-check{width:18px;height:18px;top:4px;left:4px}
+  .pd-check{width:21px;height:21px;top:3px;left:3px}
   .pd-pick input:checked ~ .pd-check::after{font-size:11px}
-  .pd-zoom{width:20px;height:20px;top:4px;right:4px;font-size:12px}
   .pd-star{left:4px;bottom:4px;font-size:13px}
 }
 
@@ -367,3 +366,29 @@ details.edit summary{display:inline-block;padding:6px 0;min-height:30px}
   .btn-row>.btn,.btn-row button{font-size:14px;white-space:nowrap;padding-left:8px;padding-right:8px}
   .choices .choice{flex-direction:column;gap:6px;border-radius:14px;font-size:12.5px;padding:10px 3px;letter-spacing:0}
 }
+
+/* visore foto a schermo intero: frecce come i tasti del sito, X per chiudere */
+.lb-on,.lb-on body{overflow:hidden}
+.lb{position:fixed;inset:0;z-index:2000;background:rgba(2,8,16,.985);display:flex;align-items:center;justify-content:center;touch-action:pan-y pinch-zoom}
+.lb[hidden]{display:none}
+.lb-fig{margin:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:64px 12px 20px}
+.lb-fig img{max-width:100%;max-height:calc(100% - 34px);object-fit:contain;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+.lb-cap{margin-top:12px;color:#cfe6f5;font-size:14px;font-weight:600;letter-spacing:.5px;text-align:center}
+.lb-btn{position:absolute;z-index:2;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;
+  background:linear-gradient(180deg,#14507E,#0B2F4E);border:1px solid rgba(60,198,245,.45);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 3px 0 #061a2c,0 6px 14px rgba(0,0,0,.45)}
+.lb-btn:active{transform:translateY(2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 1px 0 #061a2c}
+.lb-btn[hidden]{display:none}
+.lb-x{top:max(12px,env(safe-area-inset-top));right:12px}
+.lb-prev{left:12px;top:50%;margin-top:-26px}
+.lb-next{right:12px;top:50%;margin-top:-26px}
+@media (max-width:1023px){
+  .lb-fig{padding:70px 0 90px}
+  .lb-fig img{border-radius:0;max-height:calc(100% - 30px)}
+  .lb-prev,.lb-next{top:auto;margin-top:0;bottom:max(18px,env(safe-area-inset-bottom))}
+  .lb-prev{left:calc(50% - 70px)}
+  .lb-next{right:calc(50% - 70px)}
+}
+@media (max-width:1023px){ .pd-pick{width:27px;height:27px} .pd-check{width:21px;height:21px;top:3px;left:3px} }
+/* telefoni stretti: una foto per riga in Prima e in Dopo, così si vedono e si toccano bene */
+@media (max-width:400px){ .pd-grid{grid-template-columns:1fr} }
